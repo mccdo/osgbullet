@@ -24,10 +24,10 @@ Use your project files / makefiles to build osgWorks. Build the install target t
 
 The CMake system that comes with osgBullet is designed to automatically find OSG, Bullet, and osgWorks if they're installed on your system in a standard/typical location. If the CMake system fails to find any of these dependencies, it's usually for one of two reasons. Either the dependency is installed in a non-standard location, or you'd like to use the dependency  from a source tree.
 
-If you have the dependency installed in a non-standard location, specify the top-level install directory with the appropriate <dependency>_ROOT variable: OSG_ROOT, BULLET_ROOT, or OSGWORKS_ROOT. Set the appropriate variable in the environment, or in CMake. Then select Configure again.
+If you have the dependency installed in a non-standard location, specify the top-level install directory with the appropriate `<dependency>_ROOT` variable: OSG_ROOT, BULLET_ROOT, or OSGWORKS_ROOT. Set the appropriate variable in the environment, or in CMake. Then select Configure again.
 
-If you are using the dependency from a source tree, use the <dependency>_BUILD_DIR and <dependency>_SOURCE_DIR variables (either in the environment, or in CMake) to specify the root of the builf and source trees, respectively. Then select Configure again.
+If you are using the dependency from a source tree, use the `<dependency>_BUILD_DIR` and `<dependency>_SOURCE_DIR` variables (either in the environment, or in CMake) to specify the root of the builf and source trees, respectively. Then select Configure again.
 
 In summart:
   * If the dependency is in a standard location, you shouldn't need to set any variables. CMake should just find them.
-  * Set *either* the appropriate <dependency>_ROOT variable (if installed in a non-standard location) *or both* the <dependency>_BUILD_DIR/<dependency>_SOURCE_DIR variables (if using the dependency from a source tree). You should never have to set all three.
+  * Set *either* the appropriate `<dependency>_ROOT` variable (if installed in a non-standard location) *or both* the `<dependency>_BUILD_DIR` and `<dependency>_SOURCE_DIR` variables (if using the dependency from a source tree). You should never have to set all three.
