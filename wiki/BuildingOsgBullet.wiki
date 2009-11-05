@@ -28,6 +28,6 @@ If you have the dependency installed in a non-standard location, specify the top
 
 If you are using the dependency from a source tree, use the `<dependency>_BUILD_DIR` and `<dependency>_SOURCE_DIR` variables (either in the environment, or in CMake) to specify the root of the builf and source trees, respectively. Then select Configure again.
 
-In summart:
+In summary:
   * If the dependency is in a standard location, you shouldn't need to set any variables. CMake should just find them.
   * Set *either* the appropriate `<dependency>_ROOT` variable (if installed in a non-standard location) *or both* the `<dependency>_BUILD_DIR` and `<dependency>_SOURCE_DIR` variables (if using the dependency from a source tree). You should never have to set all three.
