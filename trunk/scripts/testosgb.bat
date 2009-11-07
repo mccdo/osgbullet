@@ -5,7 +5,7 @@ echo Turn-on tests. Does it work at all?
 echo Run BasicDemo, RobotArm, fountain.
 echo.
 BasicDemo
-test_robot
+robot
 
 
 echo.
