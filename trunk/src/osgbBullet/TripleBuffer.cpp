@@ -23,6 +23,7 @@
 #include <osg/Notify>
 #include <iostream>
 #include <string>
+#include <cstring>
 
 
 using namespace osgbBullet;
