@@ -29,6 +29,8 @@
 #include <iostream>
 #include <stdlib.h>
 
+#include <btBulletDynamicsCommon.h>
+
 
 // Forward declaraction
 class btDynamicsWorld;
@@ -45,6 +47,12 @@ class OSGBBULLET_EXPORT PhysicsThread : public OpenThreads::Thread
 public:
     PhysicsThread( btDynamicsWorld* bw, osgbBullet::TripleBuffer* tb=NULL );
     ~PhysicsThread();
+
+    // Specify the elapsed time parameter, used in call to stepSimulation.
+    // If value is <= 0.0, PhysicsThread uses the elapsed time.
+    // Default is 0.0 (use elapsed time).
+    void setTimeStep( btScalar timeStep );
+    btScalar getTimeStep() const;
 
     // Call Thread::start() to launch the thread.
     virtual void run();
@@ -75,10 +83,13 @@ public:
 protected:
     bool isStopping() const;
 
+    btScalar _timeStep;
+
     btDynamicsWorld* _bw;
     osg::Timer _timer;
     bool _stopped;
     int _pauseCount;
+    osg::Timer_t _lastTime;
 
     osgbBullet::TripleBuffer* _tb;
 

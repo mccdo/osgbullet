@@ -36,7 +36,8 @@ using namespace osgbBullet;
 
 
 PhysicsThread::PhysicsThread( btDynamicsWorld* bw, osgbBullet::TripleBuffer* tb )
-  : _bw( bw ),
+  : _timeStep( (btScalar)( 0.0 ) ),
+    _bw( bw ),
     _tb( tb ),
     _stopped( true ),
     _pauseCount( 0 )
@@ -46,22 +47,39 @@ PhysicsThread::~PhysicsThread()
 {
 }
 
+
+void
+PhysicsThread::setTimeStep( btScalar timeStep )
+{
+    _timeStep = timeStep;
+    _lastTime = _timer.tick();
+}
+btScalar
+PhysicsThread::getTimeStep() const
+{
+    return( _timeStep );
+}
+
+
 void
 PhysicsThread::run()
 {
     _stopped = false;
 
-    osg::Timer_t lastTime, currentTime;
+    osg::Timer_t currentTime;
 
     _timer.setStartTick();
-    lastTime = _timer.tick();
+    _lastTime = _timer.tick();
 
     osg::notify( osg::INFO ) << "PhysicsThread: Starting" << std::endl;
 
     while( !isStopping() )
     {
         currentTime = _timer.tick();
-        const double deltaTime = _timer.delta_s( lastTime, currentTime );
+        const btScalar deltaTime =
+            ( ( _timeStep > 0.0 ) ?
+                _timeStep :
+                ( btScalar )( _timer.delta_s( _lastTime, currentTime ) ) );
 
         bool localPause;
         {
@@ -95,7 +113,7 @@ PhysicsThread::run()
             _bw->stepSimulation( deltaTime );
         }
 
-        lastTime = currentTime;
+        _lastTime = currentTime;
     }
 
     osg::notify( osg::INFO ) << "PhysicsThread: Stopping" << std::endl;
