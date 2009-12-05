@@ -107,13 +107,14 @@ bool PhysicsData_readLocalData( osg::Object& obj, osgDB::Input& fr )
     osgbBullet::PhysicsData& pd = static_cast< osgbBullet::PhysicsData& >( obj );
     bool advance( false );
 
+    unsigned int version( 0 );
     if( fr.matchSequence( "Version %i" ) )
     {
-        fr[1].getUInt( pd._version );
+        fr[1].getUInt( version );
         fr+=2;
         advance = true;
 
-        osg::notify( osg::INFO ) << "OSGB: Found version " << pd._version << std::endl;
+        osg::notify( osg::INFO ) << "OSGB: Found version " << version << std::endl;
 
         pd._cr = static_cast< osgbBullet::CreationRecord* >( fr.readObject() );
         osg::notify( osg::INFO ) << "OSGB: CreationRecord " << pd._cr.get() << std::endl;
@@ -161,7 +162,7 @@ bool PhysicsData_writeLocalData( const osg::Object& obj, osgDB::Output& fw )
 {
     const osgbBullet::PhysicsData& pd = static_cast< const osgbBullet::PhysicsData& >( obj );
 
-    fw.indent() << "Version " << pd._version << std::endl;
+    fw.indent() << "Version " << pd.getVersion() << std::endl;
 
     fw.writeObject( *(pd._cr) );
 

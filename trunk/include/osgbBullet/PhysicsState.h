@@ -45,8 +45,6 @@ public:
 
     META_Object(osgbBullet,PhysicsData);
 
-    unsigned int _version;
-
     std::string _fileName;
     osg::ref_ptr< osgbBullet::CreationRecord > _cr;
     btRigidBody* _body;
@@ -57,8 +55,12 @@ public:
     osg::Vec3 _linearVelocity;
     osg::Vec3 _angularVelocity;
 
+    unsigned int getVersion() const { return( _version ); }
+
 protected:
     ~PhysicsData();
+
+    unsigned int _version;
 };
 
 class OSGBBULLET_EXPORT PhysicsState : public osg::Object
