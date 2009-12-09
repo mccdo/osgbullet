@@ -10,6 +10,8 @@ Compatible versions of Bullet: v2.74, v2.75.
 
 Compatible versions of osgWorks: v1.0.
 
+The osgBullet build system requires CMake v2.6.4 or later.
+
 = Building =
 
 Like !OpenSceneGraph, osgBullet uses CMake. To create project files for osgBullet, follow these general steps:
