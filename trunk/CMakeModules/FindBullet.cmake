@@ -21,6 +21,7 @@ SET( BULLET_ROOT "" CACHE PATH "Bullet install dir, parent of both header files 
 SET( BULLET_BUILD_DIR "" CACHE PATH "Parent directory of Bullet binary file directories such as src/BulletCollision." )
 SET( BULLET_SOURCE_DIR "" CACHE PATH "Parent directory of Bullet header file directories such as src or include." )
 
+UNSET( BULLET_INCLUDE_DIR CACHE )
 MARK_AS_ADVANCED( BULLET_INCLUDE_DIR )
 FIND_PATH( BULLET_INCLUDE_DIR btBulletCollisionCommon.h
     PATHS
