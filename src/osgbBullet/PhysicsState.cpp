@@ -37,7 +37,9 @@ PhysicsData::PhysicsData()
   : _version( 1 ),
     _fileName( std::string( "" ) ),
     _cr( NULL ),
-    _body( NULL )
+    _body( NULL ),
+    _restitution( 1 ),
+    _friction( 0.1 )
 {
 }
 PhysicsData::PhysicsData( const PhysicsData& rhs, osg::CopyOp copyop )
