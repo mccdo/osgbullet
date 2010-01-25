@@ -55,6 +55,9 @@ public:
     osg::Vec3 _linearVelocity;
     osg::Vec3 _angularVelocity;
 
+    double _friction;
+    double _restitution;
+
     unsigned int getVersion() const { return( _version ); }
 
 protected:
