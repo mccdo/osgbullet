@@ -34,7 +34,7 @@ namespace osgbBullet
 
 
 PhysicsData::PhysicsData()
-  : _version( 1 ),
+  : _version( 2 ),
     _fileName( std::string( "" ) ),
     _cr( NULL ),
     _body( NULL ),
