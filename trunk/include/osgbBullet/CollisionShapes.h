@@ -67,7 +67,7 @@ OSGBBULLET_EXPORT osg::Node* osgNodeFromBtCollisionShape( const btTriangleMeshSh
 OSGBBULLET_EXPORT osg::Node* osgNodeFromBtCollisionShape( const btConvexTriangleMeshShape* btShape, const btTransform& trans = btTransform::getIdentity() );
 OSGBBULLET_EXPORT osg::Node* osgNodeFromBtCollisionShape( const btConvexHullShape* btShape, const btTransform& trans = btTransform::getIdentity() );
 
-OSGBBULLET_EXPORT osg::Node* generateGroundPlane( const osg::Vec4& plane, btDynamicsWorld* bulletWorld );
+OSGBBULLET_EXPORT osg::Node* generateGroundPlane( const osg::Vec4& plane, btDynamicsWorld* bulletWorld, btRigidBody** rb=NULL );
 
 } // end namespace osgbBullet
 

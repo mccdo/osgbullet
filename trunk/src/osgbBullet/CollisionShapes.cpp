@@ -516,7 +516,7 @@ osg::Node* osgNodeFromBtCollisionShape( const btConvexHullShape* hull, const btT
 }
 
 
-osg::Node* generateGroundPlane( const osg::Vec4& plane, btDynamicsWorld* bulletWorld )
+osg::Node* generateGroundPlane( const osg::Vec4& plane, btDynamicsWorld* bulletWorld, btRigidBody** rb )
 {
     osg::Vec3 n(plane.x(),plane.y(),plane.z());
     n.normalize();
@@ -538,10 +538,13 @@ osg::Node* generateGroundPlane( const osg::Vec4& plane, btDynamicsWorld* bulletW
 
     osg::Vec3 p =  n * d;
 
+    // TBD use new stuff in Shapes.
     btCollisionShape* groundShape = new btStaticPlaneShape( btVector3( plane.x(), plane.y(), plane.z() ), plane.w() );
     btRigidBody::btRigidBodyConstructionInfo rbInfo( 0., NULL, groundShape, btVector3(0,0,0) );
     btRigidBody* ground = new btRigidBody(rbInfo);
     bulletWorld->addRigidBody( ground );
+    if( rb != NULL )
+        *rb = ground;
 
     osg::ref_ptr< osg::Geode > groundPlane = new osg::Geode;
     osg::Geometry* groundGeom = new osg::Geometry;
