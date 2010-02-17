@@ -42,9 +42,11 @@ namespace osgbBullet {
 class OSGBBULLET_EXPORT OSGToCollada
 {
 public:
-    // NOTR: loadedModel is _not_ const. This _will_ alter your scene graph.
-    // It flattens transforms.
-    // It removes loaded ProxyNodes (with the Optimizer).
+    // USAGE NOTE: loadedModel is _not_ const. This _will_ alter your scene graph.
+    // Amoung other changes, it flattens transforms, and it removes loaded ProxyNodes
+    // (with the Optimizer). FOR THIS REASON, you are advised to pass a scene graph
+    // COPY to OSGToCollada, which it can alter, then DISCARD that copy. The scene
+    // graph is not guaranteed to be viable after an OSGToCollada conversion.
     //
     // 'overall' and 'nodeName' work together to determine how the Bullet collision
     // shape is created (which is used to create the rigid body that is written to
