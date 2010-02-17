@@ -217,7 +217,7 @@ public:
         // This is a Transform that isn't a MatrixTransform and isn't a PAT.
         // If it is not an AMT, display a warning.
         if( node.className() != std::string( "AbsoluteModelTransform" ) )
-            osg::notify( osg::WARN ) << "OSGToCollada: Warning: Non-MatrixTransform encountered: (" <<
+            osg::notify( osg::INFO ) << "OSGToCollada: Warning: Non-MatrixTransform encountered: (" <<
                 node.className() << ") " << node.getName() << std::endl;
         traverse( node );
     }
