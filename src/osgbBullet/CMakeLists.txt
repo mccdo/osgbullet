@@ -20,6 +20,7 @@ SET( LIB_PUBLIC_HEADERS
     ${HEADER_PATH}/PhysicsState.h
     ${HEADER_PATH}/PhysicsThread.h
     ${HEADER_PATH}/RefCollisionShape.h
+    ${HEADER_PATH}/RefCollisionObject.h
     ${HEADER_PATH}/RefRigidBody.h
     ${HEADER_PATH}/RigidBodyAnimation.h
     ${HEADER_PATH}/TripleBuffer.h
@@ -44,6 +45,7 @@ ADD_SHARED_LIBRARY_INTERNAL( ${LIB_NAME}
     OSGToCollada.cpp
     PhysicsState.cpp
     PhysicsThread.cpp
+    RefCollisionObject.cpp
     RefCollisionShape.cpp
     RefRigidBody.cpp
     RigidBodyAnimation.cpp
