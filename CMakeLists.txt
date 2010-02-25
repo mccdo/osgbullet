@@ -31,6 +31,8 @@ LINK_DIRECTORIES(
     ${EXECUTABLE_OUTPUT_PATH}/Debug
 )
 
+OPTION( USE_COLLADA "Disable to avoid Bullet Collada portions" ON )
+
 OPTION( BUILD_APPLICATIONS "Enable to build applications" ON )
 IF( BUILD_APPLICATIONS )
     ADD_SUBDIRECTORY( applications )
