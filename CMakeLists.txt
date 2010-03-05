@@ -31,7 +31,7 @@ LINK_DIRECTORIES(
     ${EXECUTABLE_OUTPUT_PATH}/Debug
 )
 
-OPTION( USE_COLLADA "Disable to avoid Bullet Collada portions" ON )
+OPTION( USE_COLLADA "Enable to build Bullet ColladaConverter-dependent portions" OFF )
 
 OPTION( BUILD_APPLICATIONS "Enable to build applications" ON )
 IF( BUILD_APPLICATIONS )
