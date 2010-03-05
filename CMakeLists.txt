@@ -33,6 +33,11 @@ LINK_DIRECTORIES(
 
 OPTION( USE_COLLADA "Enable to build Bullet ColladaConverter-dependent portions" OFF )
 
+OPTION( USE_DOUBLE_PRECISION "Use Bullet built with double precision" OFF )
+IF (USE_DOUBLE_PRECISION)
+    ADD_DEFINITIONS( -DBT_USE_DOUBLE_PRECISION)
+ENDIF (USE_DOUBLE_PRECISION)
+
 OPTION( BUILD_APPLICATIONS "Enable to build applications" ON )
 IF( BUILD_APPLICATIONS )
     ADD_SUBDIRECTORY( applications )
