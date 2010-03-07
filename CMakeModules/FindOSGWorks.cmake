@@ -72,6 +72,7 @@ MACRO( FIND_OSGWORKS_LIBRARY MYLIBRARY MYLIBRARYNAME )
             /usr/freeware/lib64
         PATH_SUFFIXES
             lib
+            bin
             .
     )
     FIND_LIBRARY( ${MYLIBRARY}_debug
@@ -94,6 +95,7 @@ MACRO( FIND_OSGWORKS_LIBRARY MYLIBRARY MYLIBRARYNAME )
             /usr/freeware/lib64
         PATH_SUFFIXES
             lib
+            bin
             .
     )
 #    message( STATUS ${${MYLIBRARY}} ${${MYLIBRARY}_debug} )
