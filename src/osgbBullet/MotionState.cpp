@@ -69,10 +69,10 @@ MotionState::setWorldTransform(const btTransform& worldTrans)
     {
         // Call only if position changed.
         const btVector3 delta( worldTrans.getOrigin() - _transform.getOrigin() );
-        const float eps( (float)( 1e-5 ) );
-        const bool quiescent( osg::equivalent( delta[ 0 ], 0.f, eps ) &&
-            osg::equivalent( delta[ 1 ], 0.f, eps ) &&
-            osg::equivalent( delta[ 2 ], 0.f, eps ) );
+        const btScalar eps( (btScalar)( 1e-5 ) );
+        const bool quiescent( osg::equivalent( delta[ 0 ], btScalar(0.), eps ) &&
+            osg::equivalent( delta[ 1 ], btScalar(0.), eps ) &&
+            osg::equivalent( delta[ 2 ], btScalar(0.), eps ) );
         if( !quiescent )
         {
             MotionStateCallbackList::iterator it;
@@ -95,7 +95,7 @@ MotionState::setWorldTransform(const btTransform& worldTrans)
             osg::notify( osg::WARN ) << "MotionState: No TripleBuffer write address." << std::endl;
             return;
         }
-        float* fAddr = reinterpret_cast< float* >( addr + _tbIndex );
+        btScalar* fAddr = reinterpret_cast< btScalar* >( addr + _tbIndex );
         worldTrans.getOpenGLMatrix( fAddr );
     }
 }
@@ -233,7 +233,7 @@ MotionState::registerTripleBuffer( osgbBullet::TripleBuffer* tb )
 void
 MotionState::updateTripleBuffer( const char* addr )
 {
-    const float* fAddr = reinterpret_cast< const float* >( addr + _tbIndex );
+    const btScalar* fAddr = reinterpret_cast< const btScalar* >( addr + _tbIndex );
     btTransform trans;
     trans.setFromOpenGLMatrix( fAddr );
     setWorldTransformInternal( trans );
