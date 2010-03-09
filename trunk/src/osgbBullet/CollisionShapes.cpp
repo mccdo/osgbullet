@@ -101,7 +101,7 @@ btCylinderShape* btCylinderCollisionShapeFromOSG( osg::Node* node,
         return( NULL );
     }
 
-    btCylinderShape* shape;
+    btCylinderShape* shape = 0;
     switch( axis )
     {
         case _X:

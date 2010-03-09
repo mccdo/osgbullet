@@ -37,8 +37,8 @@ Chart::Chart()
     _y( .05f ),
     _w( .25f ),
     _h( .1f ),
-    _texW( 256 ),
     _yScale( 30.f ),
+    _texW( 256 ),
     _bg( osg::Vec4( 0.f, 0.f, 0.f, .33f ) ),
     _fg( osg::Vec4( 1.f, 1.f, 1.f, .5f ) ),
     _overrun( osg::Vec4( 1.f, 0.1f, 0.1f, .5f ) )
