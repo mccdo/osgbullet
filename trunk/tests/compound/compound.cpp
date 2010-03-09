@@ -33,7 +33,7 @@ osg::AnimationPath * createAnimationPath( const osg::Vec3 & origin,
     animationPath->setLoopMode( osg::AnimationPath::LOOP );
 
     int numSamples( 40 );
-    double time( 0. );
+    //double time( 0. );
     osg::Quat orient;
     int idx;
     for( idx = 0; idx < numSamples; idx++ )
