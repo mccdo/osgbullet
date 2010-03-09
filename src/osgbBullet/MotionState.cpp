@@ -127,12 +127,12 @@ MotionState::setWorldTransformInternal( const btTransform& worldTrans )
 void
 MotionState::setTransform( osg::Transform* transform )
 {
-    osg::MatrixTransform* mt( NULL );
-    osgwTools::AbsoluteModelTransform* amt( NULL );
-    if( mt = dynamic_cast< osg::MatrixTransform* >( transform ) )
-        _mt = mt;
-    else if( amt = dynamic_cast< osgwTools::AbsoluteModelTransform* >( transform ) )
-        _amt = amt;
+    //osg::MatrixTransform* mt( NULL );
+    //osgwTools::AbsoluteModelTransform* amt( NULL );
+    if( dynamic_cast< osg::MatrixTransform* >( transform ) )
+        _mt = static_cast< osg::MatrixTransform* >( transform );
+    else if( dynamic_cast< osgwTools::AbsoluteModelTransform* >( transform ) )
+        _amt = static_cast< osgwTools::AbsoluteModelTransform* >( transform );
     else
         osg::notify( osg::WARN ) << "MotionState: Unsupported transform type: " << transform->className() << std::endl;
 }

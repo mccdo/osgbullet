@@ -40,8 +40,8 @@ namespace osgbBullet
 GLDebugDrawer::GLDebugDrawer()
   : _enabled( true ),
     _active( false ),
-    _textStrings( 0 ),
     _textSize( 1.f ),
+    _textStrings( 0 ),
     _frame( 0 ),
     _contacts( 0 )
 {

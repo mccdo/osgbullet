@@ -36,15 +36,17 @@ using namespace osgbBullet;
 
 
 PhysicsThread::PhysicsThread( btDynamicsWorld* bw, osgbBullet::TripleBuffer* tb )
-  : _timeStep( (btScalar)( 0.0 ) ),
+  : _timeStep( btScalar( 0.0 ) ),
     _bw( bw ),
-    _tb( tb ),
     _stopped( true ),
-    _pauseCount( 0 )
+    _pauseCount( 0 ),
+    _tb( tb )
 {
+    ;
 }
 PhysicsThread::~PhysicsThread()
 {
+    ;
 }
 
 

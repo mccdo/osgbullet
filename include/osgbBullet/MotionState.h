@@ -40,7 +40,7 @@ namespace osgbBullet {
 struct OSGBBULLET_EXPORT MotionStateCallback
 {
     MotionStateCallback() {}
-    ~MotionStateCallback() {}
+    virtual ~MotionStateCallback() {}
 
     virtual void operator()( const btTransform& worldTrans ) = 0;
 };
