@@ -84,7 +84,7 @@ enablePhysics( osg::Node* root, const std::string& nodeName, btDynamicsWorld* bw
 
     osg::ref_ptr< osgwTools::AbsoluteModelTransform > model( new osgwTools::AbsoluteModelTransform );
     model->setDataVariance( osg::Object::DYNAMIC );
-    osgwTools::insertAbove( node, model );
+    osgwTools::insertAbove( node, model.get() );
 
     btRigidBody* rb = converter.getRigidBody();
     osgbBullet::MotionState* motion = new osgbBullet::MotionState;
@@ -212,7 +212,7 @@ int main( int argc,
     osg::ref_ptr< osg::Group > root = new osg::Group();
     btDynamicsWorld* bw = initPhysics();
 
-    InteractionManipulator* im = new InteractionManipulator( bw, root );
+    InteractionManipulator* im = new InteractionManipulator( bw, root.get() );
 
     root->addChild( osgbBullet::generateGroundPlane( osg::Vec4( 0.f, 0.f, 1.f, -10.f ), bw ) );
 
@@ -222,7 +222,7 @@ int main( int argc,
     osg::Node* block = osgDB::readNodeFile( "block.osg" );
     block->setName( "block" );
     mt->addChild( block );
-    enablePhysics( root, "block", bw );
+    enablePhysics( root.get(), "block", bw );
 
 
 
