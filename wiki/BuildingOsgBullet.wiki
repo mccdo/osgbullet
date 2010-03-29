@@ -4,11 +4,11 @@
 
 osgBullet depends on !OpenSceneGraph, Bullet, and osgWorks.
 
-Compatible versions of OSG: v2.6.1, v2.8.1, v2.8.2, and current svn head as of December 2009.
+Compatible versions of OSG: v2.6.1, v2.8.1, v2.8.2, and v2.8.3.
 
-Compatible versions of Bullet: v2.74, v2.75.
+Compatible versions of Bullet: v2.74 and v2.75.
 
-Compatible versions of osgWorks: v1.0.
+Compatible versions of osgWorks: v1.1.
 
 The osgBullet build system requires CMake v2.6.4 or later.
 
