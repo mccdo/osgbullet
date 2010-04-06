@@ -23,7 +23,6 @@
 #include <osg/Group>
 
 #include "osgbBullet/PhysicsState.h"
-#include "osgbBullet/OSGToCollada.h"
 
 #include "osgwTools/RefID.h"
 
