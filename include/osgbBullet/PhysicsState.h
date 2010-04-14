@@ -25,7 +25,7 @@
 #include <osg/Group>
 
 #include "osgbBullet/Export.h"
-#include "osgbBullet/OSGToCollada.h"
+#include "osgbBullet/CreationRecord.h"
 
 #include "osgwTools/RefID.h"
 
