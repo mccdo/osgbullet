@@ -3,11 +3,16 @@
 = Building osgBullet =
  * [BuildingOsgBullet Build instructions and dependencies.]
  * [CompatibilityMatrix What versions of OSG, osgWorks, and Bullet do I need?]
- * [GettingStarted Getting started.]
 
 = Running osgBullet =
- * RunningOsgBullet
+ * [RunningOsgBullet Setting up environment variables.]
+ * [GettingStarted Out-of-the-box functionality.]
 
 = osgBullet Release Information =
  * [ReleaseRoadmap Release history and roadmap.]
  * [CompatibilityMatrix osgBullet version compatibility matrix.]
+
+----
+
+=== Wiki Table of Contents ===
+ * [WikiContents This page.]
