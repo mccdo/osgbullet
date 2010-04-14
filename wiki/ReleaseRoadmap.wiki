@@ -1,17 +1,21 @@
 #summary Plans for upcoming osgBullet releases
 
-= v1.1 =
-
-*Release date:* April-May 2010
-
-*Status:* Release candidate available. Development is on the 1.1 branch.
-
-This release will contain some compatibility with Bullet v2.76. You will need to build osgBullet with the CMake USE_COLLADA flag deselected. This will leave out the portions of osgBullet that require the old Bullet !ColladaConverter library.
-
 = v2.0 =
 
 *Release date: June-July 2010
 
 *Status:* Not yet started.
 
-This non-backwards compatible release will remove all portions of osgBullet that depend on the old Bullet !ColladaConverter library.
+This non-backwards compatible release will remove all portions of osgBullet that depend on the Bullet !ColladaConverter library.
+
+= v1.1 =
+
+*Release date:* April-May 2010
+
+*Status:* Release candidate available. Development is on the 1.1 branch.
+
+This is the first release that attempts to be compatible with Bullet v2.76. The portions of osgBullet that require the Bullet !ColladaConverter library (removed in v2.76) will not function. You must use Bullet v2.74 or v2.75 to use osgBullet with !ColladaConverter.
+
+= v1.0 =
+
+*Released 4 Nov 2009*
