@@ -2,6 +2,6 @@
 
 ||osgBullet||OSG||Bullet||osgWorks||
 ||1.0||2.6.1, 2.8.x||2.74, 2.75||1.0||
-||1.1||2.6.1, 2.8.x||2.74, 2.75, 2.76*||1.1||
+||1.1||2.6.1, 2.8.x||2.74, 2.75, 2.76{{{(*)}}}||1.1||
 
-* osgBullet v1.1 is compatible with the core collision detection and rigid body dynamics features of Bullet 2.76. Due to removal of ColladaConverter in Bullet 2.76, you must build *osgBullet* with the USE_COLLADA CMake flag unselected.
+{{{(*)}}} osgBullet v1.1 is compatible with the core collision detection and rigid body dynamics features of Bullet 2.76. Due to removal of !ColladaConverter in Bullet 2.76, you must build *osgBullet* with the USE_COLLADA CMake flag unselected.
