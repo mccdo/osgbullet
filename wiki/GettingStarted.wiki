@@ -1,5 +1,7 @@
 #summary What to do after it's built.
 
+<wiki:toc />
+
 = Using colladaread =
 
 The *colladaread* example loads a scene graph, then allows you to interactively load a COLLADA file containing a rigid body for that model.

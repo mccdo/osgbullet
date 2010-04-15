@@ -1,5 +1,3 @@
-#summary Wiki Table of Contents
-
 = Building osgBullet =
  * [DownloadPage Get the source.]
  * [BuildingOsgBullet Build instructions and dependencies.]
