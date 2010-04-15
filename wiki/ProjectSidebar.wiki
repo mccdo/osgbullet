@@ -1,5 +1,4 @@
   * [DownloadPage Download]
-    * [DownloadPage Get the source.]
     * [http://code.google.com/p/osgbullet/source svn access]
     * [http://code.google.com/p/osgbullet/downloads/list Release zips]
   * Building

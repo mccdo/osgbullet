@@ -1,6 +1,7 @@
 #summary Wiki Table of Contents
 
 = Building osgBullet =
+ * [DownloadPage Get the source.]
  * [BuildingOsgBullet Build instructions and dependencies.]
  * [CompatibilityMatrix What versions of OSG, osgWorks, and Bullet do I need?]
 
@@ -16,3 +17,4 @@
 
 === Wiki Table of Contents ===
  * [WikiContents This page.]
+ * [ProjectSidebar Sidebar.]
