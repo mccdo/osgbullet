@@ -3,23 +3,13 @@ SET( LIB_NAME osgbBullet )
 ADD_DEFINITIONS(-DOSGBBULLET_LIBRARY)
 SET( HEADER_PATH ${PROJECT_SOURCE_DIR}/include/${LIB_NAME} )
 
-IF( USE_COLLADA )
-    SET( BULLET_COLLADA_HEADERS 
-	 ${HEADER_PATH}/ColladaUtils.h
-	 ${HEADER_PATH}/OSGToCollada.h
-    )    
-    SET( BULLET_COLLADA_SOURCES 
-	  OSGToCollada.cpp
-	  ColladaUtils.cpp
-    )
-
-ENDIF( USE_COLLADA )
-
 
 SET( LIB_PUBLIC_HEADERS
     ${HEADER_PATH}/BoundingCone.h
     ${HEADER_PATH}/BoundingCylinder.h
     ${HEADER_PATH}/Chart.h
+    ${HEADER_PATH}/ColladaUtils.h
+    ${HEADER_PATH}/OSGToCollada.h
     ${HEADER_PATH}/CollectVerticesVisitor.h
     ${HEADER_PATH}/CollisionShapes.h
     ${HEADER_PATH}/ComputeCylinderVisitor.h
@@ -37,7 +27,6 @@ SET( LIB_PUBLIC_HEADERS
     ${HEADER_PATH}/TripleBuffer.h
     ${HEADER_PATH}/Utils.h
     ${HEADER_PATH}/Version.h
-    ${BULLET_COLLADA_HEADERS}
 )
 
 ADD_SHARED_LIBRARY_INTERNAL( ${LIB_NAME}
@@ -46,6 +35,8 @@ ADD_SHARED_LIBRARY_INTERNAL( ${LIB_NAME}
     BoundingCone.cpp
     BoundingCylinder.cpp
     Chart.cpp
+    OSGToCollada.cpp
+    ColladaUtils.cpp
     CollectVerticesVisitor.cpp
     CollisionShapes.cpp
     ComputeCylinderVisitor.cpp
@@ -62,7 +53,6 @@ ADD_SHARED_LIBRARY_INTERNAL( ${LIB_NAME}
     TripleBuffer.cpp
     Utils.cpp
     Version.cpp
-    ${BULLET_COLLADA_SOURCES}
 ) 
 
 
