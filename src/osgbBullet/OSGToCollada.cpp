@@ -22,7 +22,9 @@
 #include "osgbBullet/CreationRecord.h"
 
 #include <btBulletDynamicsCommon.h>
-#include <BulletColladaConverter/ColladaConverter.h>
+#if defined( USE_COLLADA )
+#  include <BulletColladaConverter/ColladaConverter.h>
+#endif
 
 #include "osgbBullet/MotionState.h"
 #include "osgbBullet/Utils.h"
@@ -352,11 +354,14 @@ bool OSGToCollada::convert( const std::string& outputFileName )
         osg::notify( osg::FATAL ) << "OSGToCollada: Unable to create physics data." << std::endl;
         return false;
     }
-    else if (outputFileName.empty())
+    
+#if( defined( USE_COLLADA ) )
+    if (outputFileName.empty())
     {
         osg::notify( osg::INFO ) << "OSGToCollada: No output file name, not writing DAE." << std::endl;
         return true;
     }
+
     else
     {
         btDynamicsWorld* dynamicsWorld = initPhysics();
@@ -379,6 +384,9 @@ bool OSGToCollada::convert( const std::string& outputFileName )
 
         return true;
     }
+#else
+    return true;
+#endif
 }
 
 btRigidBody*

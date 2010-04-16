@@ -57,12 +57,13 @@ MACRO( FIND_BULLET_LIBRARY_DIRNAME LIBNAME DIRNAME )
             ./src/${DIRNAME}
             ./Extras/${DIRNAME}
             ./Demos/${DIRNAME}
-            ./src/${DIRNAME}/release
-            ./Extras/${DIRNAME}/release
-            ./Demos/${DIRNAME}/release
+            ./src/${DIRNAME}/Release
+            ./Extras/${DIRNAME}/Release
+            ./Demos/${DIRNAME}/Release
             ./libs/${DIRNAME}
             ./libs
             ./lib
+            ./lib/Release # v2.76, new location for build tree libs on Windows
         )
     FIND_LIBRARY( BULLET_${LIBNAME}_LIBRARY_debug
         NAMES
@@ -77,12 +78,13 @@ MACRO( FIND_BULLET_LIBRARY_DIRNAME LIBNAME DIRNAME )
             ./src/${DIRNAME}
             ./Extras/${DIRNAME}
             ./Demos/${DIRNAME}
-            ./src/${DIRNAME}/debug
-            ./Extras/${DIRNAME}/debug
-            ./Demos/${DIRNAME}/debug
+            ./src/${DIRNAME}/Debug
+            ./Extras/${DIRNAME}/Debug
+            ./Demos/${DIRNAME}/Debug
             ./libs/${DIRNAME}
             ./libs
             ./lib
+            ./lib/Debug # v2.76, new location for build tree libs on Windows
         )
 #    message( STATUS ${BULLET_${LIBNAME}_LIBRARY} ${BULLET_${LIBNAME}_LIBRARY_debug} )
 #    message( SEND_ERROR ${LIBNAME} )
@@ -109,12 +111,11 @@ FIND_BULLET_LIBRARY( BulletCollision )
 FIND_BULLET_LIBRARY( BulletMultiThreaded )
 FIND_BULLET_LIBRARY( LinearMath )
 FIND_BULLET_LIBRARY_DIRNAME( OpenGLSupport OpenGL )
-FIND_BULLET_LIBRARY_DIRNAME( XML LibXML )
 
-if(USE_COLLADA)
-   FIND_BULLET_LIBRARY( BulletColladaConverter )
-   FIND_BULLET_LIBRARY_DIRNAME( ColladaDom COLLADA_DOM )
-endif(USE_COLLADA)
+# Pre-2.76
+FIND_BULLET_LIBRARY_DIRNAME( XML LibXML )
+FIND_BULLET_LIBRARY_DIRNAME( ColladaDom COLLADA_DOM )
+FIND_BULLET_LIBRARY( BulletColladaConverter )
 
 # Hide BULLET_LIBRARY in the GUI, since most users can just ignore it
 MARK_AS_ADVANCED( BULLET_LIBRARIES )
@@ -124,3 +125,8 @@ SET( BULLET_FOUND 0 )
 IF( BULLET_INCLUDE_DIR AND BULLET_LIBRARIES )
     SET( BULLET_FOUND 1 )
 ENDIF( BULLET_INCLUDE_DIR AND BULLET_LIBRARIES )
+
+# in v2.76, ColladaConverter was removed.
+IF( BULLET_BulletColladaConverter_LIBRARY OR BULLET_BulletColladaConverter_LIBRARY_debug )
+    SET( BULLET_COLLADACONVERTER_FOUND )
+ENDIF( BULLET_BulletColladaConverter_LIBRARY OR BULLET_BulletColladaConverter_LIBRARY_debug )

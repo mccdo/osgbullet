@@ -170,6 +170,12 @@ createGround( float w, float h, const osg::Vec3& center )
 int main( int argc,
           char* argv[] )
 {
+#if !defined( USE_COLLADA )
+    osg::notify( osg::ALWAYS ) << "colladaread requieres Bullet's ColladaConverter," << std::endl;
+    osg::notify( osg::ALWAYS ) << "removed in Bullet v2.76. Try using Bullet 2.74 or 2.75." << std::endl;
+    return( 1 );
+#endif
+
     if( argc < 2 )
     {
         osg::notify( osg::FATAL ) << "Usage: colladaread <filename>" << std::endl;

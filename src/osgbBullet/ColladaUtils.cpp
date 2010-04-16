@@ -19,7 +19,9 @@
  *************** <auto-copyright.pl END do not edit this line> ***************/
 
 #include <btBulletDynamicsCommon.h>
-#include <BulletColladaConverter/ColladaConverter.h>
+#if defined( USE_COLLADA )
+#  include <BulletColladaConverter/ColladaConverter.h>
+#endif
 
 #include <osgbBullet/MotionState.h>
 #include <osgbBullet/RefRigidBody.h>
@@ -59,6 +61,12 @@ btDynamicsWorld* initPhysics()
 btRigidBody* loadDae( osg::Transform* node, const osg::NodePath& np, const std::string& daeName,
     btDynamicsWorld* dw )
 {
+#if !defined( USE_COLLADA )
+    osg::notify( osg::FATAL ) << "loadDae() requieres Bullet's ColladaConverter," << std::endl;
+    osg::notify( osg::FATAL ) << "removed in Bullet v2.76. Try using Bullet 2.74 or 2.75." << std::endl;
+    return( NULL );
+#else
+
     // Debug dump the node path.
     osg::NodePath::const_iterator it;
     for( it=np.begin(); it!=np.end(); it++ )
@@ -108,6 +116,7 @@ btRigidBody* loadDae( osg::Transform* node, const osg::NodePath& np, const std::
     node->setUserData( new osgbBullet::RefRigidBody( rb ) );
 
     return( rb );
+#endif
 }
 
 }
