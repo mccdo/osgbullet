@@ -159,7 +159,7 @@ int
 main( int argc,
       char ** argv )
 {
-#if !defines( USE_COLLADA )
+#if !defined( USE_COLLADA )
     osg::notify( osg::ALWAYS ) << "loadperf requieres Bullet's ColladaConverter," << std::endl;
     osg::notify( osg::ALWAYS ) << "removed in Bullet v2.76. Try using Bullet 2.74 or 2.75." << std::endl;
     return( 1 );
