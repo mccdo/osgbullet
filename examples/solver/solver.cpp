@@ -70,7 +70,10 @@ SerialParallelType g_collDisp( Serial );
 typedef enum {
     AxisSweep3,
     BigAxisSweep3,
+#if( BT_BULLET_VERSION < 276 )
+    // Removed in Bullet v2.76.
     MultiSaP,
+#endif
 #ifdef USE_BULLET_CUDA
     Cuda,
 #endif
@@ -179,12 +182,14 @@ initPhysics()
         osg::notify( osg::ALWAYS ) << "Broadphase: bt32BitAxisSweep3" << std::endl;
         broadphase = new bt32BitAxisSweep3( worldMin, worldMax, maxHandles, opc );
     }
+#if( BT_BULLET_VERSION < 276 )
     else if( g_broadphase == MultiSaP )
     {
         osg::notify( osg::ALWAYS ) << "Broadphase: btMultiSapBroadphase" << std::endl;
         int maxProxies( 16384 );
         broadphase = new btMultiSapBroadphase( maxProxies, opc );
     }
+#endif
 #ifdef USE_BULLET_CUDA
     else if( g_broadphase == Cuda )
     {
