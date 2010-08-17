@@ -80,10 +80,35 @@ makeScene( btDynamicsWorld* bw )
     root->addChild( geode );
 
 
-    osg::ref_ptr< osg::Node > cowNode = osgDB::readNodeFile( "cow.osg" );
-    osg::ref_ptr< osg::Node > truckNode = osgDB::readNodeFile( "dumptruck.osg" );
-    osg::ref_ptr< osg::Node > cubeNode = osgDB::readNodeFile( "offcube.osg" );
-    osg::ref_ptr< osg::Node > blockNode = osgDB::readNodeFile( "block.osg" );
+	std::string fileName;
+	fileName = "cow.osg";
+    osg::ref_ptr< osg::Node > cowNode = osgDB::readNodeFile( fileName );
+	if( !cowNode.valid() )
+	{
+		osg::notify( osg::FATAL ) << "Can't find \"" << fileName << "\". Make sure OSG_FILE_PATH includes the OSG sample data directory." << std::endl;
+		exit( 0 );
+	}
+	fileName = "dumptruck.osg";
+    osg::ref_ptr< osg::Node > truckNode = osgDB::readNodeFile( fileName );
+	if( !truckNode.valid() )
+	{
+		osg::notify( osg::FATAL ) << "Can't find \"" << fileName << "\". Make sure OSG_FILE_PATH includes the OSG sample data directory." << std::endl;
+		exit( 0 );
+	}
+	fileName = "offcube.osg";
+    osg::ref_ptr< osg::Node > cubeNode = osgDB::readNodeFile( fileName );
+	if( !cubeNode.valid() )
+	{
+		osg::notify( osg::FATAL ) << "Can't find \"" << fileName << "\". Make sure OSG_FILE_PATH includes the osgBullet data directory." << std::endl;
+		exit( 0 );
+	}
+	fileName = "block.osg";
+    osg::ref_ptr< osg::Node > blockNode = osgDB::readNodeFile( fileName );
+	if( !blockNode.valid() )
+	{
+		osg::notify( osg::FATAL ) << "Can't find \"" << fileName << "\". Make sure OSG_FILE_PATH includes the osgBullet data directory." << std::endl;
+		exit( 0 );
+	}
 
 
     osg::Group* origGrp = new osg::Group;
