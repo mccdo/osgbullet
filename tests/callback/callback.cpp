@@ -219,8 +219,15 @@ int main( int argc,
     osg::MatrixTransform* mt( new osg::MatrixTransform( osg::Matrix::translate( 0., 0., 10. ) ) );
     root->addChild( mt );
 
-    osg::Node* block = osgDB::readNodeFile( "block.osg" );
-    block->setName( "block" );
+	const std::string fileName( "block.osg" );
+    osg::Node* block = osgDB::readNodeFile( fileName );
+	if( block == NULL )
+	{
+		osg::notify( osg::FATAL ) << "Can't find \"" << fileName << "\". Make sure OSG_FILE_PATH includes the osgBullet data directory." << std::endl;
+		exit( 0 );
+	}
+
+	block->setName( "block" );
     mt->addChild( block );
     enablePhysics( root.get(), "block", bw );
 
