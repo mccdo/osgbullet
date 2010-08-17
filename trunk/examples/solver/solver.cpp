@@ -382,7 +382,14 @@ makeModel( const std::string& fileName, btDynamicsWorld* bw, osg::Vec3 pos, Inte
     root->addChild( amt );
 
     if( !modelNode.valid() )
+	{
         modelNode = osgDB::readNodeFile( fileName );
+		if( !modelNode.valid() )
+		{
+			osg::notify( osg::FATAL ) << "Can't find \"" << fileName << "\". Make sure OSG_FILE_PATH is set correctly." << std::endl;
+			exit( 0 );
+		}
+	}
     amt->addChild( modelNode.get() );
 
     osgbBullet::OSGToCollada converter;
@@ -417,7 +424,13 @@ makeCow( btDynamicsWorld* bw, osg::Vec3 pos, InteractionManipulator* im )
     amt->setDataVariance( osg::Object::DYNAMIC );
     root->addChild( amt );
 
-    osg::Node* node = osgDB::readNodeFile( "cow.osg" );
+	const std::string fileName( "cow.osg" );
+    osg::Node* node = osgDB::readNodeFile( fileName );
+	if( node == NULL )
+	{
+		osg::notify( osg::FATAL ) << "Can't find \"" << fileName << "\". Make sure OSG_FILE_PATH includes the OSG sample data directory." << std::endl;
+		exit( 0 );
+	}
     amt->addChild( node );
 
     btCollisionShape* cs = osgbBullet::btConvexTriMeshCollisionShapeFromOSG( node );
