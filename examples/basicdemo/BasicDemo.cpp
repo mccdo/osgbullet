@@ -178,7 +178,13 @@ osg::MatrixTransform * createModel( btDynamicsWorld * dynamicsWorld )
  *  OSG CODE
  */
     osg::ref_ptr< osg::MatrixTransform > node;
-    osg::ref_ptr< osg::Node > nodeDB = osgDB::readNodeFile( "glider.osg" );
+	const std::string fileName( "glider.osg" );
+    osg::ref_ptr< osg::Node > nodeDB = osgDB::readNodeFile( fileName );
+	if( !nodeDB.valid() )
+	{
+		osg::notify( osg::FATAL ) << "Can't find \"" << fileName << "\". Make sure OSG_FILE_PATH includes the OSG sample data directory." << std::endl;
+		exit( 0 );
+	}
 
     if( ( node = dynamic_cast< osg::MatrixTransform * >( nodeDB.get() ) ) == NULL )
     {
