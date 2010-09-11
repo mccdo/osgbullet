@@ -4,7 +4,7 @@
 
 = v2.0 =
 
-*Release date: June-July 2010
+*Release date: Expected late 2010
 
 *Status:* Not yet started.
 
@@ -12,9 +12,7 @@ This non-backwards compatible release will remove all portions of osgBullet that
 
 = v1.1 =
 
-*Release date:* April-May 2010
-
-*Status:* Release candidate available. Development is on the 1.1 branch.
+*Released 11 Sept 2010
 
 This is the first release that attempts to be compatible with Bullet v2.76. The portions of osgBullet that require the Bullet !ColladaConverter library (removed in v2.76) will not function. You must use Bullet v2.74 or v2.75 to use osgBullet with !ColladaConverter.
 
