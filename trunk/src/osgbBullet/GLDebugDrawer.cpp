@@ -127,7 +127,8 @@ GLDebugDrawer::GLDebugDrawer()
 }
 GLDebugDrawer::~GLDebugDrawer()
 {
-    _geode->getParent( 0 )->removeChild( _geode.get() );
+    while( _group->getNumParents() > 0 )
+        _group->getParent( 0 )->removeChild( _group.get() );
 }
 
 
