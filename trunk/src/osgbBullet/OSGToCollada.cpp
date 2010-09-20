@@ -22,9 +22,6 @@
 #include "osgbBullet/CreationRecord.h"
 
 #include <btBulletDynamicsCommon.h>
-#if defined( USE_COLLADA )
-#  include <BulletColladaConverter/ColladaConverter.h>
-#endif
 
 #include "osgbBullet/MotionState.h"
 #include "osgbBullet/Utils.h"
@@ -301,7 +298,7 @@ OSGToCollada::init()
 }
 
 
-bool OSGToCollada::convert( const std::string& outputFileName )
+bool OSGToCollada::convert()
 {
     osg::BoundingSphere bs = getSceneGraph()->getBound();
 
@@ -350,43 +347,9 @@ bool OSGToCollada::convert( const std::string& outputFileName )
 
 
     if (!_rigidBody)
-    {
         osg::notify( osg::FATAL ) << "OSGToCollada: Unable to create physics data." << std::endl;
-        return false;
-    }
-    
-#if( defined( USE_COLLADA ) )
-    if (outputFileName.empty())
-    {
-        osg::notify( osg::INFO ) << "OSGToCollada: No output file name, not writing DAE." << std::endl;
-        return true;
-    }
 
-    else
-    {
-        btDynamicsWorld* dynamicsWorld = initPhysics();
-        dynamicsWorld->addRigidBody( _rigidBody );
-
-        ColladaConverter* cc = new ColladaConverter( dynamicsWorld );
-        // TBD Not available in 2.75 Bullet release, maybe next one.
-        //cc->setVerbosity( ColladaConverter::SILENT );
-        cc->save( outputFileName.c_str() );
-
-        // clean up.
-        delete cc;
-
-        dynamicsWorld->removeRigidBody( _rigidBody );
-
-        delete dynamicsWorld->getBroadphase();
-        delete dynamicsWorld->getConstraintSolver();
-        delete dynamicsWorld->getDispatcher();
-        delete dynamicsWorld;
-
-        return true;
-    }
-#else
-    return true;
-#endif
+    return( _rigidBody != NULL );
 }
 
 btRigidBody*

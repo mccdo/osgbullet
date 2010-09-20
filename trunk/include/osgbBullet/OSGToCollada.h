@@ -38,7 +38,7 @@ namespace osgbBullet {
 
 // This is a support class for the osgbpp application, so that
 // an app can programmatically do the same thing as osgbpp:
-// Namely, convert an input scene graph into COLLADA physics data.
+// Namely, convert an input scene graph into a Bullet rigid body.
 class OSGBBULLET_EXPORT OSGToCollada
 {
 public:
@@ -63,7 +63,7 @@ public:
 
     void init();
 
-    bool convert( const std::string& outputFileName = std::string( "" ) );
+    bool convert();
 
 
     btRigidBody* getRigidBody();
