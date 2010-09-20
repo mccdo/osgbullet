@@ -6,7 +6,6 @@
 #   BULLET_INCLUDE_DIR
 #   BULLET_*_LIBRARY, one for each library (for example, "BULLET_BulletCollision_LIBRARY").
 #   BULLET_*_LIBRARY_debug, one for each library.
-#   BULLET_EXTRAS_INCLUDE_DIR - Directory containing the bullet "Extras" headers
 #   BULLET_DEMOS_INCLUDE_DIR - Directory containing the Demos/OpenGL headers
 #
 # This script will look in standard locations for installed Bullet. However, if you
@@ -35,7 +34,6 @@ FIND_PATH( BULLET_INCLUDE_DIR btBulletCollisionCommon.h
         /include
     )
 IF( BULLET_INCLUDE_DIR )
-    SET( BULLET_EXTRAS_INCLUDE_DIR ${BULLET_INCLUDE_DIR}/../Extras )
     SET( BULLET_DEMOS_INCLUDE_DIR ${BULLET_INCLUDE_DIR}/../Demos/OpenGL )
 ENDIF( BULLET_INCLUDE_DIR )
 
@@ -112,11 +110,6 @@ FIND_BULLET_LIBRARY( BulletMultiThreaded )
 FIND_BULLET_LIBRARY( LinearMath )
 FIND_BULLET_LIBRARY_DIRNAME( OpenGLSupport OpenGL )
 
-# Pre-2.76
-FIND_BULLET_LIBRARY_DIRNAME( XML LibXML )
-FIND_BULLET_LIBRARY_DIRNAME( ColladaDom COLLADA_DOM )
-FIND_BULLET_LIBRARY( BulletColladaConverter )
-
 # Hide BULLET_LIBRARY in the GUI, since most users can just ignore it
 MARK_AS_ADVANCED( BULLET_LIBRARIES )
 MARK_AS_ADVANCED( BULLET_LIBRARIES_debug )
@@ -127,6 +120,4 @@ IF( BULLET_INCLUDE_DIR AND BULLET_LIBRARIES )
 ENDIF( BULLET_INCLUDE_DIR AND BULLET_LIBRARIES )
 
 # in v2.76, ColladaConverter was removed.
-IF( BULLET_BulletColladaConverter_LIBRARY OR BULLET_BulletColladaConverter_LIBRARY_debug )
-    SET( BULLET_COLLADACONVERTER_FOUND )
-ENDIF( BULLET_BulletColladaConverter_LIBRARY OR BULLET_BulletColladaConverter_LIBRARY_debug )
+UNSET( BULLET_COLLADACONVERTER_FOUND )
