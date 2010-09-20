@@ -8,7 +8,6 @@ SET( LIB_PUBLIC_HEADERS
     ${HEADER_PATH}/BoundingCone.h
     ${HEADER_PATH}/BoundingCylinder.h
     ${HEADER_PATH}/Chart.h
-    ${HEADER_PATH}/ColladaUtils.h
     ${HEADER_PATH}/OSGToCollada.h
     ${HEADER_PATH}/CollectVerticesVisitor.h
     ${HEADER_PATH}/CollisionShapes.h
@@ -36,7 +35,6 @@ ADD_SHARED_LIBRARY_INTERNAL( ${LIB_NAME}
     BoundingCylinder.cpp
     Chart.cpp
     OSGToCollada.cpp
-    ColladaUtils.cpp
     CollectVerticesVisitor.cpp
     CollisionShapes.cpp
     ComputeCylinderVisitor.cpp
