@@ -117,7 +117,7 @@ public:
     void resetTransform();
 
 
-    // TripleBuffer support. The following methods allows MotionState
+    // TripleBuffer support. The following methods allow MotionState
     // to keep its btTransform world transform mechanism in a TripleBuffer
     // objects, which enables multithreaded physics simulation.
     //
