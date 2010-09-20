@@ -119,5 +119,8 @@ IF( BULLET_INCLUDE_DIR AND BULLET_LIBRARIES )
     SET( BULLET_FOUND 1 )
 ENDIF( BULLET_INCLUDE_DIR AND BULLET_LIBRARIES )
 
-# in v2.76, ColladaConverter was removed.
-UNSET( BULLET_COLLADACONVERTER_FOUND )
+
+# Possible future support for collision-only (no dynamics)
+IF( BULLET_BulletDynamics_LIBRARY OR BULLET_BulletDynamics_LIBRARY_debug )
+    SET( BULLET_DYNAMICS_FOUND 1 )
+ENDIF( BULLET_BulletDynamics_LIBRARY OR BULLET_BulletDynamics_LIBRARY_debug )
