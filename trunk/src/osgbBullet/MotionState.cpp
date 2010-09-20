@@ -227,7 +227,7 @@ void
 MotionState::registerTripleBuffer( osgbBullet::TripleBuffer* tb )
 {
     _tb = tb;
-    _tbIndex = tb->reserve( sizeof( float ) * 16 );
+    _tbIndex = tb->reserve( sizeof( btScalar ) * 16 );
 }
 
 void
