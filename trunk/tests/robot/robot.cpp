@@ -20,10 +20,6 @@
 #include <btBulletDynamicsCommon.h>
 #include <osgbBullet/GLDebugDrawer.h>
 
-#if defined( USE_COLLADA )
-#  include <BulletColladaConverter/ColladaConverter.h>
-#endif
-
 #include <iostream>
 #include <osg/io_utils>
 
@@ -155,13 +151,6 @@ public:
                     _joint1.set( .9 );
                     return true;
                 }
-#if defined( USE_COLLADA )
-                else if (ea.getKey()==osgGA::GUIEventAdapter::KEY_Space)
-                {
-                    ColladaConverter* cc = new ColladaConverter( _dynamicsWorld );
-                    cc->save( "debug.dae" );
-                }
-#endif
                 return false;
             }
 
