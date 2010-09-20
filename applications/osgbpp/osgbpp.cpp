@@ -123,8 +123,6 @@ int main( int argc,
     arguments.getApplicationUsage()->addCommandLineOption( "--overall", "Creates a single collision shape for the entire input scene graph or named subgraph (see --name), rather than a collision shape per Geode, which is the default." );
     arguments.getApplicationUsage()->addCommandLineOption( "--name <name>", "Interprets the scene graph from the first occurence of the named node. If not specified, the entire scene graph is processed." );
     arguments.getApplicationUsage()->addCommandLineOption( "--mass <n>", "Specifies the desired rigid body mass value. The default is 1.0." );
-    arguments.getApplicationUsage()->addCommandLineOption( "-o <name.dae>", "Output file name. If not present, the output file name is derived from the input file name by replacing the extension with .dae." );
-    arguments.getApplicationUsage()->addCommandLineOption( "--display", "Opens a window and displays a physics simulation of the rigid body. Use for debugging only." );
     arguments.getApplicationUsage()->addCommandLineOption( "-h or --help", "Displays help text and command line documentation." );
     arguments.getApplicationUsage()->addCommandLineOption( "-v or --version", "Display the osgbBullet version string." );
 
@@ -292,21 +290,6 @@ int main( int argc,
     if (mass != 1.f )
         osg::notify( osg::INFO ) << "osgbpp: Mass: " << mass << std::endl;
 
-    std::string outputFileName;
-    if (! arguments.read( "-o", outputFileName ) )
-    {
-        // Find the first non-option and try to treat it like a file name.
-        for( int pos = 1; pos < arguments.argc(); ++pos )
-        {
-            if ( ! arguments.isOption( pos ) )
-            {
-                outputFileName = osgDB::getNameLessExtension( arguments[ pos ] ) + ".dae";
-                break;
-            }
-        }
-    }
-    osg::notify( osg::INFO ) << "osgbpp: Using output file name: " << outputFileName << std::endl;
-
     bool comSpecified;
     std::string comStr;
     osg::Vec3 com;
@@ -317,10 +300,6 @@ int main( int argc,
         oStr >> com[ 0 ] >> comma >> com[ 1 ] >> comma >> com[ 2 ];
         osg::notify( osg::INFO ) << "osgbpp: Using center of mass: " << com << std::endl;
     }
-
-    const bool display( arguments.read( "--display" ) );
-    if (display)
-        osg::notify( osg::INFO ) << "osgbpp: Display" << std::endl;
 
 
 
@@ -344,13 +323,10 @@ int main( int argc,
     converter.setNodeName( nodeName );
     converter.setAxis( axis );
 
-    converter.convert( outputFileName );
+    converter.convert();
     osg::notify( osg::INFO ) << "osgbpp: Completed Collada conversion." << std::endl;
 
     // TBD we can deallocate 'model' here, but don't want to deallocate 'converter' yet...
-
-    if (!display)
-        return 0;
 
 
     osg::ref_ptr< osgwTools::AbsoluteModelTransform > loadedModel( new osgwTools::AbsoluteModelTransform );
