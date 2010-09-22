@@ -71,6 +71,7 @@ MACRO( FIND_OSGBULLET_LIBRARY MYLIBRARY MYLIBRARYNAME )
             /usr/freeware/lib64
         PATH_SUFFIXES
             lib
+            bin/Release
             .
     )
     FIND_LIBRARY( ${MYLIBRARY}_debug
@@ -94,6 +95,7 @@ MACRO( FIND_OSGBULLET_LIBRARY MYLIBRARY MYLIBRARYNAME )
             /usr/freeware/lib64
         PATH_SUFFIXES
             lib
+            bin/Debug
             .
     )
 #    message( STATUS ${${MYLIBRARY}} ${${MYLIBRARY}_debug} )
