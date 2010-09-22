@@ -30,7 +30,7 @@ namespace osgbBullet {
 
 #define OSGBBULLET_MAJOR_VERSION 1
 #define OSGBBULLET_MINOR_VERSION 1
-#define OSGBBULLET_SUB_VERSION 1
+#define OSGBBULLET_SUB_VERSION 50
 
 // C preprocessor integrated version number.
 // The form is Mmmss, where:
