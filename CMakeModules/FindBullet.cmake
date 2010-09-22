@@ -128,5 +128,5 @@ ENDIF( BULLET_INCLUDE_DIR AND BULLET_LIBRARIES )
 
 # in v2.76, ColladaConverter was removed.
 IF( BULLET_BulletColladaConverter_LIBRARY OR BULLET_BulletColladaConverter_LIBRARY_debug )
-    SET( BULLET_COLLADACONVERTER_FOUND )
+    SET( BULLET_COLLADACONVERTER_FOUND 1 )
 ENDIF( BULLET_BulletColladaConverter_LIBRARY OR BULLET_BulletColladaConverter_LIBRARY_debug )
