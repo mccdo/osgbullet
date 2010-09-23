@@ -148,7 +148,11 @@ int main( int argc,
     if( arguments.read( "-v" ) || arguments.read( "--version" ) )
     {
         osg::notify( osg::ALWAYS ) << osgbBullet::getVersionString() << std::endl;
-        osg::notify( osg::ALWAYS ) << "  (Bullet version " << BT_BULLET_VERSION << ")" << std::endl << std::endl;
+        osg::notify( osg::ALWAYS ) << "  (Bullet version " << BT_BULLET_VERSION;
+#ifdef BT_USE_DOUBLE_PRECISION
+        osg::notify( osg::ALWAYS ) << " double precision";
+#endif
+        osg::notify( osg::ALWAYS ) << ")" << std::endl << std::endl;
     }
 
     // Get all arguments.
