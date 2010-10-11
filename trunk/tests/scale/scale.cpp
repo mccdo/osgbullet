@@ -12,14 +12,7 @@
 
 #include <osgwTools/AbsoluteModelTransform.h>
 #include <osgwTools/Version.h>
-
-#if( OSGWORKS_VERSION < 10100 )
-   // Before verion 1.1, use the old Grid interface.
-#  include <osgwTools/Grid.h>
-#else
-   // v1.1 and later, use the new Shapes makeWirePlace interface.
-#  include <osgwTools/Shapes.h>
-#endif
+#include <osgwTools/Shapes.h>
 
 #include <osgbBullet/OSGToCollada.h>
 #include <osgbBullet/MotionState.h>
@@ -66,17 +59,10 @@ makeScene( btDynamicsWorld* bw )
 
     // Make wireframe reference grids to aid in visual verification of location.
     osg::Geode* geode = new osg::Geode;
-#if( OSGWORKS_VERSION < 10100 )
-    // Prior to v1.1, use the Grid class.
-    geode->addDrawable( osgwTools::makeGrid( osg::Vec3( -10, -10, 10 ), osg::Vec3( 20, 0, 0 ), osg::Vec3( 0, 20, 0 ), 5 ) );
-    geode->addDrawable( osgwTools::makeGrid( osg::Vec3( -10, 0, 0 ), osg::Vec3( 20, 0, 0 ), osg::Vec3( 0, 0, 20 ), 5 ) );
-#else
-    // v1.1 and later, use makeWirePlane.
     geode->addDrawable( osgwTools::makeWirePlane( osg::Vec3( -10, -10, 10 ),
         osg::Vec3( 20, 0, 0 ), osg::Vec3( 0, 20, 0 ), osg::Vec2s( 4, 4 ) ) );
     geode->addDrawable( osgwTools::makeWirePlane( osg::Vec3( -10, 0, 0 ),
         osg::Vec3( 20, 0, 0 ), osg::Vec3( 0, 0, 20 ), osg::Vec2s( 4, 4 ) ) );
-#endif
     root->addChild( geode );
 
 
