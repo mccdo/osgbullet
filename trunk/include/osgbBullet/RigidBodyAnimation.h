@@ -27,13 +27,13 @@
 
 namespace osgbBullet {
 
-/*!
-    This callback repositions an object within the
-    Bullet simulation. Attach it as an update callback
-    to an OSG MatrixTransform. The MT must have an
-    osgbBullet::RefRigidBody attached as UserData.
-*/
+/** \brief An update callback to reposition a btRigidBody in the Bullet
+simulation.
 
+This callback repositions an object within the Bullet simulation. Attach it as
+an update callback to an OSG MatrixTransform. The MatrixTransform must have an
+osgbBullet::RefRigidBody attached as UserData.
+*/
 class OSGBBULLET_EXPORT RigidBodyAnimation : public osg::NodeCallback
 {
 public:
