@@ -9,12 +9,11 @@
 
 namespace osgbBullet {
 
-/*!
-    A reference-counted btRigidBody (allows it to be added
-    as UserData to an OSG Node).
-    Does _not_ delete the rigid body in the destructor (could still be in use by Bullet).
-*/
+/** \brief A reference counted btRigidBody.
 
+RefRigidBody allows btRigidBody to be added as UserData to an OSG Node.
+\note Does \b not delete the rigid body in the destructor (could still be in use by Bullet).
+*/
 class OSGBBULLET_EXPORT RefRigidBody : public osg::Referenced
 {
 public:

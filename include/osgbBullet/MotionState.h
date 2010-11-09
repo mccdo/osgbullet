@@ -50,22 +50,22 @@ typedef std::vector< MotionStateCallback* > MotionStateCallbackList;
 // forward declaration
 class TripleBuffer;
 
-/*!
-    A btMotionState that allows Bullet to set the ransformation
-    of an OSG subgraph corresponding to a rigid body.
-    
-    This class can interface with an osg::MatrixTransform
-    or an osgwTools::AbsoluteModelTransform.
+/** \brief A btMotionState that works with OSG Transforms.
 
-    Typical usage:
-     - Call setTransform() to attach the root node of a subgraph.
-       The node must be a MatrixTransform or AbsoluteModelTransform.
-     - Call setParentTransform() to specify the initial transformation
-       for the subgraph.
-     - Call setCenterOfMass() to specify the xyz point corresponding
-       to the origin of the Bullet collision shape used by the rigid body.
+A btMotionState that allows Bullet to set the ransformation
+of an OSG subgraph corresponding to a rigid body.
+
+This class can interface with an osg::MatrixTransform
+or an osgwTools::AbsoluteModelTransform.
+
+Typical usage:
+\li Call setTransform() to attach the root node of a subgraph.
+   The node must be a MatrixTransform or AbsoluteModelTransform.
+\li Call setParentTransform() to specify the initial transformation
+   for the subgraph.
+\li Call setCenterOfMass() to specify the xyz point corresponding
+   to the origin of the Bullet collision shape used by the rigid body.
 */
-
 class OSGBBULLET_EXPORT MotionState : public btMotionState
 {
 public:

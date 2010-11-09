@@ -66,5 +66,24 @@ IF( OSGBULLET_BUILD_TESTS )
 ENDIF( OSGBULLET_BUILD_TESTS )
 
 ADD_SUBDIRECTORY( src/osgbBullet )
-
 ADD_SUBDIRECTORY( src/plugins )
+
+
+#
+# Doxygen
+OPTION( OSGBULLET_DOCUMENTATION "Enable to create build target for Doxygen documentation." OFF )
+MARK_AS_ADVANCED( CLEAR OSGBULLET_DOCUMENTATION )
+IF( OSGBULLET_DOCUMENTATION )
+    FIND_PACKAGE( Doxygen REQUIRED )
+    SET( HAVE_DOT "NO" )
+    IF( DOXYGEN_DOT_PATH )
+        SET( HAVE_DOT "YES" )
+    ENDIF( DOXYGEN_DOT_PATH )
+    
+    CONFIGURE_FILE( ${PROJECT_SOURCE_DIR}/doc/doxyfile.cmake
+        ${PROJECT_BINARY_DIR}/doc/doxyfile
+    )
+    ADD_CUSTOM_TARGET( Documentation ${DOXYGEN_EXECUTABLE}
+        ${PROJECT_BINARY_DIR}/doc/doxyfile
+    )
+ENDIF( OSGBULLET_DOCUMENTATION )
