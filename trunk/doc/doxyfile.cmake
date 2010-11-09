@@ -25,7 +25,7 @@ ABBREVIATE_BRIEF       = "The $name class" \
 ALWAYS_DETAILED_SEC    = NO
 INLINE_INHERITED_MEMB  = NO
 FULL_PATH_NAMES        = YES
-STRIP_FROM_PATH        = 
+STRIP_FROM_PATH        = "${osgBullet_SOURCE_DIR}/"
 STRIP_FROM_INC_PATH    = 
 SHORT_NAMES            = NO
 JAVADOC_AUTOBRIEF      = NO
@@ -101,18 +101,19 @@ WARN_LOGFILE           =
 # configuration options related to the input files
 #---------------------------------------------------------------------------
 INPUT                  = "${osgBullet_SOURCE_DIR}/applications " \
+                         "${osgBullet_SOURCE_DIR}/examples " \
                          "${osgBullet_SOURCE_DIR}/include " \
                          "${osgBullet_SOURCE_DIR}/src "
+                         "${osgBullet_SOURCE_DIR}/tests "
 INPUT_ENCODING         = UTF-8
 FILE_PATTERNS          = *.cpp \
                          *.h
 RECURSIVE              = YES
-EXCLUDE                = 
+EXCLUDE                = .svn
 EXCLUDE_SYMLINKS       = NO
 EXCLUDE_PATTERNS       = 
 EXCLUDE_SYMBOLS        = 
-EXAMPLE_PATH           = "${osgBullet_SOURCE_DIR}/examples " \
-                         "${osgBullet_SOURCE_DIR}/tests "
+EXAMPLE_PATH           = 
 EXAMPLE_PATTERNS       = *
 EXAMPLE_RECURSIVE      = YES
 IMAGE_PATH             = 
