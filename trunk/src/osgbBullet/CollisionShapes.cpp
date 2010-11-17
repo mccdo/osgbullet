@@ -18,7 +18,9 @@
  *
  *************** <auto-copyright.pl END do not edit this line> ***************/
 
-#include "BulletCollision/CollisionShapes/btShapeHull.h"
+#include <btBulletDynamicsCommon.h>
+#include <btBulletCollisionCommon.h>
+#include <BulletCollision/CollisionShapes/btShapeHull.h>
 
 #include <osgbBullet/CollisionShapes.h>
 #include <osgbBullet/ComputeTriMeshVisitor.h>
