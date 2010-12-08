@@ -22,16 +22,17 @@ ENDIF( WIN32 AND MSVC )
 
 INCLUDE( CMakeMacros )
 
-FIND_PACKAGE( OSG REQUIRED )
+include( FindOSGHelper )
+include( FindBulletHelper )
+
 FIND_PACKAGE( OSGWorks REQUIRED )
-FIND_PACKAGE( Bullet REQUIRED )
 
 # add bullet & osg for entire project for include & lib paths
 INCLUDE_DIRECTORIES( 
     ${PROJECT_SOURCE_DIR}/include
     ${OSG_INCLUDE_DIRS}
     ${OSGWORKS_INCLUDE_DIR}
-    ${BULLET_INCLUDE_DIR}
+    ${BULLET_INCLUDE_DIRS}
     ${BULLET_EXTRAS_INCLUDE_DIR}
 )
 # HACK: Not sure why this is necessary, but linket can't find osgbBulletd.lib without it.
