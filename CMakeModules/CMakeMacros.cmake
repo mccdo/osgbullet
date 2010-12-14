@@ -36,9 +36,9 @@ MACRO( MAKE_EXECUTABLE EXENAME )
         osgbBullet
     )
     TARGET_LINK_LIBRARIES( ${EXENAME}
+        ${OSGWORKS_LIBRARIES}
         ${OSG_LIBRARIES}
         ${BULLET_LIBRARIES}
-        ${OSGWORKS_LIBRARIES}
     )
     INSTALL(
         TARGETS ${EXENAME}
