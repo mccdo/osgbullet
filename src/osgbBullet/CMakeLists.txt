@@ -1,10 +1,12 @@
-SET( LIB_NAME osgbBullet )
+set( LIB_NAME osgbBullet )
 
-ADD_DEFINITIONS(-DOSGBBULLET_LIBRARY)
-SET( HEADER_PATH ${PROJECT_SOURCE_DIR}/include/${LIB_NAME} )
+if( BUILD_SHARED_LIBS )
+    add_definitions( -DOSGBBULLET_LIBRARY )
+endif()
 
 
-SET( LIB_PUBLIC_HEADERS
+set( HEADER_PATH ${PROJECT_SOURCE_DIR}/include/${LIB_NAME} )
+set( LIB_PUBLIC_HEADERS
     ${HEADER_PATH}/BoundingCone.h
     ${HEADER_PATH}/BoundingCylinder.h
     ${HEADER_PATH}/Chart.h
@@ -28,9 +30,7 @@ SET( LIB_PUBLIC_HEADERS
     ${HEADER_PATH}/Version.h
 )
 
-ADD_SHARED_LIBRARY_INTERNAL( ${LIB_NAME}
-    ${OPENSCENEGRAPH_USER_DEFINED_DYNAMIC_OR_STATIC}
-    ${LIB_PUBLIC_HEADERS}
+set( _osgBulletSourceFiles
     BoundingCone.cpp
     BoundingCylinder.cpp
     Chart.cpp
@@ -51,14 +51,22 @@ ADD_SHARED_LIBRARY_INTERNAL( ${LIB_NAME}
     TripleBuffer.cpp
     Utils.cpp
     Version.cpp
-) 
-
-
-TARGET_LINK_LIBRARIES(
-    ${LIB_NAME}
-    ${OSGWORKS_LIBRARIES}
-    ${OSG_LIBRARIES}
-    ${BULLET_LIBRARIES}
 )
 
-INCLUDE( ModuleInstall REQUIRED )
+add_library( ${LIB_NAME}
+    ${LIB_PUBLIC_HEADERS}
+    ${_osgBulletSourceFiles}
+)
+if( BUILD_SHARED_LIBS )
+    target_link_libraries( ${LIB_NAME}
+        ${OSGWORKS_LIBRARIES}
+        ${OSG_LIBRARIES}
+        ${BULLET_LIBRARIES}
+    )
+endif()
+
+set_target_properties( ${LIB_NAME} PROPERTIES VERSION ${OSGBULLET_VERSION} )
+set_target_properties( ${LIB_NAME} PROPERTIES SOVERSION ${OSGBULLET_VERSION} )
+set_target_properties( ${LIB_NAME} PROPERTIES PROJECT_LABEL "Lib ${LIB_NAME}" )
+
+include( ModuleInstall REQUIRED )
