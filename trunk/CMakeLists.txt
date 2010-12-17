@@ -1,8 +1,11 @@
 # # # # # #  project setup  # # # # # #
-CMAKE_MINIMUM_REQUIRED( VERSION 2.8 )
-PROJECT( osgBullet )
+cmake_minimum_required( VERSION 2.8 )
+project( osgBullet )
 
-SET( CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/CMakeModules;${CMAKE_MODULE_PATH}" )
+set( OSGBULLET_VERSION 1.1 )
+
+
+set( CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/CMakeModules;${CMAKE_MODULE_PATH}" )
 
 SET( LIBRARY_OUTPUT_PATH ${PROJECT_BINARY_DIR}/bin CACHE PATH "Single directory for all libraries." )
 MAKE_DIRECTORY( ${LIBRARY_OUTPUT_PATH} )
@@ -41,14 +44,20 @@ LINK_DIRECTORIES(
 )
 
 # Possible future support for collision-only (no dynamics)
-IF( BULLET_DYNAMICS_FOUND )
+if( BULLET_DYNAMICS_FOUND )
     ADD_DEFINITIONS( -DUSE_BULLET_DYNAMICS )
-ENDIF( BULLET_DYNAMICS_FOUND )
+endif()
 
-OPTION( OSGBULLET_USE_DOUBLE_PRECISION "Use Bullet built with double precision" OFF )
-IF( OSGBULLET_USE_DOUBLE_PRECISION )
+option( BUILD_SHARED_LIBS "Set to ON to build osgBullet for dynamic linking. Use OFF for static." ON )
+if( NOT BUILD_SHARED_LIBS )
+    add_definitions( -DOSGBBULLET_STATIC )
+endif()
+
+
+option( OSGBULLET_USE_DOUBLE_PRECISION "Use Bullet built with double precision" OFF )
+if( OSGBULLET_USE_DOUBLE_PRECISION )
     ADD_DEFINITIONS( -DBT_USE_DOUBLE_PRECISION)
-ENDIF( OSGBULLET_USE_DOUBLE_PRECISION )
+endif()
 
 
 OPTION( OSGBULLET_BUILD_APPLICATIONS "Enable to build applications" ON )

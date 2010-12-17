@@ -33,15 +33,15 @@
 #endif
 
 #if defined ( _MSC_VER ) || defined ( __CYGWIN__ ) || defined ( __MINGW32__ ) || defined ( __BCPLUSPLUS__ ) || defined ( __MWERKS__ )
- #if defined ( OSG_LIBRARY_STATIC )
-  #define OSGBBULLET_EXPORT
- #elif defined ( OSGBBULLET_LIBRARY )
-  #define OSGBBULLET_EXPORT    __declspec( dllexport )
- #else
-  #define OSGBBULLET_EXPORT    __declspec( dllimport )
- #endif
+    #if defined ( OSGBBULLET_STATIC )
+        #define OSGBBULLET_EXPORT
+    #elif defined ( OSGBBULLET_LIBRARY )
+        #define OSGBBULLET_EXPORT    __declspec( dllexport )
+    #else
+        #define OSGBBULLET_EXPORT    __declspec( dllimport )
+    #endif
 #else
- #define OSGBBULLET_EXPORT
+    #define OSGBBULLET_EXPORT
 #endif
 
 #endif
