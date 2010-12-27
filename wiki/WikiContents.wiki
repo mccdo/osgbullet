@@ -1,3 +1,5 @@
+= [http://vesuite.org/external/docs/osgbullet Doxygen Documentation] =
+
 = Building osgBullet =
  * [DownloadPage Get the source.]
  * [BuildingOsgBullet Build instructions and dependencies.]
