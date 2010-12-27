@@ -1,3 +1,4 @@
+  * [http://vesuite.org/external/docs/osgbullet Doxygen Documentation]
   * [DownloadPage Download]
     * [http://code.google.com/p/osgbullet/source svn access]
     * [http://code.google.com/p/osgbullet/downloads/list Release zips]
