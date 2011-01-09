@@ -54,7 +54,7 @@ public:
         _process( false )
     {
         if (!_overall)
-            _shape = new btCompoundShape;
+            _shape = new btCompoundShape();
     }
 
     void apply( osg::Node& node )
@@ -120,7 +120,7 @@ protected:
         btCollisionShape* child = createShape( node );
         if (child)
         {
-            btCompoundShape* master = dynamic_cast< btCompoundShape* >( _shape );
+            btCompoundShape* master = static_cast< btCompoundShape* >( _shape );
             btTransform transform; transform.setIdentity();
             master->addChildShape( transform, child );
         }
