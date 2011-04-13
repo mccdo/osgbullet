@@ -1,7 +1,7 @@
 #summary osgBullet compatibility by version
 
 || *Release date* || *osgBullet* || *!OpenSceneGraph* || *Bullet* || *osgWorks* ||
-|| 11 Sept 2010 || v1.1 || v2.6.1 - v2.8.3 || v2.74, v2.75, v2.76{{{(*)}}} || v1.1 ||
-|| 4 Nov 2009 || v1.0 || v2.6.1 - v2.8.3 || v2.74, v2.75 || v1.0 ||
+|| 11 Sept 2010 || v1.1 || v2.6.1 - v2.8.4 || v2.74, v2.75, v2.76{{{(*)}}} || v1.1 ||
+|| 4 Nov 2009 || v1.0 || v2.6.1 - v2.8.4 || v2.74, v2.75 || v1.0 ||
 
 {{{(*)}}} *osgBullet* v1.1 is compatible with the core collision detection and rigid body dynamics features of Bullet v2.76. Due to removal of !ColladaConverter in Bullet v2.76, some *osgBullet* functionality is unavailable.
