@@ -127,10 +127,12 @@ void Chart::createChart()
         
         std::string shaderName = osgDB::findDataFile( "hud.vs" );
         osg::ref_ptr< osg::Shader > vertShader = osg::Shader::readShaderFile( osg::Shader::VERTEX, shaderName );
+        vertShader->setName( "hud.vs" );
         program->addShader( vertShader.get() );
         
         shaderName = osgDB::findDataFile( "hud.fs" );
         osg::ref_ptr< osg::Shader > fragShader = osg::Shader::readShaderFile( osg::Shader::FRAGMENT, shaderName );
+        fragShader->setName( "hud.fs" );
         program->addShader( fragShader.get() );
         
         // Uniforms for color values and 1D texture width.
