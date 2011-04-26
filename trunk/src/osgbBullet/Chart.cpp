@@ -126,14 +126,26 @@ void Chart::createChart()
                          osg::StateAttribute::ON | osg::StateAttribute::PROTECTED );
         
         std::string shaderName = osgDB::findDataFile( "hud.vs" );
-        osg::ref_ptr< osg::Shader > vertShader = osg::Shader::readShaderFile( osg::Shader::VERTEX, shaderName );
-        vertShader->setName( "hud.vs" );
-        program->addShader( vertShader.get() );
+        if( !shaderName.empty() )
+        {
+            osg::ref_ptr< osg::Shader > vertShader = osg::Shader::readShaderFile( osg::Shader::VERTEX, shaderName );
+            program->addShader( vertShader.get() );
+        }
+        else
+        {
+            osg::notify( osg::WARN ) << "Chart::createChart(): Cannot find hud.vs." << std::endl;
+        }
         
         shaderName = osgDB::findDataFile( "hud.fs" );
-        osg::ref_ptr< osg::Shader > fragShader = osg::Shader::readShaderFile( osg::Shader::FRAGMENT, shaderName );
-        fragShader->setName( "hud.fs" );
-        program->addShader( fragShader.get() );
+        if( !shaderName.empty() )
+        {
+            osg::ref_ptr< osg::Shader > fragShader = osg::Shader::readShaderFile( osg::Shader::FRAGMENT, shaderName );
+            program->addShader( fragShader.get() );
+        }
+        else
+        {
+            osg::notify( osg::WARN ) << "Chart::createChart(): Cannot find hud.fs." << std::endl;
+        }
         
         // Uniforms for color values and 1D texture width.
         ss->addUniform( _fgUniform.get() );
