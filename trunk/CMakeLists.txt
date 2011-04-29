@@ -87,6 +87,11 @@ IF( OSGBULLET_BUILD_TESTS )
     ADD_SUBDIRECTORY( tests )
 ENDIF( OSGBULLET_BUILD_TESTS )
 
+option( OSGBULLET_INSTALL_DATA "Enable to add the data directory to the install target" ON )
+if( OSGBULLET_INSTALL_DATA )
+    add_subdirectory( data )
+endif()
+
 ADD_SUBDIRECTORY( src/osgbBullet )
 ADD_SUBDIRECTORY( src/plugins )
 
