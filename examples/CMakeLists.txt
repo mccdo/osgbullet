@@ -1,3 +1,5 @@
+SET( CATEGORY Example )
+
 ADD_SUBDIRECTORY( basicdemo )
 ADD_SUBDIRECTORY( dice )
 ADD_SUBDIRECTORY( multithreaded )

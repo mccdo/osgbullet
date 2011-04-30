@@ -55,10 +55,17 @@ MACRO( MAKE_EXECUTABLE EXENAME )
         ${OSG_LIBRARIES}
         ${BULLET_LIBRARIES}
     )
-    INSTALL(
-        TARGETS ${EXENAME}
-        RUNTIME DESTINATION bin COMPONENT libosgbbullet
-    )
+    if( ${CATEGORY} STREQUAL "App" )
+        install(
+            TARGETS ${EXENAME}
+            RUNTIME DESTINATION bin COMPONENT libosgbbullet
+        )
+    else()
+        install(
+            TARGETS ${EXENAME}
+            RUNTIME DESTINATION share/${CMAKE_PROJECT_NAME}/bin COMPONENT libosgbbullet
+        )
+    endif()
     # Requires ${CATAGORY}
     SET_TARGET_PROPERTIES( ${EXENAME} PROPERTIES PROJECT_LABEL "${CATEGORY} ${EXENAME}" )
 ENDMACRO( MAKE_EXECUTABLE EXENAME CATEGORY )

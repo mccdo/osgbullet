@@ -1,3 +1,5 @@
+SET( CATEGORY Test )
+
 ADD_SUBDIRECTORY( com )
 ADD_SUBDIRECTORY( compound )
 ADD_SUBDIRECTORY( triplebuf )
