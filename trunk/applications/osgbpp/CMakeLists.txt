@@ -1,4 +1,3 @@
- SET( CATEGORY App )
- MAKE_EXECUTABLE( osgbpp
+MAKE_EXECUTABLE( osgbpp
     osgbpp.cpp
 )
