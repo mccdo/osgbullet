@@ -50,10 +50,6 @@ INCLUDE_DIRECTORIES(
     ${BULLET_INCLUDE_DIRS}
     ${BULLET_EXTRAS_INCLUDE_DIR}
 )
-# HACK: Not sure why this is necessary, but linket can't find osgbBulletd.lib without it.
-LINK_DIRECTORIES(
-    ${EXECUTABLE_OUTPUT_PATH}/Debug
-)
 
 # Possible future support for collision-only (no dynamics)
 if( BULLET_DYNAMICS_FOUND )
