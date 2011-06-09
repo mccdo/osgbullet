@@ -39,7 +39,7 @@ osgbBullet::asOsgMatrix( const btTransform& t )
 btTransform
 osgbBullet::asBtTransform( const osg::Matrix& m )
 {
-    const osg::Matrixd::value_type* oPtr = m.ptr();
+    const osg::Matrix::value_type* oPtr = m.ptr();
     btScalar bPtr[ 16 ];
     int idx;
     for (idx=0; idx<16; idx++)
