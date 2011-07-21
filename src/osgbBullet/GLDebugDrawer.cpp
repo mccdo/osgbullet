@@ -171,8 +171,21 @@ void GLDebugDrawer::drawLine(const btVector3& from,const btVector3& to,const btV
         return;
     }
 
-    _lnVerts->push_back( osgbBullet::asOsgVec3( from ) );
-    _lnVerts->push_back( osgbBullet::asOsgVec3( to ) );  
+    // If the physics sim contains a plane, the AABB is rendered with
+    // astronomical values. When this occurs in combination with OSG's
+    // auto-compute near/far feature, the resulting far plane is vary
+    // distant, and consequently the near plane is pulled back to maintain
+    // the default near/far ratio. As a result, the entire scene is clipped.
+    osg::Vec3 osgFrom = osgbBullet::asOsgVec3( from );
+    osg::Vec3 osgTo = osgbBullet::asOsgVec3( to );
+    osgFrom[ 0 ] = osg::clampBetween< double >( osgFrom[ 0 ], -10000., 10000 );
+    osgFrom[ 1 ] = osg::clampBetween< double >( osgFrom[ 1 ], -10000., 10000 );
+    osgFrom[ 2 ] = osg::clampBetween< double >( osgFrom[ 2 ], -10000., 10000 );
+    osgTo[ 0 ] = osg::clampBetween< double >( osgTo[ 0 ], -10000., 10000 );
+    osgTo[ 1 ] = osg::clampBetween< double >( osgTo[ 1 ], -10000., 10000 );
+    osgTo[ 2 ] = osg::clampBetween< double >( osgTo[ 2 ], -10000., 10000 );
+    _lnVerts->push_back( osgFrom );
+    _lnVerts->push_back( osgTo );  
 
     osg::Vec4 c = osgbBullet::asOsgVec4( color, 1. );
     _lnColors->push_back( c );
@@ -192,6 +205,7 @@ void GLDebugDrawer::drawSphere( const btVector3& p, btScalar radius, const btVec
 
     osg::notify( osg::ALWAYS ) << "GLDebugDrawer::drawASphere NYI" << std::endl;
 }
+
 
 ////////////////////////////////////////////////////////////////////////////////
 void GLDebugDrawer::drawTriangle(const btVector3& a,const btVector3& b,const btVector3& c,const btVector3& color,btScalar alpha)
@@ -331,7 +345,7 @@ void GLDebugDrawer::EndDraw()
     if( _lnVerts->size() )
         _lnGeom->addPrimitiveSet( new osg::DrawArrays( GL_LINES, 0, _lnVerts->size() ) );
     if( _triVerts->size() )
-    _triGeom->addPrimitiveSet( new osg::DrawArrays( GL_TRIANGLES, 0, _triVerts->size() ) );
+        _triGeom->addPrimitiveSet( new osg::DrawArrays( GL_TRIANGLES, 0, _triVerts->size() ) );
 
     _chart->setValue( _frame, _contacts );
     _frame++;
