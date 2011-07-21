@@ -173,17 +173,20 @@ void GLDebugDrawer::drawLine(const btVector3& from,const btVector3& to,const btV
 
     // If the physics sim contains a plane, the AABB is rendered with
     // astronomical values. When this occurs in combination with OSG's
-    // auto-compute near/far feature, the resulting far plane is vary
+    // auto-compute near/far feature, the resulting far plane is very
     // distant, and consequently the near plane is pulled back to maintain
     // the default near/far ratio. As a result, the entire scene is clipped.
+    // In this case, don't draw this line.
     osg::Vec3 osgFrom = osgbBullet::asOsgVec3( from );
     osg::Vec3 osgTo = osgbBullet::asOsgVec3( to );
-    osgFrom[ 0 ] = osg::clampBetween< double >( osgFrom[ 0 ], -10000., 10000 );
-    osgFrom[ 1 ] = osg::clampBetween< double >( osgFrom[ 1 ], -10000., 10000 );
-    osgFrom[ 2 ] = osg::clampBetween< double >( osgFrom[ 2 ], -10000., 10000 );
-    osgTo[ 0 ] = osg::clampBetween< double >( osgTo[ 0 ], -10000., 10000 );
-    osgTo[ 1 ] = osg::clampBetween< double >( osgTo[ 1 ], -10000., 10000 );
-    osgTo[ 2 ] = osg::clampBetween< double >( osgTo[ 2 ], -10000., 10000 );
+    const double bigValue( 10000. );
+    if( ( osg::absolute< double >( osgFrom[ 0 ] ) > bigValue ) ||
+        ( osg::absolute< double >( osgFrom[ 1 ] ) > bigValue ) ||
+        ( osg::absolute< double >( osgFrom[ 2 ] ) > bigValue ) ||
+        ( osg::absolute< double >( osgTo[ 0 ] ) > bigValue ) ||
+        ( osg::absolute< double >( osgTo[ 1 ] ) > bigValue ) ||
+        ( osg::absolute< double >( osgTo[ 2 ] ) > bigValue ) )
+        return;
     _lnVerts->push_back( osgFrom );
     _lnVerts->push_back( osgTo );  
 
