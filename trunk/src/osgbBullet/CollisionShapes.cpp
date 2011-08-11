@@ -108,17 +108,15 @@ btCylinderShape* btCylinderCollisionShapeFromOSG( osg::Node* node,
     {
         case _X:
         case X:
-            shape = new btCylinderShapeX( btVector3( cyl.getLength(), cyl.getRadius(), 0 ) );
+            shape = new btCylinderShapeX( btVector3( cyl.getLength(), cyl.getRadius(), cyl.getRadius() ) );
             break;
-
         case _Y:
         case Y:
-            shape = new btCylinderShape( btVector3( cyl.getRadius(), cyl.getLength(), 0 ) );
+            shape = new btCylinderShape( btVector3( cyl.getRadius(), cyl.getLength(), cyl.getRadius() ) );
             break;
-
         case _Z:
         case Z:
-            shape = new btCylinderShapeZ( btVector3( cyl.getRadius(), 0, cyl.getLength() ) );
+            shape = new btCylinderShapeZ( btVector3( cyl.getRadius(), cyl.getRadius(), cyl.getLength() ) );
     }
     return( shape );
 }
