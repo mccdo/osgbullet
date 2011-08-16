@@ -33,8 +33,14 @@ namespace osg {
     class Geode;
 }
 
-namespace osgbBullet {
+namespace osgbBullet
+{
 
+
+/** \defgroup collisionshapes Collision Shapes
+\brief Low-level convenience routines for converting between OSG geometric data and Bullet collision shapes.
+*/
+/**@{*/
 
 /* Several utility functions to assist with creation of
    Bullet collision shapes from OSG geometry.
@@ -69,6 +75,13 @@ OSGBBULLET_EXPORT osg::Node* osgNodeFromBtCollisionShape( const btConvexHullShap
 
 OSGBBULLET_EXPORT osg::Node* generateGroundPlane( const osg::Vec4& plane, btDynamicsWorld* bulletWorld, btRigidBody** rb=NULL );
 
-} // end namespace osgbBullet
 
-#endif // __OSGBBULLET_COLLISIONSHAPES_H__
+/**@}*/
+
+
+// osgbBullet
+}
+
+
+// __OSGBBULLET_COLLISIONSHAPES_H__
+#endif
