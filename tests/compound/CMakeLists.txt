@@ -1,3 +1,3 @@
-MAKE_EXECUTABLE( compound
+_osgBulletMakeDynamicsExe( compound
     compound.cpp
 )

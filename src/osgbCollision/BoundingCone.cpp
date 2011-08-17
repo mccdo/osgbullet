@@ -1,6 +1,6 @@
 /*************** <auto-copyright.pl BEGIN do not edit this line> **************
  *
- * osgBullet is (C) Copyright 2009 by Kenneth Mark Bryden
+ * osgBullet is (C) Copyright 2009-2011 by Kenneth Mark Bryden
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -18,30 +18,32 @@
  *
  *************** <auto-copyright.pl END do not edit this line> ***************/
 
-#include <osgbBullet/BoundingCylinder.h>
+#include <osgbCollision/BoundingCone.h>
 #include <osg/io_utils>
 #include <iostream>
 
 
-using namespace osgbBullet;
+namespace osgbCollision
+{
 
-BoundingCylinder::BoundingCylinder( void )
+
+BoundingCone::BoundingCone( void )
 {
     axis = osg::Vec3( 0, 1, 0 );
     length = 0.0;
     radius = 0.0;
 }
 
-BoundingCylinder::~BoundingCylinder( void )
+BoundingCone::~BoundingCone( void )
 {
 }
 
-void BoundingCylinder::expandBy( const osg::Vec3& v )
+void BoundingCone::expandBy( const osg::Vec3& v )
 {
     float nl, nr;
 
-    nl = osg::absolute( v * axis );
-    if( nl > length )
+    nl = v * axis;
+    if( ( nl < 0.0 ) && ( nl < -length ) )
     {
         length = nl;
     }
@@ -53,14 +55,14 @@ void BoundingCylinder::expandBy( const osg::Vec3& v )
     }
 }
 
-void BoundingCylinder::expandBy( float x,
-                                 float y,
-                                 float z )
+void BoundingCone::expandBy( float x,
+                             float y,
+                             float z )
 {
     expandBy( osg::Vec3( x, y, z ) );
 }
 
-void BoundingCylinder::expandBy( const BoundingCylinder& bc )
+void BoundingCone::expandBy( const BoundingCone& bc )
 {
     float a, b;
 
@@ -80,4 +82,8 @@ void BoundingCylinder::expandBy( const BoundingCylinder& bc )
     }
 
     return;
+}
+
+
+// osgbCollision
 }

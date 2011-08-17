@@ -1,6 +1,6 @@
 /*************** <auto-copyright.pl BEGIN do not edit this line> **************
  *
- * osgBullet is (C) Copyright 2009 by Kenneth Mark Bryden
+ * osgBullet is (C) Copyright 2009-2011 by Kenneth Mark Bryden
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -19,7 +19,7 @@
  *************** <auto-copyright.pl END do not edit this line> ***************/
 
 #include <osgbBullet/MotionState.h>
-#include <osgbBullet/Utils.h>
+#include <osgbCollision/Utils.h>
 #include <osgbBullet/TripleBuffer.h>
 
 #include <osgwTools/AbsoluteModelTransform.h>
@@ -109,7 +109,7 @@ void
 MotionState::setWorldTransformInternal( const btTransform& worldTrans )
 {
     // This OSG matrix will be used to transform OSG debug geometry, if enabled.
-    osg::Matrix dt = osgbBullet::asOsgMatrix( worldTrans );
+    osg::Matrix dt = osgbCollision::asOsgMatrix( worldTrans );
 
     // Compute the transformation of the OSG visual representation.
     const osg::Vec3 cs( _com[0]*_scale[0], _com[1]*_scale[1], _com[2]*_scale[2] );
@@ -219,7 +219,7 @@ MotionState::resetTransform()
     // rigid body and the OSG visual representation.
     const osg::Vec3 cs( _com[0]*_scale[0], _com[1]*_scale[1], _com[2]*_scale[2] );
     osg::Matrix csMat = osg::Matrix::translate( cs );
-    setWorldTransform( osgbBullet::asBtTransform( csMat * _parentTransform ) );
+    setWorldTransform( osgbCollision::asBtTransform( csMat * _parentTransform ) );
 }
 
 

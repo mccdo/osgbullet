@@ -1,6 +1,6 @@
 /*************** <auto-copyright.pl BEGIN do not edit this line> **************
  *
- * osgBullet is (C) Copyright 2009 by Kenneth Mark Bryden
+ * osgBullet is (C) Copyright 2009-2011 by Kenneth Mark Bryden
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -18,22 +18,22 @@
  *
  *************** <auto-copyright.pl END do not edit this line> ***************/
 
-#ifndef __OSGBBULLET_REFCOLLISIONSHAPE_H__
-#define __OSGBBULLET_REFCOLLISIONSHAPE_H__
+#ifndef __OSGBCOLLISION_REF_COLLISION_SHAPE_H__
+#define __OSGBCOLLISION_REF_COLLISION_SHAPE_H__ 1
 
+#include <osgbCollision/Export.h>
 #include <osg/Referenced>
 #include <BulletCollision/CollisionShapes/btCollisionShape.h>
 
-#include <osgbBullet/Export.h>
 
-namespace osgbBullet {
-
-
-//A reference-counted btCollisionShape (allows it to be added
-// as UserData to an OSG Node).
+namespace osgbCollision
+{
 
 
-class OSGBBULLET_EXPORT RefCollisionShape : public osg::Referenced
+/** \class RefCollisionShape RefCollisionShape.h <osgbCollision/RefCollisionShape.h>
+\brief A reference-counted btCollisionShape (allows it to be added as UserData to an OSG Node).
+*/
+class OSGBCOLLISION_EXPORT RefCollisionShape : public osg::Referenced
 {
 public:
     RefCollisionShape( void );
@@ -59,8 +59,10 @@ protected:
     btCollisionShape* _collisionShape;
 };
 
+
+// osgbCollision
 }
 
 
-//__OSGBBULLET_REFCOLLISIONSHAPE_H__
+// __OSGBCOLLISION_REF_COLLISION_SHAPE_H__
 #endif

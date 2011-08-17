@@ -1,3 +1,3 @@
-MAKE_EXECUTABLE( multithreaded
+_osgBulletMakeDynamicsExe( multithreaded
     multithreaded.cpp
 )

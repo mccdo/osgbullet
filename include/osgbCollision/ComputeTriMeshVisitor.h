@@ -1,6 +1,6 @@
 /*************** <auto-copyright.pl BEGIN do not edit this line> **************
  *
- * osgBullet is (C) Copyright 2009 by Kenneth Mark Bryden
+ * osgBullet is (C) Copyright 2009-2011 by Kenneth Mark Bryden
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -18,30 +18,36 @@
  *
  *************** <auto-copyright.pl END do not edit this line> ***************/
 
-#ifndef OSGBBULLET_COMPUTETRIMESHVISITOR
-#define OSGBBULLET_COMPUTETRIMESHVISITOR    1
+#ifndef __OSGBCOLLISION_COMPUTETRIMESHVISITOR_H__
+#define __OSGBCOLLISION_COMPUTETRIMESHVISITOR_H__ 1
+
 
 #include <osg/NodeVisitor>
 #include <osg/Array>
-#include <osg/Version>
+#include <osgwTools/Version.h>
 
-namespace osgbBullet {
 
-/* TBD Consider using OSG localtoworld method instead of keeping a matrix stack. */
-class ComputeTriMeshVisitor
-    : public osg::NodeVisitor
+namespace osgbCollision
+{
+
+
+/** \class ComputeTriMeshVisitor ComputeTriMeshVisitor.h <osgbCollision/ComputeTriMeshVisitor.h>
+\brief Creates a list of triangles from OSG data, suitable for constructing Bullet triangle mesh collision shapes.
+TBD Consider using OSG localtoworld method instead of keeping a matrix stack.
+*/
+class ComputeTriMeshVisitor : public osg::NodeVisitor
 {
 public:
     ComputeTriMeshVisitor( osg::NodeVisitor::TraversalMode traversalMode = TRAVERSE_ALL_CHILDREN );
 
-#if( ( OPENSCENEGRAPH_MAJOR_VERSION >= 2) && (OPENSCENEGRAPH_MINOR_VERSION >= 8) )
-    META_NodeVisitor(osgbBullet,ComputeTriMeshVisitor)
+#if( OSGWORKS_OSG_VERSION >= 20800 )
+    META_NodeVisitor(osgbCollision,ComputeTriMeshVisitor)
 #endif
 
     virtual void reset();
 
 
-    osg::Vec3Array * getTriMesh()
+    osg::Vec3Array* getTriMesh()
     {
         return( mesh.get() );
     }
@@ -74,6 +80,10 @@ protected:
     osg::ref_ptr< osg::Vec3Array > mesh;
 };
 
+
+// osgbCollision
 }
 
+
+// __OSGBCOLLISION_COMPUTETRIMESHVISITOR_H__
 #endif

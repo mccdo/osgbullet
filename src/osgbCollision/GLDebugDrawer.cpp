@@ -1,6 +1,6 @@
 /*************** <auto-copyright.pl BEGIN do not edit this line> **************
  *
- * osgBullet is (C) Copyright 2009 by Kenneth Mark Bryden
+ * osgBullet is (C) Copyright 2009-2011 by Kenneth Mark Bryden
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -18,8 +18,9 @@
  *
  *************** <auto-copyright.pl END do not edit this line> ***************/
 
-#include "osgbBullet/GLDebugDrawer.h"
-#include "osgbBullet/Chart.h"
+#include <osgbCollision/GLDebugDrawer.h>
+#include <osgbCollision/Chart.h>
+#include <osgbCollision/Utils.h>
 
 #include <osg/Camera>
 #include <osg/Geometry>
@@ -30,11 +31,11 @@
 
 #include <stdio.h> //printf debugging
 
-#include "osgbBullet/Utils.h"
 
 
-namespace osgbBullet
+namespace osgbCollision
 {
+
 
 ////////////////////////////////////////////////////////////////////////////////
 GLDebugDrawer::GLDebugDrawer()
@@ -121,7 +122,7 @@ GLDebugDrawer::GLDebugDrawer()
     _hudCam->setProjectionMatrixAsOrtho( 0., 1., 0., 1., -1., 1. );
     _group->addChild( _hudCam.get() );
 
-    _chart = new osgbBullet::Chart;
+    _chart = new osgbCollision::Chart;
     _chart->createChart();
     _hudCam->addChild( _chart->get() );
 }
@@ -177,8 +178,8 @@ void GLDebugDrawer::drawLine(const btVector3& from,const btVector3& to,const btV
     // distant, and consequently the near plane is pulled back to maintain
     // the default near/far ratio. As a result, the entire scene is clipped.
     // In this case, don't draw this line.
-    osg::Vec3 osgFrom = osgbBullet::asOsgVec3( from );
-    osg::Vec3 osgTo = osgbBullet::asOsgVec3( to );
+    osg::Vec3 osgFrom = osgbCollision::asOsgVec3( from );
+    osg::Vec3 osgTo = osgbCollision::asOsgVec3( to );
     const double bigValue( 10000. );
     if( ( osg::absolute< double >( osgFrom[ 0 ] ) > bigValue ) ||
         ( osg::absolute< double >( osgFrom[ 1 ] ) > bigValue ) ||
@@ -190,7 +191,7 @@ void GLDebugDrawer::drawLine(const btVector3& from,const btVector3& to,const btV
     _lnVerts->push_back( osgFrom );
     _lnVerts->push_back( osgTo );  
 
-    osg::Vec4 c = osgbBullet::asOsgVec4( color, 1. );
+    osg::Vec4 c = osgbCollision::asOsgVec4( color, 1. );
     _lnColors->push_back( c );
     _lnColors->push_back( c );
 }
@@ -222,11 +223,11 @@ void GLDebugDrawer::drawTriangle(const btVector3& a,const btVector3& b,const btV
         return;
     }
 
-    _triVerts->push_back( osgbBullet::asOsgVec3( a ) );
-    _triVerts->push_back( osgbBullet::asOsgVec3( b ) );
-    _triVerts->push_back( osgbBullet::asOsgVec3( c ) );
+    _triVerts->push_back( osgbCollision::asOsgVec3( a ) );
+    _triVerts->push_back( osgbCollision::asOsgVec3( b ) );
+    _triVerts->push_back( osgbCollision::asOsgVec3( c ) );
 
-    osg::Vec4 c4 = osgbBullet::asOsgVec4( color, alpha );
+    osg::Vec4 c4 = osgbCollision::asOsgVec4( color, alpha );
     _triColors->push_back( c4 );
     _triColors->push_back( c4 );
     _triColors->push_back( c4 );
@@ -258,7 +259,7 @@ void GLDebugDrawer::draw3dText(const btVector3& location,const char* textString)
     osgText::Text* text = _textVec[ _textStrings ].get();
     _textStrings++;
 
-    text->setPosition( osgbBullet::asOsgVec3( location ) );
+    text->setPosition( osgbCollision::asOsgVec3( location ) );
     text->setText( std::string( textString ) );
 
     _geode->addDrawable( text );
@@ -287,8 +288,8 @@ void GLDebugDrawer::drawContactPoint( const btVector3& pointOnB,
 
     _contacts++;
 
-    _ptVerts->push_back( osgbBullet::asOsgVec3( pointOnB ) );
-    _ptColors->push_back( osgbBullet::asOsgVec4( color, 1. ) );
+    _ptVerts->push_back( osgbCollision::asOsgVec3( pointOnB ) );
+    _ptColors->push_back( osgbCollision::asOsgVec4( color, 1. ) );
 
     btVector3 to=pointOnB+normalOnB*distance;
     const btVector3&from = pointOnB;
@@ -388,4 +389,6 @@ GLDebugDrawer::initText()
     return text;
 }
 
+
+// osgbCollision
 }

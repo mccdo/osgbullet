@@ -1,6 +1,6 @@
 /*************** <auto-copyright.pl BEGIN do not edit this line> **************
  *
- * osgBullet is (C) Copyright 2009 by Kenneth Mark Bryden
+ * osgBullet is (C) Copyright 2009-2011 by Kenneth Mark Bryden
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -18,25 +18,29 @@
  *
  *************** <auto-copyright.pl END do not edit this line> ***************/
 
-#ifndef OSGBBULLET_COMPUTECYLINDERVISITOR
-#define OSGBBULLET_COMPUTECYLINDERVISITOR    1
+#ifndef __OSGBCOLLISION_COMPUTECYLINDERVISITOR_H__
+#define __OSGBCOLLISION_COMPUTECYLINDERVISITOR_H__ 1
 
 #include <osg/NodeVisitor>
-#include <osg/Version>
+#include <osgwTools/Version.h>
 
-#include <osgbBullet/BoundingCylinder.h>
+#include <osgbCollision/BoundingCylinder.h>
 
-namespace osgbBullet {
+namespace osgbCollision
+{
 
-/* TBD Consider using OSG localtoworld method instead of keeping a matrix stack. */
-class ComputeCylinderVisitor
-    : public osg::NodeVisitor
+
+/** \class ComputeCylinderVisitor ComputeCylinderVisitor.h <osgbCollision/ComputeCylinderVisitor.h>
+\brief Computes the extents of a cylinder around specified OSG data.
+TBD Consider using OSG localtoworld method instead of keeping a matrix stack.
+*/
+class ComputeCylinderVisitor : public osg::NodeVisitor
 {
 public:
     ComputeCylinderVisitor( osg::NodeVisitor::TraversalMode traversalMode = TRAVERSE_ALL_CHILDREN );
 
-#if( ( OPENSCENEGRAPH_MAJOR_VERSION >= 2) && (OPENSCENEGRAPH_MINOR_VERSION >= 8) )
-    META_NodeVisitor(osgbBullet,ComputeCylinderVisitor)
+#if( OSGWORKS_OSG_VERSION >= 20800 )
+    META_NodeVisitor(osgbCollision,ComputeCylinderVisitor)
 #endif
 
     virtual void reset();
@@ -49,7 +53,7 @@ public:
         bc.setAxis( axis );
     }
 
-    BoundingCylinder & getBoundingCylinder()
+    osgbCollision::BoundingCylinder& getBoundingCylinder()
     {
         return( bc );
     }
@@ -78,6 +82,10 @@ protected:
     osg::Vec3 axis;
 };
 
+
+// osgbCollision
 }
 
+
+// __OSGBCOLLISION_COMPUTECYLINDERVISITOR_H__
 #endif

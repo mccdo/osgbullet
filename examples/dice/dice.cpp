@@ -1,6 +1,6 @@
 /*************** <auto-copyright.pl BEGIN do not edit this line> **************
  *
- * osgBullet is (C) Copyright 2009 by Kenneth Mark Bryden
+ * osgBullet is (C) Copyright 2009-2011 by Kenneth Mark Bryden
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -25,8 +25,8 @@
 #include <osg/Geode>
 
 #include <osgbBullet/MotionState.h>
-#include <osgbBullet/CollisionShapes.h>
-#include <osgbBullet/Utils.h>
+#include <osgbCollision/CollisionShapes.h>
+#include <osgbCollision/Utils.h>
 
 #include <btBulletDynamicsCommon.h>
 
@@ -48,7 +48,7 @@ makeDie( btDynamicsWorld* bw )
 	}
     root->addChild( node );
 
-    btCollisionShape* cs = osgbBullet::btBoxCollisionShapeFromOSG( node );
+    btCollisionShape* cs = osgbCollision::btBoxCollisionShapeFromOSG( node );
     osgbBullet::MotionState* motion = new osgbBullet::MotionState();
     motion->setTransform( root );
     btScalar mass( 1. );
@@ -195,54 +195,54 @@ main( int argc,
         osg::Vec3 halfLengths( xDim*.5, yDim*.5, thick*.5 );
         osg::Vec3 center( 0., 0., zDim*.5 );
         shakeBox->addChild( osgBox( center, halfLengths ) );
-        btBoxShape* box = new btBoxShape( osgbBullet::asBtVector3( halfLengths ) );
+        btBoxShape* box = new btBoxShape( osgbCollision::asBtVector3( halfLengths ) );
         btTransform trans; trans.setIdentity();
-        trans.setOrigin( osgbBullet::asBtVector3( center ) );
+        trans.setOrigin( osgbCollision::asBtVector3( center ) );
         cs->addChildShape( trans, box );
     }
     { // top +Z (invisible, to allow user to see through; no OSG analogue
         osg::Vec3 halfLengths( xDim*.5, yDim*.5, thick*.5 );
         osg::Vec3 center( 0., 0., -zDim*.5 );
         //shakeBox->addChild( osgBox( center, halfLengths ) );
-        btBoxShape* box = new btBoxShape( osgbBullet::asBtVector3( halfLengths ) );
+        btBoxShape* box = new btBoxShape( osgbCollision::asBtVector3( halfLengths ) );
         btTransform trans; trans.setIdentity();
-        trans.setOrigin( osgbBullet::asBtVector3( center ) );
+        trans.setOrigin( osgbCollision::asBtVector3( center ) );
         cs->addChildShape( trans, box );
     }
     { // left -X
         osg::Vec3 halfLengths( thick*.5, yDim*.5, zDim*.5 );
         osg::Vec3 center( -xDim*.5, 0., 0. );
         shakeBox->addChild( osgBox( center, halfLengths ) );
-        btBoxShape* box = new btBoxShape( osgbBullet::asBtVector3( halfLengths ) );
+        btBoxShape* box = new btBoxShape( osgbCollision::asBtVector3( halfLengths ) );
         btTransform trans; trans.setIdentity();
-        trans.setOrigin( osgbBullet::asBtVector3( center ) );
+        trans.setOrigin( osgbCollision::asBtVector3( center ) );
         cs->addChildShape( trans, box );
     }
     { // right +X
         osg::Vec3 halfLengths( thick*.5, yDim*.5, zDim*.5 );
         osg::Vec3 center( xDim*.5, 0., 0. );
         shakeBox->addChild( osgBox( center, halfLengths ) );
-        btBoxShape* box = new btBoxShape( osgbBullet::asBtVector3( halfLengths ) );
+        btBoxShape* box = new btBoxShape( osgbCollision::asBtVector3( halfLengths ) );
         btTransform trans; trans.setIdentity();
-        trans.setOrigin( osgbBullet::asBtVector3( center ) );
+        trans.setOrigin( osgbCollision::asBtVector3( center ) );
         cs->addChildShape( trans, box );
     }
     { // bottom of window -Y
         osg::Vec3 halfLengths( xDim*.5, thick*.5, zDim*.5 );
         osg::Vec3 center( 0., -yDim*.5, 0. );
         shakeBox->addChild( osgBox( center, halfLengths ) );
-        btBoxShape* box = new btBoxShape( osgbBullet::asBtVector3( halfLengths ) );
+        btBoxShape* box = new btBoxShape( osgbCollision::asBtVector3( halfLengths ) );
         btTransform trans; trans.setIdentity();
-        trans.setOrigin( osgbBullet::asBtVector3( center ) );
+        trans.setOrigin( osgbCollision::asBtVector3( center ) );
         cs->addChildShape( trans, box );
     }
     { // bottom of window -Y
         osg::Vec3 halfLengths( xDim*.5, thick*.5, zDim*.5 );
         osg::Vec3 center( 0., yDim*.5, 0. );
         shakeBox->addChild( osgBox( center, halfLengths ) );
-        btBoxShape* box = new btBoxShape( osgbBullet::asBtVector3( halfLengths ) );
+        btBoxShape* box = new btBoxShape( osgbCollision::asBtVector3( halfLengths ) );
         btTransform trans; trans.setIdentity();
-        trans.setOrigin( osgbBullet::asBtVector3( center ) );
+        trans.setOrigin( osgbCollision::asBtVector3( center ) );
         cs->addChildShape( trans, box );
     }
     /* END: Create environment boxes */

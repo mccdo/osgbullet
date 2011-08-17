@@ -2,15 +2,6 @@ IF(WIN32)
     SET(CMAKE_DEBUG_POSTFIX d)
 ENDIF(WIN32)
 
-
-MACRO( ADD_SHARED_LIBRARY_INTERNAL TRGTNAME )
-    ADD_LIBRARY( ${TRGTNAME} SHARED ${ARGN} )
-    IF( WIN32 )
-        SET_TARGET_PROPERTIES( ${TRGTNAME} PROPERTIES DEBUG_POSTFIX d )
-    ENDIF( WIN32 )
-    SET_TARGET_PROPERTIES( ${TRGTNAME} PROPERTIES PROJECT_LABEL "Lib ${TRGTNAME}" )
-ENDMACRO( ADD_SHARED_LIBRARY_INTERNAL TRGTNAME )
-
 MACRO( ADD_OSGPLUGIN TRGTNAME )
     if( WIN32 )
         set( RELATIVE_LIB_PATH ../../../lib/ )
@@ -21,6 +12,7 @@ MACRO( ADD_OSGPLUGIN TRGTNAME )
 
         link_internal( ${TRGTNAME}
             osgbBullet
+            osgbCollision
         )
         target_link_libraries( ${TRGTNAME}
             ${OSGWORKS_LIBRARIES}
@@ -38,47 +30,58 @@ MACRO( ADD_OSGPLUGIN TRGTNAME )
 ENDMACRO( ADD_OSGPLUGIN TRGTNAME )
 
 
-MACRO( MAKE_EXECUTABLE EXENAME )
-    ADD_EXECUTABLE_INTERNAL( ${EXENAME}
-        ${ARGN}
+macro( _osgBulletMakeDynamicsExe _exeName )
+    set( _osgBulletLibs
+        "osgbBullet;osgbCollision"
     )
+    set( _bulletLibs
+        "${BULLET_LIBRARIES}"
+    )
+    _osgBulletMakeExeInternal( ${_exeName} "${_osgBulletLibs}" "${_bulletLibs}" ${ARGN} )
+endmacro()
 
+macro( _osgBulletMakeCollisionExe _exeName )
+    set( _osgBulletLibs
+        "osgbCollision"
+    )
+    set( _bulletLibs
+        "${BULLET_COLLISION_LIBRARY};${BULLET_MATH_LIBRARY}"
+    )
+    _osgBulletMakeExeInternal( ${_exeName} "${_osgBulletLibs}" "${_bulletLibs}" ${ARGN} )
+endmacro()
+
+macro( _osgBulletMakeExeInternal _exeName _osgBulletLibs _bulletLibs )
+    add_executable( ${_exeName} ${ARGN} )
     if( WIN32 )
+        set_target_properties( ${_exeName} PROPERTIES DEBUG_POSTFIX d )
         set( RELATIVE_LIB_PATH ../../lib/ )
     endif()
 
-    LINK_INTERNAL( ${EXENAME}
-        osgbBullet
+    link_internal( ${_exeName}
+        ${_osgBulletLibs}
     )
-    TARGET_LINK_LIBRARIES( ${EXENAME}
+    target_link_libraries( ${_exeName}
         ${OSGWORKS_LIBRARIES}
         ${OSG_LIBRARIES}
-        ${BULLET_LIBRARIES}
+        ${_bulletLibs}
     )
     if( ${CATEGORY} STREQUAL "App" )
         install(
-            TARGETS ${EXENAME}
+            TARGETS ${_exeName}
             RUNTIME DESTINATION bin COMPONENT libosgbbullet
         )
     else()
         install(
-            TARGETS ${EXENAME}
+            TARGETS ${_exeName}
             RUNTIME DESTINATION share/${CMAKE_PROJECT_NAME}/bin COMPONENT libosgbbullet
         )
     endif()
-    # Requires ${CATAGORY}
-    SET_TARGET_PROPERTIES( ${EXENAME} PROPERTIES PROJECT_LABEL "${CATEGORY} ${EXENAME}" )
-ENDMACRO( MAKE_EXECUTABLE EXENAME CATEGORY )
+    set_target_properties( ${_exeName} PROPERTIES PROJECT_LABEL "${CATEGORY} ${_exeName}" )
+endmacro()
 
-MACRO( ADD_EXECUTABLE_INTERNAL TRGTNAME )
-    ADD_EXECUTABLE( ${TRGTNAME} ${ARGN} )
-    IF( WIN32 )
-        SET_TARGET_PROPERTIES( ${TRGTNAME} PROPERTIES DEBUG_POSTFIX d )
-    ENDIF(WIN32)
-ENDMACRO( ADD_EXECUTABLE_INTERNAL TRGTNAME )
 
-MACRO( LINK_INTERNAL TRGTNAME )
-    FOREACH(LINKLIB ${ARGN})
-        TARGET_LINK_LIBRARIES( ${TRGTNAME} optimized "${LINKLIB}" debug "${RELATIVE_LIB_PATH}${LINKLIB}${CMAKE_DEBUG_POSTFIX}" )
-    ENDFOREACH(LINKLIB)
-ENDMACRO( LINK_INTERNAL TRGTNAME )
+macro( link_internal TRGTNAME )
+    foreach( LINKLIB ${ARGN} )
+        target_link_libraries( ${TRGTNAME} optimized "${LINKLIB}" debug "${RELATIVE_LIB_PATH}${LINKLIB}${CMAKE_DEBUG_POSTFIX}" )
+    endforeach()
+endmacro()

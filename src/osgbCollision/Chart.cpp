@@ -1,6 +1,6 @@
 /*************** <auto-copyright.pl BEGIN do not edit this line> **************
  *
- * osgBullet is (C) Copyright 2009 by Kenneth Mark Bryden
+ * osgBullet is (C) Copyright 2009-2011 by Kenneth Mark Bryden
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -18,7 +18,7 @@
  *
  *************** <auto-copyright.pl END do not edit this line> ***************/
 
-#include <osgbBullet/Chart.h>
+#include <osgbCollision/Chart.h>
 #include <osg/Geode>
 #include <osg/Geometry>
 #include <osg/BlendFunc>
@@ -29,7 +29,8 @@
 #include <osgDB/FileUtils>
 
 
-using namespace osgbBullet;
+namespace osgbCollision
+{
 
 ////////////////////////////////////////////////////////////////////////////////
 Chart::Chart()
@@ -188,3 +189,7 @@ void Chart::createChart()
     _geom->addPrimitiveSet( new osg::DrawArrays( GL_QUADS, 0, 4 ) );
 }
 ////////////////////////////////////////////////////////////////////////////////
+
+
+// osgbCollision
+}

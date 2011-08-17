@@ -1,6 +1,6 @@
 /*************** <auto-copyright.pl BEGIN do not edit this line> **************
  *
- * osgBullet is (C) Copyright 2009 by Kenneth Mark Bryden
+ * osgBullet is (C) Copyright 2009-2011 by Kenneth Mark Bryden
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -23,7 +23,7 @@
 
 
 #include <osgbBullet/Export.h>
-#include <osgbBullet/CollisionShapes.h>
+#include <osgbCollision/CollisionShapes.h>
 
 #include <osg/Object>
 #include <osg/Vec3>
@@ -73,7 +73,7 @@ struct OSGBBULLET_EXPORT CreationRecord : public osg::Object
 
     bool _overall;
     std::string _nodeName;
-    osgbBullet::AXIS _axis;
+    osgbCollision::AXIS _axis;
 };
 
 

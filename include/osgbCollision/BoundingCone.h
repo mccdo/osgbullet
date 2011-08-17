@@ -1,6 +1,6 @@
 /*************** <auto-copyright.pl BEGIN do not edit this line> **************
  *
- * osgBullet is (C) Copyright 2009 by Kenneth Mark Bryden
+ * osgBullet is (C) Copyright 2009-2011 by Kenneth Mark Bryden
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -18,22 +18,26 @@
  *
  *************** <auto-copyright.pl END do not edit this line> ***************/
 
-#ifndef __OSGBBULLET_BOUNDINGCYLINDER_H__
-#define __OSGBBULLET_BOUNDINGCYLINDER_H__
+#ifndef __OSGBCOLLISION_BOUNDINGCONE_H__
+#define __OSGBCOLLISION_BOUNDINGCONE_H__ 1
 
 
+#include <osgbCollision/Export.h>
 #include <osg/Vec3>
-#include <osgbBullet/Export.h>
 
-namespace osgbBullet {
 
-/* Used internally to store cylinder parameters. */
-/* TBD consider not encapsulating parameters in a class. */
-class OSGBBULLET_EXPORT BoundingCylinder
+namespace osgbCollision
+{
+
+
+/** \class BoundingCone BoundingCone.h <osgbCollision/BoundingCone.h>
+\brief Used internally to store cone parameters.
+TBD Not currently used. when we do support cones, consider not encapsulating parameters in a class. */
+class OSGBCOLLISION_EXPORT BoundingCone
 {
 public:
-    BoundingCylinder( void );
-    virtual ~BoundingCylinder( void );
+    BoundingCone( void );
+    virtual ~BoundingCone( void );
 
     void init()
     {
@@ -70,11 +74,12 @@ public:
 
     void expandBy( const osg::Vec3& v );
 
+
     void expandBy( float x,
                    float y,
                    float z );
 
-    void expandBy( const BoundingCylinder& bc );
+    void expandBy( const BoundingCone& bc );
 
 protected:
     float length;
@@ -82,6 +87,10 @@ protected:
     osg::Vec3 axis;
 };
 
-} // end namespace osgbBullet
 
-#endif // __OSGBBULLET_BOUNDINGCYLINDER_H__
+// osgbCollision
+}
+
+
+// __OSGBCOLLISION_BOUNDINGCONE_H__
+#endif

@@ -5,7 +5,7 @@
 
 
 #include <osgbBullet/MotionState.h>
-#include <osgbBullet/CollisionShapes.h>
+#include <osgbCollision/CollisionShapes.h>
 #include <osgbBullet/RefRigidBody.h>
 #include <osgbBullet/RigidBodyAnimation.h>
 #include <btBulletDynamicsCommon.h>
@@ -128,7 +128,7 @@ osg::MatrixTransform* createOffOriginOSGBox( osg::Vec3 size )
 btRigidBody * createBTBox( osg::MatrixTransform * box,
                           osg::Vec3 center )
 {
-    btCollisionShape * collision = osgbBullet::btBoxCollisionShapeFromOSG( box );
+    btCollisionShape * collision = osgbCollision::btBoxCollisionShapeFromOSG( box );
 
     osgbBullet::MotionState * motion = new osgbBullet::MotionState();
     motion->setTransform( box );
@@ -170,7 +170,7 @@ void createTarget( osg::Group * root,
     motion->setTransform( target );
     motion->setCenterOfMass( osg::Vec3( 1, 1, 1 ) );
 
-    btCollisionShape* collision = osgbBullet::btBoxCollisionShapeFromOSG( target );
+    btCollisionShape* collision = osgbCollision::btBoxCollisionShapeFromOSG( target );
 
     btScalar mass( 1.0 );
     btVector3 inertia;

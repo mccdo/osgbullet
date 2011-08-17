@@ -1,6 +1,6 @@
 /*************** <auto-copyright.pl BEGIN do not edit this line> **************
  *
- * osgBullet is (C) Copyright 2009 by Kenneth Mark Bryden
+ * osgBullet is (C) Copyright 2009-2011 by Kenneth Mark Bryden
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -18,38 +18,22 @@
  *
  *************** <auto-copyright.pl END do not edit this line> ***************/
 
-#include "osgbBullet/Version.h"
-#include <string>
-#include <sstream>
-
-namespace osgbBullet {
+#ifndef OSGBCOLLISION_EXPORT_
+#define OSGBCOLLISION_EXPORT_ 1
 
 
-unsigned int
-getVersionNumber()
-{
-    return( OSGBBULLET_VERSION );
-}
+#if defined ( _MSC_VER ) || defined ( __CYGWIN__ ) || defined ( __MINGW32__ ) || defined ( __BCPLUSPLUS__ ) || defined ( __MWERKS__ )
+    #if defined ( OSGBBULLET_STATIC )
+        #define OSGBCOLLISION_EXPORT
+    #elif defined ( OSGBBULLET_LIBRARY )
+        #define OSGBCOLLISION_EXPORT __declspec( dllexport )
+    #else
+        #define OSGBCOLLISION_EXPORT __declspec( dllimport )
+    #endif
+#else
+    #define OSGBCOLLISION_EXPORT
+#endif
 
 
-static std::string s_osgbullet_version( "" );
-
-std::string
-getVersionString()
-{
-    if( s_osgbullet_version.empty() )
-    {
-        std::ostringstream oStr;
-        oStr << std::string( "osgbBullet version " ) <<
-            OSGBBULLET_MAJOR_VERSION << "." <<
-            OSGBBULLET_MINOR_VERSION << "." <<
-            OSGBBULLET_SUB_VERSION << " (" <<
-            getVersionNumber() << ").";
-        s_osgbullet_version = oStr.str();
-    }
-    return( s_osgbullet_version );
-}
-
-
-// namespace osgbBullet
-}
+// OSGBCOLLISION_EXPORT_
+#endif

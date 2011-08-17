@@ -1,6 +1,6 @@
 /*************** <auto-copyright.pl BEGIN do not edit this line> **************
  *
- * osgBullet is (C) Copyright 2009 by Kenneth Mark Bryden
+ * osgBullet is (C) Copyright 2009-2011 by Kenneth Mark Bryden
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -18,15 +18,18 @@
  *
  *************** <auto-copyright.pl END do not edit this line> ***************/
 
-#include <osgbBullet/CollectVerticesVisitor.h>
+#include <osgbCollision/CollectVerticesVisitor.h>
 #include <osg/Transform>
 #include <osg/Geometry>
 #include <osg/Geode>
 
 #include <iostream>
 
-using namespace osgbBullet;
 using namespace osg;
+
+
+namespace osgbCollision
+{
 
 
 CollectVerticesVisitor::CollectVerticesVisitor( osg::NodeVisitor::TraversalMode traversalMode )
@@ -38,21 +41,7 @@ CollectVerticesVisitor::CollectVerticesVisitor( osg::NodeVisitor::TraversalMode 
 
 void CollectVerticesVisitor::reset()
 {
-    stack_.clear();
-    stack_.push_back( osg::Matrix::identity() );
     verts_->clear();
-}
-
-void CollectVerticesVisitor::apply( osg::Transform& transform )
-{
-    osg::Matrix matrix;
-    matrix = stack_.back();
-    transform.computeLocalToWorldMatrix( matrix, this );
-    pushMatrix( matrix );
-
-    traverse( transform );
-
-    popMatrix();
 }
 
 void CollectVerticesVisitor::apply( osg::Geode& geode )
@@ -64,7 +53,7 @@ void CollectVerticesVisitor::apply( osg::Geode& geode )
 
 void CollectVerticesVisitor::applyDrawable( osg::Drawable* drawable )
 {
-    osg::Geometry* geom = dynamic_cast< osg::Geometry* >( drawable );
+    osg::Geometry* geom = drawable->asGeometry();
     if( geom == NULL )
         return;
 
@@ -75,7 +64,7 @@ void CollectVerticesVisitor::applyDrawable( osg::Drawable* drawable )
         return;
     }
 
-    const osg::Matrix& m( stack_.back() );
+    osg::Matrix m = osg::computeLocalToWorld( getNodePath() );
     osg::Vec3Array::const_iterator iter;
     for( iter = in->begin(); iter != in->end(); iter++ )
     {
@@ -83,3 +72,6 @@ void CollectVerticesVisitor::applyDrawable( osg::Drawable* drawable )
     }
 }
 
+
+// osgbCollision
+}

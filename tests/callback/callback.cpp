@@ -8,8 +8,9 @@
 
 #include <osgbBullet/OSGToCollada.h>
 #include <osgbBullet/MotionState.h>
-#include <osgbBullet/CollisionShapes.h>
-#include <osgbBullet/Utils.h>
+#include <osgbBullet/GroundPlane.h>
+#include <osgbCollision/CollisionShapes.h>
+#include <osgbCollision/Utils.h>
 
 #include <osgwTools/FindNamedNode.h>
 #include <osgwTools/InsertRemove.h>
@@ -173,7 +174,7 @@ protected:
         for( it=_posMap.begin(); it!=_posMap.end(); it++ )
         {
             btRigidBody* rb = it->first;
-            btTransform t = osgbBullet::asBtTransform( it->second );
+            btTransform t = osgbCollision::asBtTransform( it->second );
             rb->setWorldTransform( t );
         }
     }
@@ -196,11 +197,11 @@ protected:
         motion->setParentTransform( osg::Matrix::translate( _viewPos ) );
 
         btScalar mass( 1. );
-        btVector3 inertia( btVector3( 0., 0., 0. ) );//osgbBullet::asBtVector3( _viewDir ) );
+        btVector3 inertia( btVector3( 0., 0., 0. ) );//osgbCollision::asBtVector3( _viewDir ) );
         collision->calculateLocalInertia( mass, inertia );
         btRigidBody::btRigidBodyConstructionInfo rbinfo( mass, motion, collision, inertia );
         btRigidBody* body = new btRigidBody( rbinfo );
-        body->setLinearVelocity( osgbBullet::asBtVector3( _viewDir * 50. ) );
+        body->setLinearVelocity( osgbCollision::asBtVector3( _viewDir * 50. ) );
         _world->addRigidBody( body );
     }
 };

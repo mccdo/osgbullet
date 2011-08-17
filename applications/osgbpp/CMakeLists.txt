@@ -1,3 +1,3 @@
-MAKE_EXECUTABLE( osgbpp
+_osgBulletMakeDynamicsExe( osgbpp
     osgbpp.cpp
 )

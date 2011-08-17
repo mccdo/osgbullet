@@ -1,6 +1,6 @@
 /*************** <auto-copyright.pl BEGIN do not edit this line> **************
  *
- * osgBullet is (C) Copyright 2009 by Kenneth Mark Bryden
+ * osgBullet is (C) Copyright 2009-2011 by Kenneth Mark Bryden
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -22,7 +22,7 @@
 
 #include <osgbBullet/RigidBodyAnimation.h>
 #include <osgbBullet/RefRigidBody.h>
-#include <osgbBullet/Utils.h>
+#include <osgbCollision/Utils.h>
 
 #include <osg/io_utils>
 
@@ -58,7 +58,7 @@ void RigidBodyAnimation::operator()( osg::Node* node, osg::NodeVisitor* nv )
 
     osg::Matrix mat = matTrans->getMatrix();
     rb->getRigidBody()->getMotionState()->setWorldTransform(
-        osgbBullet::asBtTransform( mat ) );
+        osgbCollision::asBtTransform( mat ) );
 
     traverse( node, nv );
 }

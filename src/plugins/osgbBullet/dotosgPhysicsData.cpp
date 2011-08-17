@@ -1,6 +1,6 @@
 /*************** <auto-copyright.pl BEGIN do not edit this line> **************
  *
- * osgBullet is (C) Copyright 2009 by Kenneth Mark Bryden
+ * osgBullet is (C) Copyright 2009-2011 by Kenneth Mark Bryden
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -18,9 +18,9 @@
  *
  *************** <auto-copyright.pl END do not edit this line> ***************/
 
-#include "osgbBullet/PhysicsState.h"
-#include "osgbBullet/MotionState.h"
-#include "osgbBullet/Utils.h"
+#include <osgbBullet/PhysicsState.h>
+#include <osgbBullet/MotionState.h>
+#include <osgbCollision/Utils.h>
 
 #include <osgDB/Registry>
 #include <osgDB/Input>
@@ -208,11 +208,11 @@ bool PhysicsData_writeLocalData( const osg::Object& obj, osgDB::Output& fw )
     }
 
     // Save rigid body state.
-    osg::Matrix m( osgbBullet::asOsgMatrix( pd._body->getWorldTransform() ) );
+    osg::Matrix m( osgbCollision::asOsgMatrix( pd._body->getWorldTransform() ) );
     writeMatrix( m, fw, "BodyWorldTransform" );
-    osg::Vec3 lv( osgbBullet::asOsgVec3( pd._body->getLinearVelocity() ) );
+    osg::Vec3 lv( osgbCollision::asOsgVec3( pd._body->getLinearVelocity() ) );
     fw.indent() << "Linear velocity " << lv << std::endl;
-    osg::Vec3 av( osgbBullet::asOsgVec3( pd._body->getAngularVelocity() ) );
+    osg::Vec3 av( osgbCollision::asOsgVec3( pd._body->getAngularVelocity() ) );
     fw.indent() << "Angular velocity " << av << std::endl;
     fw.indent() << "Friction " << pd._body->getFriction() << std::endl;
     fw.indent() << "Restitution " << pd._body->getRestitution() << std::endl;

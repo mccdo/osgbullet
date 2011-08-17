@@ -1,3 +1,3 @@
-MAKE_EXECUTABLE( callback
+_osgBulletMakeDynamicsExe( callback
     callback.cpp
 )

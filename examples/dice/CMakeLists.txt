@@ -1,3 +1,3 @@
-MAKE_EXECUTABLE( dice
+_osgBulletMakeDynamicsExe( dice
     dice.cpp
 )

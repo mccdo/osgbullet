@@ -1,6 +1,6 @@
 /*************** <auto-copyright.pl BEGIN do not edit this line> **************
  *
- * osgBullet is (C) Copyright 2009 by Kenneth Mark Bryden
+ * osgBullet is (C) Copyright 2009-2011 by Kenneth Mark Bryden
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -18,17 +18,17 @@
  *
  *************** <auto-copyright.pl END do not edit this line> ***************/
 
-#include <osgbBullet/Utils.h>
+#include <osgbCollision/Utils.h>
 #include <osg/Matrix>
 #include <LinearMath/btTransform.h>
 
 
-using namespace osgbBullet;
+using namespace osgbCollision;
 
 
 // Convert a btTransform to an OSG Matrix
 osg::Matrix
-osgbBullet::asOsgMatrix( const btTransform& t )
+osgbCollision::asOsgMatrix( const btTransform& t )
 {
     btScalar ogl[ 16 ];
     t.getOpenGLMatrix( ogl );
@@ -37,7 +37,7 @@ osgbBullet::asOsgMatrix( const btTransform& t )
 }
 
 btTransform
-osgbBullet::asBtTransform( const osg::Matrix& m )
+osgbCollision::asBtTransform( const osg::Matrix& m )
 {
     const osg::Matrix::value_type* oPtr = m.ptr();
     btScalar bPtr[ 16 ];
@@ -51,7 +51,7 @@ osgbBullet::asBtTransform( const osg::Matrix& m )
 
 
 osg::Matrix
-osgbBullet::asOsgMatrix( const btMatrix3x3& m )
+osgbCollision::asOsgMatrix( const btMatrix3x3& m )
 {
     btScalar f[ 9 ];
     m.getOpenGLSubMatrix( f );
@@ -63,7 +63,7 @@ osgbBullet::asOsgMatrix( const btMatrix3x3& m )
 }
 
 btMatrix3x3
-osgbBullet::asBtMatrix3x3( const osg::Matrix& m )
+osgbCollision::asBtMatrix3x3( const osg::Matrix& m )
 {
     return( btMatrix3x3(
         m(0,0), m(0,1), m(0,2),
@@ -73,32 +73,32 @@ osgbBullet::asBtMatrix3x3( const osg::Matrix& m )
 
 
 osg::Vec3
-osgbBullet::asOsgVec3( const btVector3& v )
+osgbCollision::asOsgVec3( const btVector3& v )
 {
     return osg::Vec3( v.x(), v.y(), v.z() );
 }
 
 btVector3
-osgbBullet::asBtVector3( const osg::Vec3& v )
+osgbCollision::asBtVector3( const osg::Vec3& v )
 {
     return btVector3( v.x(), v.y(), v.z() );
 }
 
 
 osg::Vec4
-osgbBullet::asOsgVec4( const btVector3& v, const double w )
+osgbCollision::asOsgVec4( const btVector3& v, const double w )
 {
     return osg::Vec4( v.x(), v.y(), v.z(), w );
 }
 
 osg::Vec4
-osgbBullet::asOsgVec4( const btVector4& v )
+osgbCollision::asOsgVec4( const btVector4& v )
 {
     return osg::Vec4( v.x(), v.y(), v.z(), v.w() );
 }
 
 btVector4
-osgbBullet::asBtVector4( const osg::Vec4& v )
+osgbCollision::asBtVector4( const osg::Vec4& v )
 {
     return btVector4( v.x(), v.y(), v.z(), v.w() );
 }

@@ -16,8 +16,8 @@
 
 #include <osgbBullet/OSGToCollada.h>
 #include <osgbBullet/MotionState.h>
-#include <osgbBullet/Utils.h>
-#include <osgbBullet/GLDebugDrawer.h>
+#include <osgbCollision/Utils.h>
+#include <osgbCollision/GLDebugDrawer.h>
 
 #include <btBulletDynamicsCommon.h>
 
@@ -548,7 +548,7 @@ main( int argc,
     viewer.setCameraManipulator( tb );
 
 
-    osgbBullet::GLDebugDrawer* dbgDraw = new osgbBullet::GLDebugDrawer();
+    osgbCollision::GLDebugDrawer* dbgDraw = new osgbCollision::GLDebugDrawer();
     dbgDraw->setDebugMode( ~btIDebugDraw::DBG_DrawText );
     bulletWorld->setDebugDrawer( dbgDraw );
     root->addChild( dbgDraw->getSceneGraph() );
