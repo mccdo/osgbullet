@@ -42,6 +42,9 @@ namespace osgbDynamics {
 class TripleBuffer;
 
 
+/** \class PhysicsThread PhysicsThread.h <osgbDynamics/PhysicsThread.h>
+\brief An OSG / OpenThreads class for asynchronous physics simulation.
+*/
 class OSGBDYNAMICS_EXPORT PhysicsThread : public OpenThreads::Thread
 {
 public:

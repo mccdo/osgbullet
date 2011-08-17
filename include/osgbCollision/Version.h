@@ -28,6 +28,7 @@
 namespace osgbCollision {
 
 
+// Please keep in sync with top-level CMakeLists.txt OSGBULLET_VERSION variable.
 #define OSGBCOLLISION_MAJOR_VERSION 1
 #define OSGBCOLLISION_MINOR_VERSION 1
 #define OSGBCOLLISION_SUB_VERSION 80
@@ -38,7 +39,7 @@ namespace osgbCollision {
 //   mm is the minor version (zero-padded)
 //   ss is the sub version (zero padded)
 // Use this in version-specific code, for example:
-//   #if( OSGBBULLET_VERSION < 10500 )
+//   #if( OSGBCOLLISION_VERSION < 10500 )
 //      ... code specific to releases before v1.05
 //   #endif
 #define OSGBCOLLISION_VERSION ( \
@@ -46,7 +47,7 @@ namespace osgbCollision {
         ( OSGBCOLLISION_MINOR_VERSION * 100 ) + \
           OSGBCOLLISION_SUB_VERSION )
 
-// Returns OSGBBULLET_VERSION.
+// Returns OSGBCOLLISION_VERSION.
 unsigned int OSGBCOLLISION_EXPORT getVersionNumber();
 
 // Pretty string.
@@ -66,3 +67,28 @@ std::string OSGBCOLLISION_EXPORT getVersionString();
 
 // __OSGBCOLLISION_VERSION_H__
 #endif
+
+
+/** \mainpage osgBullet Documentation
+
+\section Introduction Introduction
+
+TBD
+
+\section Libraries Libraries
+
+\subsection osgbCollision osgbCollision
+
+Collision detection and collision shape support. Facilities for
+creating Bullet collision shapes from OSG scene graphs, and vice
+versa.
+
+\subsection osgbDynamics osgbDynamics
+
+Rigid body dynamics and constraints support.
+
+\subsection osgdb_osgbDynamics osgdb_osgbDynamics
+
+Dot OSG file support for classes and objects in the osgbDynamics library.
+
+*/
