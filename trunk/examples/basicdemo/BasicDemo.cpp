@@ -192,7 +192,7 @@ osg::MatrixTransform * createModel( btDynamicsWorld * dynamicsWorld )
         node->addChild( nodeDB.get() );
     }
 
-    /*  OSGBBULLET CODE */
+    /*  osgBullet code */
     osgbDynamics::MotionState * motion = new osgbDynamics::MotionState;
     motion->setTransform( node.get() );
     btCollisionShape * collision = osgbCollision::btConvexTriMeshCollisionShapeFromOSG( node.get() );
@@ -297,7 +297,7 @@ int main( int argc,
     boxBody->setActivationState( DISABLE_DEACTIVATION );
     dynamicsWorld->addRigidBody( boxBody );
 
-    /* osgbBullet Code */
+    /* osgBullet Code */
     osgbDynamics::RefRigidBody * boxRigid = new osgbDynamics::RefRigidBody();
     boxRigid->setRigidBody( boxBody );
     box->setUserData( boxRigid );

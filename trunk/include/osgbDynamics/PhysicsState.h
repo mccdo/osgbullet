@@ -33,6 +33,9 @@
 namespace osgbDynamics {
 
 
+/** \class PhysicsData PhysicsState.h <osgbDynamics\PhysicsState.h>
+\brief TBD
+*/
 class OSGBDYNAMICS_EXPORT PhysicsData : public osg::Object
 {
 public:
@@ -41,7 +44,7 @@ public:
 
     PhysicsData& operator=( const PhysicsData& rhs );
 
-    META_Object(osgbBullet,PhysicsData);
+    META_Object(osgbDynamics,PhysicsData);
 
     std::string _fileName;
     osg::ref_ptr< osgbDynamics::CreationRecord > _cr;
@@ -64,6 +67,9 @@ protected:
     unsigned int _version;
 };
 
+/** \class PhysicsState PhysicsState.h <osgbDynamics\PhysicsState.h>
+\brief TBD
+*/
 class OSGBDYNAMICS_EXPORT PhysicsState : public osg::Object
 {
 public:
@@ -71,7 +77,7 @@ public:
     PhysicsState( const osgbDynamics::PhysicsState& rhs, osg::CopyOp copyop=osg::CopyOp::SHALLOW_COPY );
     ~PhysicsState();
 
-    META_Object(osgbBullet,PhysicsState);
+    META_Object(osgbDynamics,PhysicsState);
 
     void addPhysicsData( const osgwTools::RefID* id, PhysicsData* pd );
     void removePhysicsData( const osgwTools::RefID* id );

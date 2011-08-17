@@ -1,8 +1,22 @@
-//
-// Copyright (c) 2008 Blue Newt Software LLC and Skew Matrix Software LLC.
-// All rights reserved.
-//
-
+/*************** <auto-copyright.pl BEGIN do not edit this line> **************
+ *
+ * osgBullet is (C) Copyright 2009-2011 by Kenneth Mark Bryden
+ *
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Lesser General Public
+ * License version 2.1 as published by the Free Software Foundation.
+ *
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Library General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this library; if not, write to the
+ * Free Software Foundation, Inc., 59 Temple Place - Suite 330,
+ * Boston, MA 02111-1307, USA.
+ *
+ *************** <auto-copyright.pl END do not edit this line> ***************/
 
 #include <osgbDynamics/MotionState.h>
 #include <osgbCollision/CollisionShapes.h>
@@ -165,7 +179,7 @@ void createTarget( osg::Group * root,
     osg::MatrixTransform * target = createOffOriginOSGBox( osg::Vec3( 1, 1, 1 ) );
     root->addChild( target );
 
-/*  OSGBBULLET CODE */
+    /* osgBullet code */
     osgbDynamics::MotionState * motion = new osgbDynamics::MotionState();
     motion->setTransform( target );
     motion->setCenterOfMass( osg::Vec3( 1, 1, 1 ) );
@@ -216,7 +230,7 @@ int main( int argc,
     boxBody->setActivationState( DISABLE_DEACTIVATION );
     dynamicsWorld->addRigidBody( boxBody );
 
-    //   Animated box, osgbBullet Code
+    //   Animated box, osgBullet Code
     osgbDynamics::RefRigidBody* boxRigid = new osgbDynamics::RefRigidBody();
     boxRigid->setRigidBody( boxBody );
     box->setUserData( boxRigid );

@@ -39,17 +39,20 @@ namespace osgbDynamics
 
 
 
-// Fill in this struct and pass it to the OSGToCollada constructor
-// as a one-step config process, or first configure OSGToCollada
-// and then get this record from it, and store it as UserData on
-// the rigid body subgraph root node to facilitate saving and
-// restoring physics state.
+/** \class CreationRecord CreationRecord.h <osgbDynamics/CreationRecord.h>
+\brief Data record for rigid body construction information.
+Fill in this struct and pass it to the OSGToCollada constructor
+as a one-step config process, or first configure OSGToCollada
+and then get this record from it, and store it as UserData on
+the rigid body subgraph root node to facilitate saving and
+restoring physics state.
+*/
 struct OSGBDYNAMICS_EXPORT CreationRecord : public osg::Object
 {
     CreationRecord();
     CreationRecord( const CreationRecord& rhs, osg::CopyOp copyop=osg::CopyOp::SHALLOW_COPY );
 
-    META_Object(osgbBullet,CreationRecord);
+    META_Object(osgbDynamics,CreationRecord);
 
     osg::Node* _sceneGraph;
 

@@ -124,7 +124,7 @@ int main( int argc,
     arguments.getApplicationUsage()->addCommandLineOption( "--name <name>", "Interprets the scene graph from the first occurence of the named node. If not specified, the entire scene graph is processed." );
     arguments.getApplicationUsage()->addCommandLineOption( "--mass <n>", "Specifies the desired rigid body mass value. The default is 1.0." );
     arguments.getApplicationUsage()->addCommandLineOption( "-h or --help", "Displays help text and command line documentation." );
-    arguments.getApplicationUsage()->addCommandLineOption( "-v or --version", "Display the osgbBullet version string." );
+    arguments.getApplicationUsage()->addCommandLineOption( "-v or --version", "Display the osgBullet version string." );
 
 
     if( arguments.read( "-h" ) || arguments.read( "--help" ) )

@@ -36,8 +36,11 @@ namespace osgbDynamics
 
 
 
-// Derive a struct from MotionStateCallback and add it to the MotionState class.
-// The operator() method will get called whenever Buller sets the world transform.
+/** \class MotionStateCallback MotionState.h <osgbDynamics/MotionState.h>
+\brief Application notification of changes to a MotionState world transform.
+Derive a struct from MotionStateCallback and add it to the MotionState class.
+The operator() method will get called whenever Buller sets the world transform.
+*/
 struct OSGBDYNAMICS_EXPORT MotionStateCallback
 {
     MotionStateCallback() {}
@@ -51,8 +54,8 @@ typedef std::vector< MotionStateCallback* > MotionStateCallbackList;
 // forward declaration
 class TripleBuffer;
 
-/** \brief A btMotionState that works with OSG Transforms.
-
+/** \class MotionState MotionState.h <osgbDynamics/MotionState.h>
+\brief A btMotionState that works with OSG Transforms.
 A btMotionState that allows Bullet to set the ransformation
 of an OSG subgraph corresponding to a rigid body.
 
@@ -157,11 +160,12 @@ private:
 };
 
 
-// TripleBuffer support. Apps running Bullet is a thread separate from OSG
-// rendering should keep a list of all MotionState objects. During update,
-// the app should call TripleBufferMotionStateUpdate to update all MotionState
-// objects with data from the TripleBuffer (and push those matrices out to
-// the OSG scene graph Transform nodes).
+/** \brief Class for updating a list of MotionState objects from a TripleBuffer.
+TripleBuffer support. Apps running Bullet is a thread separate from OSG
+rendering should keep a list of all MotionState objects. During update,
+the app should call TripleBufferMotionStateUpdate to update all MotionState
+objects with data from the TripleBuffer (and push those matrices out to
+the OSG scene graph Transform nodes). */
 typedef std::vector< osgbDynamics::MotionState* > MotionStateList;
 
 bool OSGBDYNAMICS_EXPORT TripleBufferMotionStateUpdate( osgbDynamics::MotionStateList& msl, osgbDynamics::TripleBuffer* tb );

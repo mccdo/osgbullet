@@ -18,8 +18,8 @@
  *
  *************** <auto-copyright.pl END do not edit this line> ***************/
 
-#ifndef OSGBBULLET_RIGIDBODYANIMATION
-#define OSGBBULLET_RIGIDBODYANIMATION
+#ifndef __OSGBDYAMICS_RIGID_BODY_ANIMATION_H__
+#define __OSGBDYAMICS_RIGID_BODY_ANIMATION_H__ 1
 
 #include <osg/NodeCallback>
 
@@ -27,8 +27,9 @@
 
 namespace osgbDynamics {
 
-/** \brief An update callback to reposition a btRigidBody in the Bullet
-simulation.
+
+/** \class RigidBodyAnimation RigidBodyAnimation.h <osgbDynamics/RigidBodyAnimation.h>
+\brief An update callback to reposition a btRigidBody in the Bullet simulation.
 
 This callback repositions an object within the Bullet simulation. Attach it as
 an update callback to an OSG MatrixTransform. The MatrixTransform must have an
@@ -49,5 +50,5 @@ protected:
 // osgbDynamics
 }
 
-// osgbDynamics_RIGIDBODYANIMATION
+// __OSGBDYAMICS_RIGID_BODY_ANIMATION_H__
 #endif
