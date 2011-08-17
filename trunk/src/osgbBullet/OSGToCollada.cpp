@@ -1,6 +1,6 @@
 /*************** <auto-copyright.pl BEGIN do not edit this line> **************
  *
- * osgBullet is (C) Copyright 2009 by Kenneth Mark Bryden
+ * osgBullet is (C) Copyright 2009-2011 by Kenneth Mark Bryden
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -24,7 +24,7 @@
 #include <btBulletDynamicsCommon.h>
 
 #include "osgbBullet/MotionState.h"
-#include "osgbBullet/Utils.h"
+#include "osgbCollision/Utils.h"
 
 #include <osg/NodeVisitor>
 #include <osg/Geode>
@@ -44,7 +44,7 @@ class ProcessSceneGraph : public osg::NodeVisitor
 {
 public:
     ProcessSceneGraph( const bool overall, const std::string& nodeName,
-        const BroadphaseNativeTypes shapeType, const AXIS axis )
+        const BroadphaseNativeTypes shapeType, const osgbCollision::AXIS axis )
       : osg::NodeVisitor( osg::NodeVisitor::TRAVERSE_ALL_CHILDREN ),
         _overall( overall ),
         _nodeName( nodeName ),
@@ -140,39 +140,39 @@ protected:
             node.accept( cbv );
             osg::BoundingBox bb = cbv.getBoundingBox();
             center = bb.center();
-            collision = osgbBullet::btBoxCollisionShapeFromOSG( &node, &bb );
+            collision = osgbCollision::btBoxCollisionShapeFromOSG( &node, &bb );
             break;
         }
         case SPHERE_SHAPE_PROXYTYPE:
         {
             osg::BoundingSphere bs = node.getBound();
             center = bs.center();
-            collision = osgbBullet::btSphereCollisionShapeFromOSG( &node );
+            collision = osgbCollision::btSphereCollisionShapeFromOSG( &node );
             break;
         }
         case CYLINDER_SHAPE_PROXYTYPE:
         {
             osg::BoundingSphere bs = node.getBound();
             center = bs.center();
-            collision = osgbBullet::btCylinderCollisionShapeFromOSG( &node, _axis );
+            collision = osgbCollision::btCylinderCollisionShapeFromOSG( &node, _axis );
             break;
         }
         case TRIANGLE_MESH_SHAPE_PROXYTYPE:
         {
             // Do _not_ compute center of bounding sphere for tri meshes.
-            collision = osgbBullet::btTriMeshCollisionShapeFromOSG( &node );
+            collision = osgbCollision::btTriMeshCollisionShapeFromOSG( &node );
             break;
         }
         case CONVEX_TRIANGLEMESH_SHAPE_PROXYTYPE:
         {
             // Do _not_ compute center of bounding sphere for tri meshes.
-            collision = osgbBullet::btConvexTriMeshCollisionShapeFromOSG( &node );
+            collision = osgbCollision::btConvexTriMeshCollisionShapeFromOSG( &node );
             break;
         }
         case CONVEX_HULL_SHAPE_PROXYTYPE:
         {
             // Do _not_ compute center of bounding sphere for tri meshes.
-            collision = osgbBullet::btConvexHullCollisionShapeFromOSG( &node );
+            collision = osgbCollision::btConvexHullCollisionShapeFromOSG( &node );
             break;
         }
         default:
@@ -185,7 +185,7 @@ protected:
         if( collision && (center != osg::Vec3( 0., 0., 0. )) )
         {
             btTransform trans; trans.setIdentity();
-            trans.setOrigin( osgbBullet::asBtVector3( center ) );
+            trans.setOrigin( osgbCollision::asBtVector3( center ) );
             btCompoundShape* masterShape = new btCompoundShape();
             masterShape->addChildShape( trans, collision );
             collision = masterShape;
@@ -197,7 +197,7 @@ protected:
     const bool _overall;
     const std::string& _nodeName;
     const BroadphaseNativeTypes _shapeType;
-    const AXIS _axis;
+    const osgbCollision::AXIS _axis;
 
     bool _process;
 
@@ -294,7 +294,7 @@ OSGToCollada::init()
 
     setOverall( true );
     setNodeName( std::string( "" ) );
-    setAxis( osgbBullet::Z );
+    setAxis( osgbCollision::Z );
 }
 
 
@@ -452,11 +452,11 @@ OSGToCollada::getNodeName() const
 }
 
 void
-OSGToCollada::setAxis( osgbBullet::AXIS axis )
+OSGToCollada::setAxis( osgbCollision::AXIS axis )
 {
     getOrCreateCreationRecord()->_axis = axis;
 }
-osgbBullet::AXIS
+osgbCollision::AXIS
 OSGToCollada::getAxis() const
 {
     return( getOrCreateCreationRecord()->_axis );

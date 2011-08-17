@@ -12,13 +12,13 @@
 #include <osg/PolygonMode>
 #include <osg/PolygonOffset>
 
-#include <osgbBullet/RefCollisionShape.h>
+#include <osgbCollision/RefCollisionShape.h>
 #include <osgbBullet/MotionState.h>
-#include <osgbBullet/CollisionShapes.h>
+#include <osgbCollision/CollisionShapes.h>
 #include <osgbBullet/RigidBodyAnimation.h>
-#include <osgbBullet/Utils.h>
+#include <osgbCollision/Utils.h>
 #include <btBulletDynamicsCommon.h>
-#include <osgbBullet/GLDebugDrawer.h>
+#include <osgbCollision/GLDebugDrawer.h>
 
 #include <iostream>
 #include <osg/io_utils>
@@ -60,9 +60,9 @@ struct Joint
         get = osg::Matrix::translate( _limbBTOffset );
         osg::Matrix btm = get * m * put * l2w;
         if (_btChildIdx >= 0)
-            _artShape->updateChildTransform( _btChildIdx, osgbBullet::asBtTransform( btm ) );
+            _artShape->updateChildTransform( _btChildIdx, osgbCollision::asBtTransform( btm ) );
             //_artShape->getChildList()[ _btChildIdx ].m_transform
-              //  = osgbBullet::asBtTransform( btm );
+              //  = osgbCollision::asBtTransform( btm );
 
         if( _dependent != NULL )
             // Update the subordinate joint's world transform, because it
@@ -186,7 +186,7 @@ osg::MatrixTransform* createOSGBox( osg::Vec3 size )
 btRigidBody * createBTBox( osg::MatrixTransform * box,
                           osg::Vec3 center )
 {
-    btCollisionShape* collision = osgbBullet::btBoxCollisionShapeFromOSG( box );
+    btCollisionShape* collision = osgbCollision::btBoxCollisionShapeFromOSG( box );
 
     osgbBullet::MotionState * motion = new osgbBullet::MotionState();
     motion->setTransform( box );
@@ -239,7 +239,7 @@ public:
         btSphereShape* collision = new btSphereShape( radius );
         btTransform xform;
         xform.setIdentity();
-        xform.setOrigin( osgbBullet::asBtVector3( c ) );
+        xform.setOrigin( osgbCollision::asBtVector3( c ) );
 
         _shape = new btCompoundShape;
         _shape->addChildShape( xform, collision );
@@ -254,7 +254,7 @@ public:
         btBoxShape* collision = new btBoxShape( btVector3( sizes.x(), sizes.y(), sizes.z() ) );
         btTransform xform;
         xform.setIdentity();
-        xform.setOrigin( osgbBullet::asBtVector3( c ) );
+        xform.setOrigin( osgbCollision::asBtVector3( c ) );
 
         _shape = new btCompoundShape;
         _shape->addChildShape( xform, collision );
@@ -270,7 +270,7 @@ public:
         btCylinderShape* collision = new btCylinderShapeZ( btVector3( radius, 0., height * .5 ) );
         btTransform xform;
         xform.setIdentity();
-        //xform.setOrigin( osgbBullet::asBtVector3( c ) );
+        //xform.setOrigin( osgbCollision::asBtVector3( c ) );
 
         _shape = new btCompoundShape;
         _shape->addChildShape( xform, collision );
@@ -336,7 +336,7 @@ public:
 
         osg::BoundingBox bb = accumulateChildBB( node );
         btTransform xform =
-            osgbBullet::asBtTransform( osg::Matrix::translate( bb.center() ) );
+            osgbCollision::asBtTransform( osg::Matrix::translate( bb.center() ) );
         _shape->addChildShape( xform, cs );
         int idx = _shape->getNumChildShapes();
         osg::notify( osg::INFO ) << "  Total children " << idx << std::endl;
@@ -401,7 +401,7 @@ public:
                 shape->accept( bsv );
                 if (bsv._shape)
                 {
-                    osgbBullet::RefCollisionShape* collision = new osgbBullet::RefCollisionShape( bsv._shape );
+                    osgbCollision::RefCollisionShape* collision = new osgbCollision::RefCollisionShape( bsv._shape );
                     node.setUserData( collision );
                 }
             }
@@ -434,7 +434,7 @@ protected:
             osg::Node* child = node.getChild( idx );
             if ( dynamic_cast< osg::MatrixTransform* >( child ) )
                 continue;
-            osgbBullet::RefCollisionShape* bcs = dynamic_cast< osgbBullet::RefCollisionShape* >( child->getUserData() );
+            osgbCollision::RefCollisionShape* bcs = dynamic_cast< osgbCollision::RefCollisionShape* >( child->getUserData() );
             if (!bcs)
                 continue;
 
@@ -540,7 +540,7 @@ createBall( btDynamicsWorld* dynamicsWorld )
     motion->setTransform( mt.get() );
 
     // Debug OSG rep of bullet shape.
-    osg::Node* debugNode = osgbBullet::osgNodeFromBtCollisionShape( collision );
+    osg::Node* debugNode = osgbCollision::osgNodeFromBtCollisionShape( collision );
     mt->addChild( debugNode );
 
     btTransform bodyTransform;
@@ -600,7 +600,7 @@ main( int argc,
     viewer.setSceneData( root.get() );
     viewer.setThreadingModel( osgViewer::ViewerBase::SingleThreaded );
 
-    osgbBullet::GLDebugDrawer* dbgDraw = new osgbBullet::GLDebugDrawer();
+    osgbCollision::GLDebugDrawer* dbgDraw = new osgbCollision::GLDebugDrawer();
     dynamicsWorld->setDebugDrawer( dbgDraw );
     root->addChild( dbgDraw->getSceneGraph() );
 

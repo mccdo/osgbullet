@@ -1,6 +1,6 @@
 /*************** <auto-copyright.pl BEGIN do not edit this line> **************
  *
- * osgBullet is (C) Copyright 2009 by Kenneth Mark Bryden
+ * osgBullet is (C) Copyright 2009-2011 by Kenneth Mark Bryden
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -20,7 +20,7 @@
 
 #include "osgbBullet/CreationRecord.h"
 
-#include <osgbBullet/CollisionShapes.h>
+#include <osgbCollision/CollisionShapes.h>
 
 #include <osg/Object>
 #include <osg/Vec3>
@@ -51,7 +51,7 @@ CreationRecord::CreationRecord()
     _reducerMaxEdgeError( 360.f ),
     _overall( true ),
     _nodeName( "" ),
-    _axis( osgbBullet::Z )
+    _axis( osgbCollision::Z )
 {
 }
 CreationRecord::CreationRecord( const CreationRecord& rhs, osg::CopyOp copyop )

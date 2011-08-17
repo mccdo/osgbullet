@@ -1,3 +1,3 @@
-MAKE_EXECUTABLE( triplebuf
+_osgBulletMakeDynamicsExe( triplebuf
     triplebuf.cpp
 )

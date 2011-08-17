@@ -18,23 +18,36 @@
  *
  *************** <auto-copyright.pl END do not edit this line> ***************/
 
-#include <osgbBullet/RefRigidBody.h>
+#include <osgbCollision/Version.h>
+#include <string>
+#include <sstream>
+
+namespace osgbCollision {
 
 
-namespace osgbBullet {
-
-RefRigidBody::RefRigidBody( void )
+unsigned int getVersionNumber()
 {
+    return( OSGBCOLLISION_VERSION );
 }
 
-RefRigidBody::RefRigidBody( btRigidBody* rigidBody )
-  : _rigidBody( rigidBody )
+
+static std::string s_osgcollision_version( "" );
+
+std::string getVersionString()
 {
+    if( s_osgcollision_version.empty() )
+    {
+        std::ostringstream oStr;
+        oStr << std::string( "osgbCollision version " ) <<
+            OSGBCOLLISION_MAJOR_VERSION << "." <<
+            OSGBCOLLISION_MINOR_VERSION << "." <<
+            OSGBCOLLISION_SUB_VERSION << " (" <<
+            getVersionNumber() << ").";
+        s_osgcollision_version = oStr.str();
+    }
+    return( s_osgcollision_version );
 }
 
-RefRigidBody::~RefRigidBody( void )
-{
-}
 
-// osgbBullet
+// namespace osgbCollision
 }

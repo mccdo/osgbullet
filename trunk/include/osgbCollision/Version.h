@@ -1,6 +1,6 @@
 /*************** <auto-copyright.pl BEGIN do not edit this line> **************
  *
- * osgBullet is (C) Copyright 2009 by Kenneth Mark Bryden
+ * osgBullet is (C) Copyright 2009-2011 by Kenneth Mark Bryden
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -18,19 +18,19 @@
  *
  *************** <auto-copyright.pl END do not edit this line> ***************/
 
-#ifndef __OSGBBULLET_VERSION_H__
-#define __OSGBBULLET_VERSION_H__ 1
+#ifndef __OSGBCOLLISION_VERSION_H__
+#define __OSGBCOLLISION_VERSION_H__ 1
 
-#include "osgbBullet/Export.h"
+#include "osgbCollision/Export.h"
 #include <string>
 
 
-namespace osgbBullet {
+namespace osgbCollision {
 
 
-#define OSGBBULLET_MAJOR_VERSION 1
-#define OSGBBULLET_MINOR_VERSION 1
-#define OSGBBULLET_SUB_VERSION 50
+#define OSGBCOLLISION_MAJOR_VERSION 1
+#define OSGBCOLLISION_MINOR_VERSION 1
+#define OSGBCOLLISION_SUB_VERSION 80
 
 // C preprocessor integrated version number.
 // The form is Mmmss, where:
@@ -41,20 +41,28 @@ namespace osgbBullet {
 //   #if( OSGBBULLET_VERSION < 10500 )
 //      ... code specific to releases before v1.05
 //   #endif
-#define OSGBBULLET_VERSION ( \
-        ( OSGBBULLET_MAJOR_VERSION * 10000 ) + \
-        ( OSGBBULLET_MINOR_VERSION * 100 ) + \
-          OSGBBULLET_SUB_VERSION )
+#define OSGBCOLLISION_VERSION ( \
+        ( OSGBCOLLISION_MAJOR_VERSION * 10000 ) + \
+        ( OSGBCOLLISION_MINOR_VERSION * 100 ) + \
+          OSGBCOLLISION_SUB_VERSION )
 
 // Returns OSGBBULLET_VERSION.
-unsigned int OSGBBULLET_EXPORT getVersionNumber();
+unsigned int OSGBCOLLISION_EXPORT getVersionNumber();
 
 // Pretty string.
-std::string OSGBBULLET_EXPORT getVersionString();
+std::string OSGBCOLLISION_EXPORT getVersionString();
 
 
-// namespace osgbBullet
+// Backwards compatibility
+#define OSGBBULLET_MAJOR_VERSION OSGBCOLLISION_MAJOR_VERSION
+#define OSGBBULLET_MINOR_VERSION OSGBCOLLISION_MINOR_VERSION
+#define OSGBBULLET_SUB_VERSION OSGBCOLLISION_SUB_VERSION
+#define OSGBBULLET_VERSION OSGBCOLLISION_VERSION
+
+
+// namespace osgbCollision
 }
 
-// __OSGBBULLET_VERSION_H__
+
+// __OSGBCOLLISION_VERSION_H__
 #endif

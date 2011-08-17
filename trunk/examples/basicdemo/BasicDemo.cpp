@@ -1,6 +1,6 @@
 /*************** <auto-copyright.pl BEGIN do not edit this line> **************
  *
- * osgBullet is (C) Copyright 2009 by Kenneth Mark Bryden
+ * osgBullet is (C) Copyright 2009-2011 by Kenneth Mark Bryden
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -34,7 +34,7 @@
 #include <iostream>
 
 #include <osgbBullet/MotionState.h>
-#include <osgbBullet/CollisionShapes.h>
+#include <osgbCollision/CollisionShapes.h>
 #include <osgbBullet/RefRigidBody.h>
 #include <osgbBullet/RigidBodyAnimation.h>
 
@@ -87,7 +87,7 @@ osg::MatrixTransform * createOSGBox( osg::Vec3 size )
 btRigidBody * createBTBox( osg::MatrixTransform * box,
                           osg::Vec3 center )
 {
-    btCollisionShape * collision = osgbBullet::btBoxCollisionShapeFromOSG( box );
+    btCollisionShape * collision = osgbCollision::btBoxCollisionShapeFromOSG( box );
 
     osgbBullet::MotionState * motion = new osgbBullet::MotionState();
     motion->setTransform( box );
@@ -195,10 +195,10 @@ osg::MatrixTransform * createModel( btDynamicsWorld * dynamicsWorld )
     /*  OSGBBULLET CODE */
     osgbBullet::MotionState * motion = new osgbBullet::MotionState;
     motion->setTransform( node.get() );
-    btCollisionShape * collision = osgbBullet::btConvexTriMeshCollisionShapeFromOSG( node.get() );
+    btCollisionShape * collision = osgbCollision::btConvexTriMeshCollisionShapeFromOSG( node.get() );
     // Create an OSG representation of the Bullet shape and attach it.
     // This is mainly for debugging.
-    osg::Node* debugNode = osgbBullet::osgNodeFromBtCollisionShape( collision );
+    osg::Node* debugNode = osgbCollision::osgNodeFromBtCollisionShape( collision );
     node->addChild( debugNode );
 
     // Set debug node state.

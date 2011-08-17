@@ -1,6 +1,6 @@
 /*************** <auto-copyright.pl BEGIN do not edit this line> **************
  *
- * osgBullet is (C) Copyright 2009 by Kenneth Mark Bryden
+ * osgBullet is (C) Copyright 2009-2011 by Kenneth Mark Bryden
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -18,18 +18,21 @@
  *
  *************** <auto-copyright.pl END do not edit this line> ***************/
 
+#include <osgbCollision/ComputeTriMeshVisitor.h>
 #include <osg/Transform>
 #include <osg/Drawable>
 #include <osg/Geode>
 #include <osg/PrimitiveSet>
 #include <osg/TriangleFunctor>
 
-#include <osgbBullet/ComputeTriMeshVisitor.h>
-
 #include <iostream>
 
-using namespace osgbBullet;
 using namespace osg;
+
+
+namespace osgbCollision
+{
+
 
 struct ComputeTriMeshFunc
 {
@@ -105,3 +108,6 @@ void ComputeTriMeshVisitor::applyDrawable( osg::Drawable * drawable )
     }
 }
 
+
+// osgbCollision
+}

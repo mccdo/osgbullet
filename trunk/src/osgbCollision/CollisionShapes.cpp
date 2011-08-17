@@ -1,6 +1,6 @@
 /*************** <auto-copyright.pl BEGIN do not edit this line> **************
  *
- * osgBullet is (C) Copyright 2009 by Kenneth Mark Bryden
+ * osgBullet is (C) Copyright 2009-2011 by Kenneth Mark Bryden
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -18,15 +18,14 @@
  *
  *************** <auto-copyright.pl END do not edit this line> ***************/
 
-#include <btBulletDynamicsCommon.h>
 #include <btBulletCollisionCommon.h>
 #include <BulletCollision/CollisionShapes/btShapeHull.h>
 
-#include <osgbBullet/CollisionShapes.h>
-#include <osgbBullet/ComputeTriMeshVisitor.h>
-#include <osgbBullet/ComputeCylinderVisitor.h>
-#include <osgbBullet/CollectVerticesVisitor.h>
-#include <osgbBullet/Utils.h>
+#include <osgbCollision/CollisionShapes.h>
+#include <osgbCollision/ComputeTriMeshVisitor.h>
+#include <osgbCollision/ComputeCylinderVisitor.h>
+#include <osgbCollision/CollectVerticesVisitor.h>
+#include <osgbCollision/Utils.h>
 
 #include <osg/ComputeBoundsVisitor>
 #include <osg/ShapeDrawable>
@@ -39,7 +38,7 @@
 #include <iostream>
 
 
-namespace osgbBullet
+namespace osgbCollision
 {
 
 
@@ -129,7 +128,7 @@ btTriangleMeshShape* btTriMeshCollisionShapeFromOSG( osg::Node* node )
     osg::Vec3Array* vertices = visitor.getTriMesh();
     if( vertices->size() < 3 )
     {
-        osg::notify( osg::WARN ) << "osgbBullet::btTriMeshCollisionShapeFromOSG, no triangles found" << std::endl;
+        osg::notify( osg::WARN ) << "osgbCollision::btTriMeshCollisionShapeFromOSG, no triangles found" << std::endl;
         return( NULL );
     }
 
@@ -516,69 +515,5 @@ osg::Node* osgNodeFromBtCollisionShape( const btConvexHullShape* hull, const btT
 }
 
 
-osg::Node* generateGroundPlane( const osg::Vec4& plane, btDynamicsWorld* bulletWorld, btRigidBody** rb )
-{
-    osg::Vec3 n(plane.x(),plane.y(),plane.z());
-    n.normalize();
-    float d (plane.w());
-    osg::Vec3 v (1.f,0,0);
-
-    // TBD consider using osg::Vec3::operator^ for cross product: (v^n)
-    osg::Vec3 u1 = v -n*(v.x()*n.x() +v.y()*n.y() + v.z()*n.z());
-    osg::Vec3 u2;
-    if (u1.length()==0){
-        u1 = osg::Vec3(0.f,1.f,0.f);
-        u2 = osg::Vec3(0.f,0.f,1.f);
-    }
-    else{
-        u1.normalize();
-        u2 = n^u1;
-        u2.normalize();
-    }
-
-    osg::Vec3 p =  n * d;
-
-    // TBD use new stuff in Shapes.
-    btCollisionShape* groundShape = new btStaticPlaneShape( btVector3( plane.x(), plane.y(), plane.z() ), plane.w() );
-    btRigidBody::btRigidBodyConstructionInfo rbInfo( 0., NULL, groundShape, btVector3(0,0,0) );
-    btRigidBody* ground = new btRigidBody(rbInfo);
-    bulletWorld->addRigidBody( ground );
-    if( rb != NULL )
-        *rb = ground;
-
-    osg::ref_ptr< osg::Geode > groundPlane = new osg::Geode;
-    osg::Geometry* groundGeom = new osg::Geometry;
-    groundPlane->addDrawable(groundGeom);
-    osg::ref_ptr<osg::Vec3Array> vertarray = new osg::Vec3Array;
-    groundGeom->setVertexArray( vertarray.get() );
-
-    int width(30);
-    osg::Vec3 point;
-    const int nVerts( 4*width+2 );
-    for(int i = -width; i < width; i++)
-    {
-        for(int j = -width; j < width+1; j ++)
-        {  
-            vertarray->push_back(p + u1*i + u2*j);
-            vertarray->push_back(p + u1*(i+1) + u2*j);
-        }
-        groundGeom->addPrimitiveSet( new osg::DrawArrays(
-            osg::PrimitiveSet::TRIANGLE_STRIP, (i+width)*nVerts, nVerts ) );
-    }
-
-    osg::ref_ptr<osg::Vec3Array> norm = new osg::Vec3Array;
-    groundGeom->setNormalArray( norm.get() );
-    norm->push_back( n );
-    groundGeom->setNormalBinding( osg::Geometry::BIND_OVERALL );
-
-    osg::ref_ptr<osg::Vec4Array> c = new osg::Vec4Array;
-    groundGeom->setColorArray( c.get() );
-    c->push_back( osg::Vec4( 0.5f, 0.5f, 0.5f, 1.5f ) );
-    groundGeom->setColorBinding( osg::Geometry::BIND_OVERALL );
-
-    return( groundPlane.release() );
+// osgbCollision
 }
-
-
-}
-// end of namespace osgbBullet

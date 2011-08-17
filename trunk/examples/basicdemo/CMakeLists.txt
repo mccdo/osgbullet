@@ -1,3 +1,3 @@
-MAKE_EXECUTABLE( BasicDemo
+_osgBulletMakeDynamicsExe( BasicDemo
     BasicDemo.cpp
 )

@@ -1,3 +1,3 @@
-MAKE_EXECUTABLE( scale
+_osgBulletMakeDynamicsExe( scale
     scale.cpp
 )

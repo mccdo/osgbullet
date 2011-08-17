@@ -1,6 +1,6 @@
 /*************** <auto-copyright.pl BEGIN do not edit this line> **************
  *
- * osgBullet is (C) Copyright 2009 by Kenneth Mark Bryden
+ * osgBullet is (C) Copyright 2009-2011 by Kenneth Mark Bryden
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -28,8 +28,9 @@
 
 #include <osgbBullet/OSGToCollada.h>
 #include <osgbBullet/MotionState.h>
-#include <osgbBullet/CollisionShapes.h>
-#include <osgbBullet/Utils.h>
+#include <osgbBullet/GroundPlane.h>
+#include <osgbCollision/CollisionShapes.h>
+#include <osgbCollision/Utils.h>
 #include <osgbBullet/TripleBuffer.h>
 #include <osgbBullet/PhysicsThread.h>
 
@@ -130,7 +131,7 @@ protected:
         for( it=_posMap.begin(); it!=_posMap.end(); it++ )
         {
             btRigidBody* rb = it->first;
-            btTransform t = osgbBullet::asBtTransform( it->second );
+            btTransform t = osgbCollision::asBtTransform( it->second );
             rb->setWorldTransform( t );
         }
     }
@@ -157,11 +158,11 @@ protected:
         motion->setParentTransform( osg::Matrix::translate( _viewPos ) );
 
         btScalar mass( 0.2 );
-        btVector3 inertia( btVector3( 0., 0., 0. ) );//osgbBullet::asBtVector3( _viewDir ) );
+        btVector3 inertia( btVector3( 0., 0., 0. ) );//osgbCollision::asBtVector3( _viewDir ) );
         collision->calculateLocalInertia( mass, inertia );
         btRigidBody::btRigidBodyConstructionInfo rbinfo( mass, motion, collision, inertia );
         btRigidBody* body = new btRigidBody( rbinfo );
-        body->setLinearVelocity( osgbBullet::asBtVector3( _viewDir * 50. ) );
+        body->setLinearVelocity( osgbCollision::asBtVector3( _viewDir * 50. ) );
         _world->addRigidBody( body );
 
         // Set up for multithreading and triple buffering.
@@ -242,7 +243,7 @@ makeCow( btDynamicsWorld* bw, osg::Vec3 pos, InteractionManipulator* im )
 	}
     amt->addChild( node );
 
-    btCollisionShape* cs = osgbBullet::btConvexTriMeshCollisionShapeFromOSG( node );
+    btCollisionShape* cs = osgbCollision::btConvexTriMeshCollisionShapeFromOSG( node );
     osgbBullet::MotionState* motion = new osgbBullet::MotionState();
     motion->setTransform( amt );
     motion->setParentTransform( m );

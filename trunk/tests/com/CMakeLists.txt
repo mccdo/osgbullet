@@ -1,3 +1,3 @@
-MAKE_EXECUTABLE( com
+_osgBulletMakeDynamicsExe( com
     com.cpp
 )

@@ -2,7 +2,7 @@
 cmake_minimum_required( VERSION 2.8 )
 project( osgBullet )
 
-set( OSGBULLET_VERSION 1.1 )
+set( OSGBULLET_VERSION 1.1.80
 
 
 set( CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/CMakeModules;${CMAKE_MODULE_PATH}" )
@@ -88,6 +88,8 @@ if( OSGBULLET_INSTALL_DATA )
     add_subdirectory( data )
 endif()
 
+
+ADD_SUBDIRECTORY( src/osgbCollision )
 ADD_SUBDIRECTORY( src/osgbBullet )
 ADD_SUBDIRECTORY( src/plugins )
 

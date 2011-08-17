@@ -1,6 +1,6 @@
 /*************** <auto-copyright.pl BEGIN do not edit this line> **************
  *
- * osgBullet is (C) Copyright 2009 by Kenneth Mark Bryden
+ * osgBullet is (C) Copyright 2009-2011 by Kenneth Mark Bryden
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -22,7 +22,7 @@
 #define __OSGBBULLET_OSG_TO_COLLADA_H__ 1
 
 
-#include <osgbBullet/CollisionShapes.h>
+#include <osgbCollision/CollisionShapes.h>
 #include <osgbBullet/CreationRecord.h>
 #include <osgbBullet/Export.h>
 
@@ -93,8 +93,8 @@ public:
     const std::string& getNodeName() const;
 
     // for cylinder alignment only, ignored otherwise.
-    void setAxis( osgbBullet::AXIS axis );
-    osgbBullet::AXIS getAxis() const;
+    void setAxis( osgbCollision::AXIS axis );
+    osgbCollision::AXIS getAxis() const;
 
     // OSGToCollada already transforms all vertices by the inverse COM and the
     // accumulated model transformations in the specified

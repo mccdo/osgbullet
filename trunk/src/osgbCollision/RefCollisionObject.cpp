@@ -1,6 +1,6 @@
 /*************** <auto-copyright.pl BEGIN do not edit this line> **************
  *
- * osgBullet is (C) Copyright 2009 by Kenneth Mark Bryden
+ * osgBullet is (C) Copyright 2009-2011 by Kenneth Mark Bryden
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -18,21 +18,26 @@
  *
  *************** <auto-copyright.pl END do not edit this line> ***************/
 
-#include <osgbBullet/RefCollisionShape.h>
+#include <osgbCollision/RefCollisionObject.h>
 
-namespace osgbBullet {
 
-RefCollisionShape::RefCollisionShape( void )
+namespace osgbCollision
+{
+
+
+RefCollisionObject::RefCollisionObject( void )
 {
 }
 
-RefCollisionShape::RefCollisionShape( btCollisionShape* collisionShape )
-: _collisionShape( collisionShape )
+RefCollisionObject::RefCollisionObject( btCollisionObject* collisionObject )
+  : _collisionObject( collisionObject )
 {
 }
 
-RefCollisionShape::~RefCollisionShape( void )
+RefCollisionObject::~RefCollisionObject( void )
 {
 }
 
-} // end namespace osgbBullet
+
+// osgbCollision
+}

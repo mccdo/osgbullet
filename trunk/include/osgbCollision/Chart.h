@@ -1,6 +1,6 @@
 /*************** <auto-copyright.pl BEGIN do not edit this line> **************
  *
- * osgBullet is (C) Copyright 2009 by Kenneth Mark Bryden
+ * osgBullet is (C) Copyright 2009-2011 by Kenneth Mark Bryden
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -18,22 +18,27 @@
  *
  *************** <auto-copyright.pl END do not edit this line> ***************/
 
-#ifndef __OSGBBULLET_CHART_H__
-#define __OSGBBULLET_CHART_H__
+#ifndef __OSGCOLLISION_CHART_H__
+#define __OSGCOLLISION_CHART_H__ 1
+
+
+#include <osgbCollision/Export.h>
 
 #include <osg/Referenced>
 #include <osg/Geode>
 #include <osg/Geometry>
 #include <osg/Image>
 
-#include <osgbBullet/Export.h>
 
 
-namespace osgbBullet {
+namespace osgbCollision
+{
 
 
-// Used by GLDebugDrawer to render a 2D HUD graph of intersection points.
-class OSGBBULLET_EXPORT Chart : public osg::Referenced
+/** \class Chart Chart.h <osgbCollision/Chart.h>
+\brief Used by GLDebugDrawer to render a 2D HUD graph of intersection points.
+*/
+class OSGBCOLLISION_EXPORT Chart : public osg::Referenced
 {
 public:
     ///Constructor
@@ -82,6 +87,9 @@ protected:
 };
 
 
-} // end namespace osgbBullet
+// osgbBullet
+}
 
-#endif // __OSGBBULLET_UTILS_H__
+
+// __OSGCOLLISION_CHART_H__
+#endif

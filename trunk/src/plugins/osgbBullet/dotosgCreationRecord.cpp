@@ -1,6 +1,6 @@
 /*************** <auto-copyright.pl BEGIN do not edit this line> **************
  *
- * osgBullet is (C) Copyright 2009 by Kenneth Mark Bryden
+ * osgBullet is (C) Copyright 2009-2011 by Kenneth Mark Bryden
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -164,7 +164,7 @@ bool Creation_readLocalData( osg::Object& obj, osgDB::Input& fr )
     {
         unsigned int uint;
         fr[2].getUInt( uint );
-        cr._axis = (osgbBullet::AXIS)( uint );
+        cr._axis = (osgbCollision::AXIS)( uint );
         fr+=3;
         advance = true;
     }

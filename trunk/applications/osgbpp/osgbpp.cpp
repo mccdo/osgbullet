@@ -1,6 +1,6 @@
 /*************** <auto-copyright.pl BEGIN do not edit this line> **************
  *
- * osgBullet is (C) Copyright 2009 by Kenneth Mark Bryden
+ * osgBullet is (C) Copyright 2009-2011 by Kenneth Mark Bryden
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -28,12 +28,12 @@
 
 #include <btBulletDynamicsCommon.h>
 
-#include <osgbBullet/Version.h>
+#include <osgbCollision/Version.h>
 #include <osgbBullet/MotionState.h>
-#include <osgbBullet/CollisionShapes.h>
+#include <osgbCollision/CollisionShapes.h>
 #include <osgbBullet/RefRigidBody.h>
 #include <osgbBullet/OSGToCollada.h>
-#include <osgbBullet/Utils.h>
+#include <osgbCollision/Utils.h>
 
 #include <osgwTools/AbsoluteModelTransform.h>
 
@@ -95,7 +95,7 @@ createGround( float w, float h, const osg::Vec3& center )
     osgbBullet::MotionState* motion = dynamic_cast< osgbBullet::MotionState* >( body->getMotionState() );
     osg::Matrix m( osg::Matrix::translate( center ) );
     motion->setParentTransform( m );
-    body->setWorldTransform( osgbBullet::asBtTransform( m ) );
+    body->setWorldTransform( osgbCollision::asBtTransform( m ) );
 
     ground->setUserData( new osgbBullet::RefRigidBody( body ) );
 
@@ -147,7 +147,7 @@ int main( int argc,
 
     if( arguments.read( "-v" ) || arguments.read( "--version" ) )
     {
-        osg::notify( osg::ALWAYS ) << osgbBullet::getVersionString() << std::endl;
+        osg::notify( osg::ALWAYS ) << osgbCollision::getVersionString() << std::endl;
         osg::notify( osg::ALWAYS ) << "  (Bullet version " << BT_BULLET_VERSION;
 #ifdef BT_USE_DOUBLE_PRECISION
         osg::notify( osg::ALWAYS ) << " double precision";
@@ -191,15 +191,15 @@ int main( int argc,
     }
 
     std::string str;
-    osgbBullet::AXIS axis( osgbBullet::Z );
+    osgbCollision::AXIS axis( osgbCollision::Z );
     if ( arguments.read( "--axis", str ) )
     {
         if( (str.find( "X" ) != str.npos) || (str.find( "x" ) != str.npos) )
-            axis = osgbBullet::X;
+            axis = osgbCollision::X;
         else if( (str.find( "Y" ) != str.npos) || (str.find( "y" ) != str.npos) )
-            axis = osgbBullet::Y;
+            axis = osgbCollision::Y;
         else if( (str.find( "Z" ) != str.npos) || (str.find( "z" ) != str.npos) )
-            axis = osgbBullet::Z;
+            axis = osgbCollision::Z;
         else
         {
             arguments.getApplicationUsage()->write( osg::notify( osg::FATAL ) );
@@ -208,13 +208,13 @@ int main( int argc,
     }
     switch( axis )
     {
-    case osgbBullet::X:
+    case osgbCollision::X:
         osg::notify( osg::INFO ) << "osgbpp: Axis: X" << std::endl;
         break;
-    case osgbBullet::Y:
+    case osgbCollision::Y:
         osg::notify( osg::INFO ) << "osgbpp: Axis: Y" << std::endl;
         break;
-    case osgbBullet::Z:
+    case osgbCollision::Z:
         osg::notify( osg::INFO ) << "osgbpp: Axis: Z" << std::endl;
         break;
     }

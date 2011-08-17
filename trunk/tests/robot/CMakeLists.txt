@@ -1,3 +1,3 @@
-MAKE_EXECUTABLE( robot
+_osgBulletMakeDynamicsExe( robot
     robot.cpp
 )

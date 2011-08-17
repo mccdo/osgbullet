@@ -18,23 +18,33 @@
  *
  *************** <auto-copyright.pl END do not edit this line> ***************/
 
-#include <osgbBullet/RefRigidBody.h>
+#ifndef __OSGBULLET_GROUND_PLANE_H__
+#define __OSGBULLET_GROUND_PLANE_H__ 1
 
 
-namespace osgbBullet {
+#include <osgbBullet/Export.h>
 
-RefRigidBody::RefRigidBody( void )
-{
+#include <btBulletDynamicsCommon.h>
+#include <btBulletCollisionCommon.h>
+
+#include <osg/Vec4>
+
+
+namespace osg {
+    class Node;
+    class Geode;
 }
 
-RefRigidBody::RefRigidBody( btRigidBody* rigidBody )
-  : _rigidBody( rigidBody )
+namespace osgbBullet
 {
-}
 
-RefRigidBody::~RefRigidBody( void )
-{
-}
+
+OSGBBULLET_EXPORT osg::Node* generateGroundPlane( const osg::Vec4& plane, btDynamicsWorld* bulletWorld, btRigidBody** rb=NULL );
+
 
 // osgbBullet
 }
+
+
+// __OSGBULLET_GROUND_PLANE_H__
+#endif

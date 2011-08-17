@@ -1,6 +1,6 @@
 /*************** <auto-copyright.pl BEGIN do not edit this line> **************
  *
- * osgBullet is (C) Copyright 2009 by Kenneth Mark Bryden
+ * osgBullet is (C) Copyright 2009-2011 by Kenneth Mark Bryden
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -18,13 +18,13 @@
  *
  *************** <auto-copyright.pl END do not edit this line> ***************/
 
-#ifndef GL_DEBUG_DRAWER_H
-#define GL_DEBUG_DRAWER_H
+#ifndef __OSGBCOLLISION_GL_DEBUG_DRAWER_H__
+#define __OSGBCOLLISION_GL_DEBUG_DRAWER_H__ 1
+
+#include <osgbCollision/Export.h>
 
 #include <LinearMath/btIDebugDraw.h>
-#include <osgbBullet/Chart.h>
-
-#include <osgbBullet/Export.h>
+#include <osgbCollision/Chart.h>
 
 #include <osg/Geometry>
 #include <osg/Group>
@@ -32,15 +32,22 @@
 #include <osg/Geometry>
 #include <osg/Camera>
 
+
 namespace osgText {
     class Text;
 };
 
 
-namespace osgbBullet
+namespace osgbCollision
 {
 
-class OSGBBULLET_EXPORT GLDebugDrawer : public btIDebugDraw
+
+/** \class GLDebugDrawer GLDebugDrawer.h <osgbCollision/GLDebugDrawer.h>
+\brief Debug utility to render Bullet collision shapes.
+The class visualizes Bullet collision shapes. Use it as a debugging aid
+to ensure that Bullet collision shapes and OSG geometry are synchronized.
+*/
+class OSGBCOLLISION_EXPORT GLDebugDrawer : public btIDebugDraw
 {
 public:
     GLDebugDrawer();
@@ -100,11 +107,15 @@ private:
     // HUD display
     osg::ref_ptr< osg::Camera > _hudCam;
 
-    osg::ref_ptr< osgbBullet::Chart > _chart;
+    osg::ref_ptr< osgbCollision::Chart > _chart;
     int _frame;
     int _contacts;
 };
 
+
+// osgbCollision
 }
 
-#endif//GL_DEBUG_DRAWER_H
+
+// __OSGBCOLLISION_GL_DEBUG_DRAWER_H__
+#endif

@@ -1,6 +1,6 @@
 /*************** <auto-copyright.pl BEGIN do not edit this line> **************
  *
- * osgBullet is (C) Copyright 2009 by Kenneth Mark Bryden
+ * osgBullet is (C) Copyright 2009-2011 by Kenneth Mark Bryden
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -18,19 +18,21 @@
  *
  *************** <auto-copyright.pl END do not edit this line> ***************/
 
+#include <osgbCollision/ComputeCylinderVisitor.h>
+#include <osgbCollision/BoundingCylinder.h>
+
 #include <osg/Transform>
 #include <osg/Drawable>
 #include <osg/Geode>
 #include <osg/PrimitiveSet>
 
-#include <osgbBullet/ComputeCylinderVisitor.h>
-#include <osgbBullet/BoundingCylinder.h>
-
-using namespace osgbBullet;
 using namespace osg;
 
-struct ComputeCylinderBound
-    : public osg::PrimitiveFunctor
+namespace osgbCollision
+{
+
+
+struct ComputeCylinderBound : public osg::PrimitiveFunctor
 {
     ComputeCylinderBound()
     {
@@ -164,9 +166,7 @@ struct ComputeCylinderBound
         }
     }
 
-    virtual void drawElements(                                                                                                                                            GLenum,
-                                                                                                                                                                          GLsizei count,
-                                                                                                                                                                          const GLushort * indices )
+    virtual void drawElements( GLenum, GLsizei count, const GLushort* indices )
     {
         if( _vertices3f )
         {
@@ -194,9 +194,7 @@ struct ComputeCylinderBound
         }
     }
 
-    virtual void drawElements(                                                                                                                        GLenum,
-                                                                                                                                                      GLsizei count,
-                                                                                                                                                      const GLuint * indices )
+    virtual void drawElements( GLenum,  GLsizei count, const GLuint* indices )
     {
         if( _vertices3f )
         {
@@ -385,3 +383,6 @@ void ComputeCylinderVisitor::applyDrawable( osg::Drawable * drawable )
     }
 }
 
+
+// osgbCollision
+}

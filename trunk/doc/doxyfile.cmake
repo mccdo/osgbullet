@@ -5,7 +5,7 @@
 #---------------------------------------------------------------------------
 DOXYFILE_ENCODING      = UTF-8
 PROJECT_NAME           = osgBullet
-PROJECT_NUMBER         = "osgBullet 1.1.50"
+PROJECT_NUMBER         = "osgBullet 1.1.80"
 OUTPUT_DIRECTORY       = "${PROJECT_BINARY_DIR}/doc"
 CREATE_SUBDIRS         = NO
 OUTPUT_LANGUAGE        = English
