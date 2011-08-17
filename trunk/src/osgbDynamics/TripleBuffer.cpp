@@ -19,14 +19,16 @@
  *************** <auto-copyright.pl END do not edit this line> ***************/
 
 #include <OpenThreads/ScopedLock>
-#include <osgbBullet/TripleBuffer.h>
+#include <osgbDynamics/TripleBuffer.h>
 #include <osg/Notify>
 #include <iostream>
 #include <string>
 #include <cstring>
 
 
-using namespace osgbBullet;
+namespace osgbDynamics
+{
+
 
 
 TripleBuffer::TripleBuffer( unsigned int initialSize )
@@ -243,4 +245,8 @@ TripleBuffer::reallocate( unsigned int index, unsigned int size )
         delete[] _buf[ index ];
     }
     _buf[ index ] = newBuf;
+}
+
+
+// osgbDynamics
 }

@@ -18,7 +18,7 @@
  *
  *************** <auto-copyright.pl END do not edit this line> ***************/
 
-#include <osgbBullet/GroundPlane.h>
+#include <osgbDynamics/GroundPlane.h>
 
 #include <btBulletDynamicsCommon.h>
 #include <btBulletCollisionCommon.h>
@@ -32,7 +32,7 @@
 #include <iostream>
 
 
-namespace osgbBullet
+namespace osgbDynamics
 {
 
 
@@ -102,5 +102,5 @@ osg::Node* generateGroundPlane( const osg::Vec4& plane, btDynamicsWorld* bulletW
 
 
 
-// osgbBullet
+// osgbDynamics
 }

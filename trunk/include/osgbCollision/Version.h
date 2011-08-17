@@ -21,7 +21,7 @@
 #ifndef __OSGBCOLLISION_VERSION_H__
 #define __OSGBCOLLISION_VERSION_H__ 1
 
-#include "osgbCollision/Export.h"
+#include <osgbCollision/Export.h>
 #include <string>
 
 

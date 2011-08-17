@@ -22,7 +22,6 @@
 #define __OSGBCOLLISION_GL_DEBUG_DRAWER_H__ 1
 
 #include <osgbCollision/Export.h>
-
 #include <LinearMath/btIDebugDraw.h>
 #include <osgbCollision/Chart.h>
 
@@ -31,11 +30,8 @@
 #include <osg/Geode>
 #include <osg/Geometry>
 #include <osg/Camera>
+#include <osgText/Text>
 
-
-namespace osgText {
-    class Text;
-};
 
 
 namespace osgbCollision

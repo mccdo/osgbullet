@@ -1,9 +1,5 @@
 set( LIB_NAME osgbCollision )
 
-if( BUILD_SHARED_LIBS )
-    add_definitions( -DOSGBBULLET_LIBRARY )
-endif()
-
 
 set( HEADER_PATH ${PROJECT_SOURCE_DIR}/include/${LIB_NAME} )
 set( LIB_PUBLIC_HEADERS

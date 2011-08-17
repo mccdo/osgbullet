@@ -18,17 +18,15 @@
  *
  *************** <auto-copyright.pl END do not edit this line> ***************/
 
+#include <osgbDynamics/PhysicsState.h>
 #include <osg/Notify>
 #include <osg/Object>
 #include <osg/Group>
-
-#include "osgbBullet/PhysicsState.h"
-
-#include "osgwTools/RefID.h"
+#include <osgwTools/RefID.h>
 
 #include <btBulletDynamicsCommon.h>
 
-namespace osgbBullet
+namespace osgbDynamics
 {
 
 
@@ -66,7 +64,7 @@ PhysicsData::operator=( const PhysicsData& rhs )
 PhysicsState::PhysicsState()
 {
 }
-PhysicsState::PhysicsState( const osgbBullet::PhysicsState& rhs, osg::CopyOp copyop )
+PhysicsState::PhysicsState( const osgbDynamics::PhysicsState& rhs, osg::CopyOp copyop )
 {
 }
 PhysicsState::~PhysicsState()
@@ -116,7 +114,7 @@ PhysicsState::addPhysicsData( const osgwTools::RefID* id, const btRigidBody* bod
 }
 
 void
-PhysicsState::addPhysicsData( const osgwTools::RefID* id, const osgbBullet::CreationRecord* cr )
+PhysicsState::addPhysicsData( const osgwTools::RefID* id, const osgbDynamics::CreationRecord* cr )
 {
     DataMap::iterator it = _dataMap.find( id->str() );
     if( it == _dataMap.end() )
@@ -155,5 +153,5 @@ PhysicsState::addPhysicsData( const osgwTools::RefID* id, const std::string& fil
 
 
 
-// namespace osgbBullet
+// osgbDynamics
 }

@@ -23,9 +23,9 @@
 
 
 #if defined ( _MSC_VER ) || defined ( __CYGWIN__ ) || defined ( __MINGW32__ ) || defined ( __BCPLUSPLUS__ ) || defined ( __MWERKS__ )
-    #if defined ( OSGBBULLET_STATIC )
+    #if defined ( OSGBULLET_STATIC )
         #define OSGBCOLLISION_EXPORT
-    #elif defined ( OSGBBULLET_LIBRARY )
+    #elif defined ( OSGBULLET_SHARED )
         #define OSGBCOLLISION_EXPORT __declspec( dllexport )
     #else
         #define OSGBCOLLISION_EXPORT __declspec( dllimport )

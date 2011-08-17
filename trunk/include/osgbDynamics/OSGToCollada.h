@@ -18,13 +18,13 @@
  *
  *************** <auto-copyright.pl END do not edit this line> ***************/
 
-#ifndef __OSGBBULLET_OSG_TO_COLLADA_H__
-#define __OSGBBULLET_OSG_TO_COLLADA_H__ 1
+#ifndef __OSGBDYNAMICS_OSG_TO_COLLADA_H__
+#define __OSGBDYNAMICS_OSG_TO_COLLADA_H__ 1
 
 
 #include <osgbCollision/CollisionShapes.h>
-#include <osgbBullet/CreationRecord.h>
-#include <osgbBullet/Export.h>
+#include <osgbDynamics/CreationRecord.h>
+#include <osgbDynamics/Export.h>
 
 #include <btBulletDynamicsCommon.h>
 
@@ -32,14 +32,14 @@
 
 
 
-namespace osgbBullet {
+namespace osgbDynamics {
 
 
 
 // This is a support class for the osgbpp application, so that
 // an app can programmatically do the same thing as osgbpp:
 // Namely, convert an input scene graph into a Bullet rigid body.
-class OSGBBULLET_EXPORT OSGToCollada
+class OSGBDYNAMICS_EXPORT OSGToCollada
 {
 public:
     // USAGE NOTE: loadedModel is _not_ const. This _will_ alter your scene graph.

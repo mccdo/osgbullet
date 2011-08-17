@@ -13,9 +13,9 @@
 #include <osg/PolygonOffset>
 
 #include <osgbCollision/RefCollisionShape.h>
-#include <osgbBullet/MotionState.h>
+#include <osgbDynamics/MotionState.h>
 #include <osgbCollision/CollisionShapes.h>
-#include <osgbBullet/RigidBodyAnimation.h>
+#include <osgbDynamics/RigidBodyAnimation.h>
 #include <osgbCollision/Utils.h>
 #include <btBulletDynamicsCommon.h>
 #include <osgbCollision/GLDebugDrawer.h>
@@ -188,7 +188,7 @@ btRigidBody * createBTBox( osg::MatrixTransform * box,
 {
     btCollisionShape* collision = osgbCollision::btBoxCollisionShapeFromOSG( box );
 
-    osgbBullet::MotionState * motion = new osgbBullet::MotionState();
+    osgbDynamics::MotionState * motion = new osgbDynamics::MotionState();
     motion->setTransform( box );
     motion->setParentTransform( osg::Matrix::translate( center ) );
 
@@ -536,7 +536,7 @@ createBall( btDynamicsWorld* dynamicsWorld )
     sp->accept( bsv );
     btCollisionShape* collision = bsv._shape;
 
-    osgbBullet::MotionState * motion = new osgbBullet::MotionState;
+    osgbDynamics::MotionState * motion = new osgbDynamics::MotionState;
     motion->setTransform( mt.get() );
 
     // Debug OSG rep of bullet shape.

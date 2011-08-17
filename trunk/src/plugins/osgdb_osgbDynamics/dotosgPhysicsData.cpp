@@ -18,8 +18,8 @@
  *
  *************** <auto-copyright.pl END do not edit this line> ***************/
 
-#include <osgbBullet/PhysicsState.h>
-#include <osgbBullet/MotionState.h>
+#include <osgbDynamics/PhysicsState.h>
+#include <osgbDynamics/MotionState.h>
 #include <osgbCollision/Utils.h>
 
 #include <osgDB/Registry>
@@ -27,7 +27,7 @@
 #include <osgDB/Output>
 #include <osg/MatrixTransform>
 
-#include "osgwTools/AbsoluteModelTransform.h"
+#include <osgwTools/AbsoluteModelTransform.h>
 
 #include <iostream>
 #include <string>
@@ -40,7 +40,7 @@ bool PhysicsData_writeLocalData( const osg::Object& obj, osgDB::Output& fw );
 
 osgDB::RegisterDotOsgWrapperProxy PhysicsData_Proxy
 (
-    new osgbBullet::PhysicsData,
+    new osgbDynamics::PhysicsData,
     "PhysicsData",
     "Object PhysicsData",
     PhysicsData_readLocalData,
@@ -104,7 +104,7 @@ bool writeMatrix( const osg::Matrix& matrix, osgDB::Output& fw, const char* keyw
 
 bool PhysicsData_readLocalData( osg::Object& obj, osgDB::Input& fr )
 {
-    osgbBullet::PhysicsData& pd = static_cast< osgbBullet::PhysicsData& >( obj );
+    osgbDynamics::PhysicsData& pd = static_cast< osgbDynamics::PhysicsData& >( obj );
     bool advance( false );
 
     unsigned int version( 0 );
@@ -116,7 +116,7 @@ bool PhysicsData_readLocalData( osg::Object& obj, osgDB::Input& fr )
 
         osg::notify( osg::INFO ) << "OSGB: Found version " << version << std::endl;
 
-        pd._cr = static_cast< osgbBullet::CreationRecord* >( fr.readObject() );
+        pd._cr = static_cast< osgbDynamics::CreationRecord* >( fr.readObject() );
         osg::notify( osg::INFO ) << "OSGB: CreationRecord " << pd._cr.get() << std::endl;
 
         bool readM = readMatrix( pd._osgTransform, fr, "OSGTransform" );
@@ -177,7 +177,7 @@ bool PhysicsData_readLocalData( osg::Object& obj, osgDB::Input& fr )
 
 bool PhysicsData_writeLocalData( const osg::Object& obj, osgDB::Output& fw )
 {
-    const osgbBullet::PhysicsData& pd = static_cast< const osgbBullet::PhysicsData& >( obj );
+    const osgbDynamics::PhysicsData& pd = static_cast< const osgbDynamics::PhysicsData& >( obj );
 
     fw.indent() << "Version " << pd.getVersion() << std::endl;
 
@@ -187,7 +187,7 @@ bool PhysicsData_writeLocalData( const osg::Object& obj, osgDB::Output& fw )
     // separately here so that we can display the OSG subgraph transformed
     // correctly while waiting for physics data to load.
     btMotionState* motion = pd._body->getMotionState();
-    osgbBullet::MotionState* ms = dynamic_cast< osgbBullet::MotionState* >( motion );
+    osgbDynamics::MotionState* ms = dynamic_cast< osgbDynamics::MotionState* >( motion );
     if( ms != NULL )
     {
         osg::Transform* trans = ms->getTransform();

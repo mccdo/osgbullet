@@ -6,9 +6,9 @@
 #include <osgGA/TrackballManipulator>
 #include <osg/ShapeDrawable>
 
-#include <osgbBullet/OSGToCollada.h>
-#include <osgbBullet/MotionState.h>
-#include <osgbBullet/GroundPlane.h>
+#include <osgbDynamics/OSGToCollada.h>
+#include <osgbDynamics/MotionState.h>
+#include <osgbDynamics/GroundPlane.h>
 #include <osgbCollision/CollisionShapes.h>
 #include <osgbCollision/Utils.h>
 
@@ -39,7 +39,7 @@ btDynamicsWorld * initPhysics()
 }
 
 
-struct MyCallback : public osgbBullet::MotionStateCallback
+struct MyCallback : public osgbDynamics::MotionStateCallback
 {
     unsigned int _count;
 
@@ -75,7 +75,7 @@ enablePhysics( osg::Node* root, const std::string& nodeName, btDynamicsWorld* bw
     osg::Group* asGrp = node->asGroup();
     osg::ref_ptr< osg::Group > copyGrp = new osg::Group( *asGrp, osg::CopyOp::DEEP_COPY_ALL );
 
-    osgbBullet::OSGToCollada converter;
+    osgbDynamics::OSGToCollada converter;
     converter.setSceneGraph( copyGrp.get() );
     converter.setShapeType( BOX_SHAPE_PROXYTYPE );
     converter.setMass( 1. );
@@ -88,7 +88,7 @@ enablePhysics( osg::Node* root, const std::string& nodeName, btDynamicsWorld* bw
     osgwTools::insertAbove( node, model.get() );
 
     btRigidBody* rb = converter.getRigidBody();
-    osgbBullet::MotionState* motion = new osgbBullet::MotionState;
+    osgbDynamics::MotionState* motion = new osgbDynamics::MotionState;
 
     // Test callback
     motion->getCallbackList().push_back( new MyCallback );
@@ -191,7 +191,7 @@ protected:
 
         btSphereShape* collision = new btSphereShape( .5 );
 
-        osgbBullet::MotionState* motion = new osgbBullet::MotionState;
+        osgbDynamics::MotionState* motion = new osgbDynamics::MotionState;
         motion->setTransform( amt.get() );
 
         motion->setParentTransform( osg::Matrix::translate( _viewPos ) );
@@ -215,7 +215,7 @@ int main( int argc,
 
     InteractionManipulator* im = new InteractionManipulator( bw, root.get() );
 
-    root->addChild( osgbBullet::generateGroundPlane( osg::Vec4( 0.f, 0.f, 1.f, -10.f ), bw ) );
+    root->addChild( osgbDynamics::generateGroundPlane( osg::Vec4( 0.f, 0.f, 1.f, -10.f ), bw ) );
 
     osg::MatrixTransform* mt( new osg::MatrixTransform( osg::Matrix::translate( 0., 0., 10. ) ) );
     root->addChild( mt );

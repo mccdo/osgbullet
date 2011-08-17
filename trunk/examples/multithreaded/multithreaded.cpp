@@ -26,13 +26,13 @@
 #include <osg/ShapeDrawable>
 #include <osg/Geode>
 
-#include <osgbBullet/OSGToCollada.h>
-#include <osgbBullet/MotionState.h>
-#include <osgbBullet/GroundPlane.h>
+#include <osgbDynamics/OSGToCollada.h>
+#include <osgbDynamics/MotionState.h>
+#include <osgbDynamics/GroundPlane.h>
 #include <osgbCollision/CollisionShapes.h>
 #include <osgbCollision/Utils.h>
-#include <osgbBullet/TripleBuffer.h>
-#include <osgbBullet/PhysicsThread.h>
+#include <osgbDynamics/TripleBuffer.h>
+#include <osgbDynamics/PhysicsThread.h>
 
 #include <btBulletDynamicsCommon.h>
 
@@ -43,8 +43,8 @@
 
 
 
-osgbBullet::TripleBuffer tBuf;
-osgbBullet::MotionStateList msl;
+osgbDynamics::TripleBuffer tBuf;
+osgbDynamics::MotionStateList msl;
 
 
 btDiscreteDynamicsWorld* initPhysics()
@@ -68,7 +68,7 @@ btDiscreteDynamicsWorld* initPhysics()
 class InteractionManipulator : public osgGA::GUIEventHandler
 {
 public:
-    InteractionManipulator( btDiscreteDynamicsWorld* world, osg::Group* sg, osgbBullet::PhysicsThread* pt=NULL )
+    InteractionManipulator( btDiscreteDynamicsWorld* world, osg::Group* sg, osgbDynamics::PhysicsThread* pt=NULL )
       : _world( world ),
         _sg( sg ),
         _pt( pt )
@@ -115,7 +115,7 @@ public:
 protected:
     btDiscreteDynamicsWorld* _world;
     osg::ref_ptr< osg::Group > _sg;
-    osgbBullet::PhysicsThread* _pt;
+    osgbDynamics::PhysicsThread* _pt;
 
     osg::Vec3 _viewPos, _viewDir;
 
@@ -153,7 +153,7 @@ protected:
             // Blocks until thread is paused.
             _pt->pause( true );
 
-        osgbBullet::MotionState* motion = new osgbBullet::MotionState;
+        osgbDynamics::MotionState* motion = new osgbDynamics::MotionState;
         motion->setTransform( amt.get() );
         motion->setParentTransform( osg::Matrix::translate( _viewPos ) );
 
@@ -198,7 +198,7 @@ makeModel( const std::string& fileName, btDynamicsWorld* bw, osg::Vec3 pos, Inte
 	}
     amt->addChild( modelNode.get() );
 
-    osgbBullet::OSGToCollada converter;
+    osgbDynamics::OSGToCollada converter;
     converter.setSceneGraph( modelNode.get() );
     converter.setShapeType( BOX_SHAPE_PROXYTYPE );
     converter.setMass( .2 );
@@ -206,7 +206,7 @@ makeModel( const std::string& fileName, btDynamicsWorld* bw, osg::Vec3 pos, Inte
     converter.convert();
 
     btRigidBody* rb = converter.getRigidBody();
-    osgbBullet::MotionState* motion = new osgbBullet::MotionState;
+    osgbDynamics::MotionState* motion = new osgbDynamics::MotionState;
     motion->setTransform( amt );
     motion->setParentTransform( m );
     rb->setMotionState( motion );
@@ -244,7 +244,7 @@ makeCow( btDynamicsWorld* bw, osg::Vec3 pos, InteractionManipulator* im )
     amt->addChild( node );
 
     btCollisionShape* cs = osgbCollision::btConvexTriMeshCollisionShapeFromOSG( node );
-    osgbBullet::MotionState* motion = new osgbBullet::MotionState();
+    osgbDynamics::MotionState* motion = new osgbDynamics::MotionState();
     motion->setTransform( amt );
     motion->setParentTransform( m );
     btScalar mass( 2. );
@@ -273,7 +273,7 @@ main( int argc,
     tBuf.resize( 16384 );
 
     btDiscreteDynamicsWorld* bulletWorld = initPhysics();
-    osgbBullet::PhysicsThread pt( bulletWorld, &tBuf );
+    osgbDynamics::PhysicsThread pt( bulletWorld, &tBuf );
     osg::Group* root = new osg::Group;
 
     InteractionManipulator* im = new InteractionManipulator( bulletWorld, root, &pt );
@@ -315,7 +315,7 @@ main( int argc,
     // Make ground.
     {
         osg::Vec4 gp( 0, 0, 1, 0 );
-        root->addChild( osgbBullet::generateGroundPlane( gp, bulletWorld ) );
+        root->addChild( osgbDynamics::generateGroundPlane( gp, bulletWorld ) );
     }
 
 

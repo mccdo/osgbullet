@@ -33,10 +33,10 @@
 #include <osg/io_utils>
 #include <iostream>
 
-#include <osgbBullet/MotionState.h>
+#include <osgbDynamics/MotionState.h>
 #include <osgbCollision/CollisionShapes.h>
-#include <osgbBullet/RefRigidBody.h>
-#include <osgbBullet/RigidBodyAnimation.h>
+#include <osgbDynamics/RefRigidBody.h>
+#include <osgbDynamics/RigidBodyAnimation.h>
 
 osg::AnimationPath * createAnimationPath( const osg::Vec3 & center,
                                           float radius,
@@ -89,7 +89,7 @@ btRigidBody * createBTBox( osg::MatrixTransform * box,
 {
     btCollisionShape * collision = osgbCollision::btBoxCollisionShapeFromOSG( box );
 
-    osgbBullet::MotionState * motion = new osgbBullet::MotionState();
+    osgbDynamics::MotionState * motion = new osgbDynamics::MotionState();
     motion->setTransform( box );
     motion->setParentTransform( osg::Matrix::translate( center ) );
 
@@ -193,7 +193,7 @@ osg::MatrixTransform * createModel( btDynamicsWorld * dynamicsWorld )
     }
 
     /*  OSGBBULLET CODE */
-    osgbBullet::MotionState * motion = new osgbBullet::MotionState;
+    osgbDynamics::MotionState * motion = new osgbDynamics::MotionState;
     motion->setTransform( node.get() );
     btCollisionShape * collision = osgbCollision::btConvexTriMeshCollisionShapeFromOSG( node.get() );
     // Create an OSG representation of the Bullet shape and attach it.
@@ -298,11 +298,11 @@ int main( int argc,
     dynamicsWorld->addRigidBody( boxBody );
 
     /* osgbBullet Code */
-    osgbBullet::RefRigidBody * boxRigid = new osgbBullet::RefRigidBody();
+    osgbDynamics::RefRigidBody * boxRigid = new osgbDynamics::RefRigidBody();
     boxRigid->setRigidBody( boxBody );
     box->setUserData( boxRigid );
 
-    osgbBullet::RigidBodyAnimation * rba = new osgbBullet::RigidBodyAnimation;
+    osgbDynamics::RigidBodyAnimation * rba = new osgbDynamics::RigidBodyAnimation;
     apc->setNestedCallback( rba );
     /* END: Create animated box */
 

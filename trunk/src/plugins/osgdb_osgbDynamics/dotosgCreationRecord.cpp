@@ -18,7 +18,7 @@
  *
  *************** <auto-copyright.pl END do not edit this line> ***************/
 
-#include "osgbBullet/CreationRecord.h"
+#include <osgbDynamics/CreationRecord.h>
 
 #include <iostream>
 #include <string>
@@ -35,7 +35,7 @@ bool Creation_writeLocalData( const osg::Object& obj, osgDB::Output& fw );
 
 osgDB::RegisterDotOsgWrapperProxy Creation_Proxy
 (
-    new osgbBullet::CreationRecord,
+    new osgbDynamics::CreationRecord,
     "CreationRecord",
     "Object CreationRecord",
     Creation_readLocalData,
@@ -47,7 +47,7 @@ osgDB::RegisterDotOsgWrapperProxy Creation_Proxy
 
 bool Creation_readLocalData( osg::Object& obj, osgDB::Input& fr )
 {
-    osgbBullet::CreationRecord& cr = static_cast< osgbBullet::CreationRecord& >( obj );
+    osgbDynamics::CreationRecord& cr = static_cast< osgbDynamics::CreationRecord& >( obj );
     bool advance( false );
 
     if( fr.matchSequence( "Version %i" ) )
@@ -174,7 +174,7 @@ bool Creation_readLocalData( osg::Object& obj, osgDB::Input& fr )
 
 bool Creation_writeLocalData( const osg::Object& obj, osgDB::Output& fw )
 {
-    const osgbBullet::CreationRecord& cr = static_cast< const osgbBullet::CreationRecord& >( obj );
+    const osgbDynamics::CreationRecord& cr = static_cast< const osgbDynamics::CreationRecord& >( obj );
 
     fw.indent() << "Version " << 1 << std::endl;
     fw.indent() << "COM " << cr._com << std::endl;

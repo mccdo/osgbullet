@@ -14,8 +14,8 @@
 #include <osgwTools/Version.h>
 #include <osgwTools/Shapes.h>
 
-#include <osgbBullet/OSGToCollada.h>
-#include <osgbBullet/MotionState.h>
+#include <osgbDynamics/OSGToCollada.h>
+#include <osgbDynamics/MotionState.h>
 #include <osgbCollision/Utils.h>
 #include <osgbCollision/GLDebugDrawer.h>
 
@@ -470,7 +470,7 @@ enablePhysics( osg::Node* root, const std::string& nodeName, btDynamicsWorld* bw
     osg::Group* asGrp = node->asGroup();
     osg::ref_ptr< osg::Group > copyGrp = new osg::Group( *asGrp, osg::CopyOp::DEEP_COPY_ALL );
 
-    osgbBullet::OSGToCollada converter;
+    osgbDynamics::OSGToCollada converter;
 #if 0
     // This currently crashes and has other issues. Many operations in
     // OSGToCOllada don't adhere to this setting, e.h., auto compute COM
@@ -501,7 +501,7 @@ enablePhysics( osg::Node* root, const std::string& nodeName, btDynamicsWorld* bw
     model->addChild( node );
 
     btRigidBody* rb = converter.getRigidBody();
-    osgbBullet::MotionState* motion = new osgbBullet::MotionState;
+    osgbDynamics::MotionState* motion = new osgbDynamics::MotionState;
     motion->setTransform( model.get() );
     // To position the collision shape and the OSG visual rep correctly, MotionState needs
     // three pieces of data: the COM, the scaling factor, and the parent transform (or

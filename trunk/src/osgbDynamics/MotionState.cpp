@@ -18,9 +18,9 @@
  *
  *************** <auto-copyright.pl END do not edit this line> ***************/
 
-#include <osgbBullet/MotionState.h>
+#include <osgbDynamics/MotionState.h>
 #include <osgbCollision/Utils.h>
-#include <osgbBullet/TripleBuffer.h>
+#include <osgbDynamics/TripleBuffer.h>
 
 #include <osgwTools/AbsoluteModelTransform.h>
 
@@ -29,7 +29,9 @@
 #include <osg/io_utils>
 
 
-using namespace osgbBullet;
+namespace osgbDynamics
+{
+
 
 MotionState::MotionState( const osg::Matrix& parentTransform,
                          const osg::Vec3& centerOfMass )
@@ -224,7 +226,7 @@ MotionState::resetTransform()
 
 
 void
-MotionState::registerTripleBuffer( osgbBullet::TripleBuffer* tb )
+MotionState::registerTripleBuffer( osgbDynamics::TripleBuffer* tb )
 {
     _tb = tb;
     _tbIndex = tb->reserve( sizeof( btScalar ) * 16 );
@@ -240,7 +242,7 @@ MotionState::updateTripleBuffer( const char* addr )
 }
 
 bool
-osgbBullet::TripleBufferMotionStateUpdate( osgbBullet::MotionStateList& msl, osgbBullet::TripleBuffer* tb )
+osgbDynamics::TripleBufferMotionStateUpdate( osgbDynamics::MotionStateList& msl, osgbDynamics::TripleBuffer* tb )
 {
     const char* addr = tb->beginRead();
     if( addr == NULL )
@@ -255,3 +257,6 @@ osgbBullet::TripleBufferMotionStateUpdate( osgbBullet::MotionStateList& msl, osg
     return( true );
 }
 
+
+// osgbDynamics
+}

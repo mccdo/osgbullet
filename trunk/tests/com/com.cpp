@@ -4,10 +4,10 @@
 //
 
 
-#include <osgbBullet/MotionState.h>
+#include <osgbDynamics/MotionState.h>
 #include <osgbCollision/CollisionShapes.h>
-#include <osgbBullet/RefRigidBody.h>
-#include <osgbBullet/RigidBodyAnimation.h>
+#include <osgbDynamics/RefRigidBody.h>
+#include <osgbDynamics/RigidBodyAnimation.h>
 #include <btBulletDynamicsCommon.h>
 
 #include <osgViewer/Viewer>
@@ -130,7 +130,7 @@ btRigidBody * createBTBox( osg::MatrixTransform * box,
 {
     btCollisionShape * collision = osgbCollision::btBoxCollisionShapeFromOSG( box );
 
-    osgbBullet::MotionState * motion = new osgbBullet::MotionState();
+    osgbDynamics::MotionState * motion = new osgbDynamics::MotionState();
     motion->setTransform( box );
     motion->setParentTransform( osg::Matrix::translate( center ) );
 
@@ -166,7 +166,7 @@ void createTarget( osg::Group * root,
     root->addChild( target );
 
 /*  OSGBBULLET CODE */
-    osgbBullet::MotionState * motion = new osgbBullet::MotionState();
+    osgbDynamics::MotionState * motion = new osgbDynamics::MotionState();
     motion->setTransform( target );
     motion->setCenterOfMass( osg::Vec3( 1, 1, 1 ) );
 
@@ -217,11 +217,11 @@ int main( int argc,
     dynamicsWorld->addRigidBody( boxBody );
 
     //   Animated box, osgbBullet Code
-    osgbBullet::RefRigidBody* boxRigid = new osgbBullet::RefRigidBody();
+    osgbDynamics::RefRigidBody* boxRigid = new osgbDynamics::RefRigidBody();
     boxRigid->setRigidBody( boxBody );
     box->setUserData( boxRigid );
 
-    osgbBullet::RigidBodyAnimation * rba = new osgbBullet::RigidBodyAnimation;
+    osgbDynamics::RigidBodyAnimation * rba = new osgbDynamics::RigidBodyAnimation;
     apc->setNestedCallback( rba );
 
 

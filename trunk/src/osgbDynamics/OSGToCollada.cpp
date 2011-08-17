@@ -18,13 +18,13 @@
  *
  *************** <auto-copyright.pl END do not edit this line> ***************/
 
-#include "osgbBullet/OSGToCollada.h"
-#include "osgbBullet/CreationRecord.h"
+#include <osgbDynamics/OSGToCollada.h>
+#include <osgbDynamics/CreationRecord.h>
 
 #include <btBulletDynamicsCommon.h>
 
-#include "osgbBullet/MotionState.h"
-#include "osgbCollision/Utils.h"
+#include <osgbDynamics/MotionState.h>
+#include <osgbCollision/Utils.h>
 
 #include <osg/NodeVisitor>
 #include <osg/Geode>
@@ -36,8 +36,9 @@
 #include <osg/Version>
 #include <osg/io_utils>
 
-using namespace osgbBullet;
 
+namespace osgbDynamics
+{
 
 
 class ProcessSceneGraph : public osg::NodeVisitor
@@ -506,11 +507,11 @@ OSGToCollada::createRigidBody( btScalar mass,
 	if (isDynamic)
 		shape->calculateLocalInertia( mass, localInertia );
 
-    osgbBullet::MotionState* motion( NULL );
+    osgbDynamics::MotionState* motion( NULL );
     osg::Transform* trans = dynamic_cast< osg::Transform* >( node );
     if( trans != NULL )
     {
-        motion = new osgbBullet::MotionState();
+        motion = new osgbDynamics::MotionState();
         motion->setTransform( trans );
         motion->setCenterOfMass( centerOfMass );
         // TBD. motion->setScale?
@@ -521,3 +522,6 @@ OSGToCollada::createRigidBody( btScalar mass,
 	return( new btRigidBody( rbInfo ) );
 }
 
+
+// osgbDynamics
+}
