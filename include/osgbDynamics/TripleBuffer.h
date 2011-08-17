@@ -1,14 +1,14 @@
 
-#ifndef __OSGBBULLET_TRIPLEBUFFER_H__
-#define __OSGBBULLET_TRIPLEBUFFER_H__ 1
+#ifndef __OSGBDYNAMICS_TRIPLEBUFFER_H__
+#define __OSGBDYNAMICS_TRIPLEBUFFER_H__ 1
 
-#include <osgbBullet/Export.h>
+#include <osgbDynamics/Export.h>
 #include <OpenThreads/Mutex>
 #include <iostream>
 #include <stdlib.h>
 
 
-namespace osgbBullet {
+namespace osgbDynamics {
 
 
 // A generic triple buffer mechanism. Allows the read
@@ -29,7 +29,7 @@ namespace osgbBullet {
 // the rendering update thread calls beginRead, uses the data to update
 // matrices in the scene graph, then calls endRead.
 // 
-class OSGBBULLET_EXPORT TripleBuffer
+class OSGBDYNAMICS_EXPORT TripleBuffer
 {
 public:
     TripleBuffer( unsigned int initialSize=8192 );
@@ -71,8 +71,8 @@ protected:
 };
 
 
-// namespace osgbBullet
+// osgbDynamics
 }
 
-// __OSGBBULLET_TRIPLEBUFFER_H__
+// __OSGBDYNAMICS_TRIPLEBUFFER_H__
 #endif

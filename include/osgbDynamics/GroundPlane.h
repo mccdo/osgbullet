@@ -18,33 +18,33 @@
  *
  *************** <auto-copyright.pl END do not edit this line> ***************/
 
-#ifndef OSGBBULLET_RIGIDBODYANIMATION
-#define OSGBBULLET_RIGIDBODYANIMATION
+#ifndef __OSGBULLET_GROUND_PLANE_H__
+#define __OSGBULLET_GROUND_PLANE_H__ 1
 
-#include <osg/NodeCallback>
 
-#include <osgbBullet/Export.h>
+#include <osgbDynamics/Export.h>
 
-namespace osgbBullet {
+#include <btBulletDynamicsCommon.h>
+#include <btBulletCollisionCommon.h>
 
-/** \brief An update callback to reposition a btRigidBody in the Bullet
-simulation.
+#include <osg/Vec4>
 
-This callback repositions an object within the Bullet simulation. Attach it as
-an update callback to an OSG MatrixTransform. The MatrixTransform must have an
-osgbBullet::RefRigidBody attached as UserData.
-*/
-class OSGBBULLET_EXPORT RigidBodyAnimation : public osg::NodeCallback
+
+namespace osg {
+    class Node;
+    class Geode;
+}
+
+namespace osgbDynamics
 {
-public:
-    RigidBodyAnimation( void );
 
-    virtual void operator()( osg::Node* node, osg::NodeVisitor* nv );
 
-protected:
-    virtual ~RigidBodyAnimation() { }
-};
+OSGBDYNAMICS_EXPORT osg::Node* generateGroundPlane( const osg::Vec4& plane, btDynamicsWorld* bulletWorld, btRigidBody** rb=NULL );
 
-} // end namespace osgbBullet
 
-#endif // OSGBBULLET_RIGIDBODYANIMATION
+// osgbDynamics
+}
+
+
+// __OSGBULLET_GROUND_PLANE_H__
+#endif

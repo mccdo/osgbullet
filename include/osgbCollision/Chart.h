@@ -87,7 +87,7 @@ protected:
 };
 
 
-// osgbBullet
+// osgbDynamics
 }
 
 

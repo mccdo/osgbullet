@@ -20,8 +20,8 @@
 
 #include <osg/MatrixTransform>
 
-#include <osgbBullet/RigidBodyAnimation.h>
-#include <osgbBullet/RefRigidBody.h>
+#include <osgbDynamics/RigidBodyAnimation.h>
+#include <osgbDynamics/RefRigidBody.h>
 #include <osgbCollision/Utils.h>
 
 #include <osg/io_utils>
@@ -30,7 +30,10 @@
 
 #include <btBulletCollisionCommon.h>
 
-using namespace osgbBullet;
+
+namespace osgbDynamics
+{
+
 
 RigidBodyAnimation::RigidBodyAnimation( void )
 {
@@ -61,4 +64,8 @@ void RigidBodyAnimation::operator()( osg::Node* node, osg::NodeVisitor* nv )
         osgbCollision::asBtTransform( mat ) );
 
     traverse( node, nv );
+}
+
+
+// osgbDynamics
 }

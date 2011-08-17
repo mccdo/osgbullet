@@ -29,10 +29,10 @@
 #include <btBulletDynamicsCommon.h>
 
 #include <osgbCollision/Version.h>
-#include <osgbBullet/MotionState.h>
+#include <osgbDynamics/MotionState.h>
 #include <osgbCollision/CollisionShapes.h>
-#include <osgbBullet/RefRigidBody.h>
-#include <osgbBullet/OSGToCollada.h>
+#include <osgbDynamics/RefRigidBody.h>
+#include <osgbDynamics/OSGToCollada.h>
 #include <osgbCollision/Utils.h>
 
 #include <osgwTools/AbsoluteModelTransform.h>
@@ -81,7 +81,7 @@ createGround( float w, float h, const osg::Vec3& center )
 {
     osg::Transform* ground = createOSGBox( osg::Vec3( w, h, .01 ) );
 
-    osgbBullet::OSGToCollada converter;
+    osgbDynamics::OSGToCollada converter;
     converter.setSceneGraph( ground );
     converter.setShapeType( BOX_SHAPE_PROXYTYPE );
     converter.setMass( 0.f );
@@ -92,12 +92,12 @@ createGround( float w, float h, const osg::Vec3& center )
     // OSGToCollada flattens transformation to transform all
     // verts, but that doesn't work with ShapeDrawables, so we must
     // transform the box explicitly.
-    osgbBullet::MotionState* motion = dynamic_cast< osgbBullet::MotionState* >( body->getMotionState() );
+    osgbDynamics::MotionState* motion = dynamic_cast< osgbDynamics::MotionState* >( body->getMotionState() );
     osg::Matrix m( osg::Matrix::translate( center ) );
     motion->setParentTransform( m );
     body->setWorldTransform( osgbCollision::asBtTransform( m ) );
 
-    ground->setUserData( new osgbBullet::RefRigidBody( body ) );
+    ground->setUserData( new osgbDynamics::RefRigidBody( body ) );
 
     return ground;
 }
@@ -316,7 +316,7 @@ int main( int argc,
     osg::notify( osg::INFO ) << "osgbpp: Loaded model(s)." << std::endl;
 
 
-    osgbBullet::OSGToCollada converter;
+    osgbDynamics::OSGToCollada converter;
     if( comSpecified )
         converter.setCenterOfMass( com );
     converter.setSceneGraph( model.get() );
@@ -348,7 +348,7 @@ int main( int argc,
     osg::notify( osg::INFO ) << "osgbpp: Reloaded model(s) for display." << std::endl;
 
     btRigidBody* rb = converter.getRigidBody();
-    osgbBullet::MotionState* motion = new osgbBullet::MotionState;
+    osgbDynamics::MotionState* motion = new osgbDynamics::MotionState;
     motion->setTransform( loadedModel.get() );
     osg::BoundingSphere bs = loadedModel->getBound();
 
@@ -378,7 +378,7 @@ int main( int argc,
     cen[ 2 ] -= dim;
     osg::ref_ptr< osg::Node > ground = createGround( dim, dim, cen );
     root->addChild( ground.get() );
-    osgbBullet::RefRigidBody* body = dynamic_cast< osgbBullet::RefRigidBody* >( ground->getUserData() );
+    osgbDynamics::RefRigidBody* body = dynamic_cast< osgbDynamics::RefRigidBody* >( ground->getUserData() );
     dynamicsWorld->addRigidBody( body->getRigidBody() );
 
 

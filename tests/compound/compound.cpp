@@ -4,10 +4,10 @@
 //
 
 
-#include <osgbBullet/MotionState.h>
+#include <osgbDynamics/MotionState.h>
 #include <osgbCollision/CollisionShapes.h>
-#include <osgbBullet/RefRigidBody.h>
-#include <osgbBullet/RigidBodyAnimation.h>
+#include <osgbDynamics/RefRigidBody.h>
+#include <osgbDynamics/RigidBodyAnimation.h>
 #include <btBulletDynamicsCommon.h>
 
 #include <osgViewer/Viewer>
@@ -155,7 +155,7 @@ btRigidBody * createBTBox( osg::MatrixTransform * box,
 {
     btCollisionShape * collision = osgbCollision::btBoxCollisionShapeFromOSG( box );
 
-    osgbBullet::MotionState * motion = new osgbBullet::MotionState();
+    osgbDynamics::MotionState * motion = new osgbDynamics::MotionState();
     motion->setTransform( box );
     motion->setParentTransform( osg::Matrix::translate( center ) );
 
@@ -172,7 +172,7 @@ btRigidBody* createBTCompound( osg::MatrixTransform* obj,
 {
     btCollisionShape* collision = osgbCollision::btTriMeshCollisionShapeFromOSG( obj );
 
-    osgbBullet::MotionState * motion = new osgbBullet::MotionState();
+    osgbDynamics::MotionState * motion = new osgbDynamics::MotionState();
     motion->setTransform( obj );
     motion->setParentTransform( osg::Matrix::translate( center ) );
 
@@ -217,7 +217,7 @@ void createTarget( osg::Group * root,
     root->addChild( target );
 
 /*  OSGBBULLET CODE */
-    osgbBullet::MotionState * motion = new osgbBullet::MotionState();
+    osgbDynamics::MotionState * motion = new osgbDynamics::MotionState();
     motion->setTransform( target );
     motion->setCenterOfMass( osg::Vec3( 1, 1, 1 ) );
 
@@ -269,11 +269,11 @@ int main( int argc,
     dynamicsWorld->addRigidBody( animBody );
 
     //   Add osgbBullet code to link OSG and Bullet representations.
-    osgbBullet::RefRigidBody* animRB = new osgbBullet::RefRigidBody();
+    osgbDynamics::RefRigidBody* animRB = new osgbDynamics::RefRigidBody();
     animRB->setRigidBody( animBody );
     animObj->setUserData( animRB );
 
-    osgbBullet::RigidBodyAnimation * rba = new osgbBullet::RigidBodyAnimation;
+    osgbDynamics::RigidBodyAnimation * rba = new osgbDynamics::RigidBodyAnimation;
     apc->setNestedCallback( rba );
 
 

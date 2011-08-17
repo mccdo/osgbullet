@@ -18,10 +18,10 @@
  *
  *************** <auto-copyright.pl END do not edit this line> ***************/
 
-#include <osgbBullet/RefRigidBody.h>
+#include <osgbDynamics/RefRigidBody.h>
 
 
-namespace osgbBullet {
+namespace osgbDynamics {
 
 RefRigidBody::RefRigidBody( void )
 {
@@ -36,5 +36,5 @@ RefRigidBody::~RefRigidBody( void )
 {
 }
 
-// osgbBullet
+// osgbDynamics
 }

@@ -1,1 +1,1 @@
-ADD_SUBDIRECTORY( osgbBullet )
+ADD_SUBDIRECTORY( osgdb_osgbDynamics )

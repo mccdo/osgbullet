@@ -18,10 +18,10 @@
  *
  *************** <auto-copyright.pl END do not edit this line> ***************/
 
-#ifndef __OSGBBULLET_PHYSICSTHREAD_H__
-#define __OSGBBULLET_PHYSICSTHREAD_H__ 1
+#ifndef __OSGBDYNAMICS_PHYSICSTHREAD_H__
+#define __OSGBDYNAMICS_PHYSICSTHREAD_H__ 1
 
-#include <osgbBullet/Export.h>
+#include <osgbDynamics/Export.h>
 #include <OpenThreads/Thread>
 #include <OpenThreads/Mutex>
 #include <OpenThreads/Barrier>
@@ -35,17 +35,17 @@
 // Forward declaraction
 class btDynamicsWorld;
 
-namespace osgbBullet {
+namespace osgbDynamics {
 
 
 // Forward declaraction
 class TripleBuffer;
 
 
-class OSGBBULLET_EXPORT PhysicsThread : public OpenThreads::Thread
+class OSGBDYNAMICS_EXPORT PhysicsThread : public OpenThreads::Thread
 {
 public:
-    PhysicsThread( btDynamicsWorld* bw, osgbBullet::TripleBuffer* tb=NULL );
+    PhysicsThread( btDynamicsWorld* bw, osgbDynamics::TripleBuffer* tb=NULL );
     ~PhysicsThread();
 
     // Specify the elapsed time parameter, used in call to stepSimulation.
@@ -91,7 +91,7 @@ protected:
     int _pauseCount;
     osg::Timer_t _lastTime;
 
-    osgbBullet::TripleBuffer* _tb;
+    osgbDynamics::TripleBuffer* _tb;
 
     mutable OpenThreads::Mutex _stopMutex;
     mutable OpenThreads::Mutex _pauseMutex;
@@ -99,8 +99,8 @@ protected:
 };
 
 
-// namespace osgbBullet
+// osgbDynamics
 }
 
-// __OSGBBULLET_PHYSICSTHREAD_H__
+// __OSGBDYNAMICS_PHYSICSTHREAD_H__
 #endif

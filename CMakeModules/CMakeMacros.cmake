@@ -1,8 +1,15 @@
-IF(WIN32)
-    SET(CMAKE_DEBUG_POSTFIX d)
-ENDIF(WIN32)
+if( WIN32 )
+    set( CMAKE_DEBUG_POSTFIX d )
+endif()
 
-MACRO( ADD_OSGPLUGIN TRGTNAME )
+macro( link_internal TRGTNAME )
+    foreach( LINKLIB ${ARGN} )
+        target_link_libraries( ${TRGTNAME} optimized "${LINKLIB}" debug "${RELATIVE_LIB_PATH}${LINKLIB}${CMAKE_DEBUG_POSTFIX}" )
+    endforeach()
+endmacro()
+
+
+macro( _osgBulletPlugin TRGTNAME )
     if( WIN32 )
         set( RELATIVE_LIB_PATH ../../../lib/ )
     endif()
@@ -11,7 +18,7 @@ MACRO( ADD_OSGPLUGIN TRGTNAME )
         add_library( ${TRGTNAME} MODULE ${ARGN} )
 
         link_internal( ${TRGTNAME}
-            osgbBullet
+            osgbDynamics
             osgbCollision
         )
         target_link_libraries( ${TRGTNAME}
@@ -22,17 +29,17 @@ MACRO( ADD_OSGPLUGIN TRGTNAME )
         add_library( ${TRGTNAME} STATIC ${ARGN} )
     endif()
 
-    IF( WIN32 )
-        SET_TARGET_PROPERTIES( ${TRGTNAME} PROPERTIES DEBUG_POSTFIX d )
-    ENDIF( WIN32 )
-    SET_TARGET_PROPERTIES( ${TRGTNAME} PROPERTIES PREFIX "" )
-    SET_TARGET_PROPERTIES( ${TRGTNAME} PROPERTIES PROJECT_LABEL "Plugin ${TRGTNAME}" )
-ENDMACRO( ADD_OSGPLUGIN TRGTNAME )
+    if( WIN32 )
+        set_target_properties( ${TRGTNAME} PROPERTIES DEBUG_POSTFIX d )
+    endif()
+    set_target_properties( ${TRGTNAME} PROPERTIES PREFIX "" )
+    set_target_properties( ${TRGTNAME} PROPERTIES PROJECT_LABEL "Plugin ${TRGTNAME}" )
+endmacro()
 
 
 macro( _osgBulletMakeDynamicsExe _exeName )
     set( _osgBulletLibs
-        "osgbBullet;osgbCollision"
+        "osgbDynamics;osgbCollision"
     )
     set( _bulletLibs
         "${BULLET_LIBRARIES}"
@@ -68,20 +75,13 @@ macro( _osgBulletMakeExeInternal _exeName _osgBulletLibs _bulletLibs )
     if( ${CATEGORY} STREQUAL "App" )
         install(
             TARGETS ${_exeName}
-            RUNTIME DESTINATION bin COMPONENT libosgbbullet
+            RUNTIME DESTINATION bin COMPONENT osgbullet
         )
     else()
         install(
             TARGETS ${_exeName}
-            RUNTIME DESTINATION share/${CMAKE_PROJECT_NAME}/bin COMPONENT libosgbbullet
+            RUNTIME DESTINATION share/${CMAKE_PROJECT_NAME}/bin COMPONENT osgbullet
         )
     endif()
     set_target_properties( ${_exeName} PROPERTIES PROJECT_LABEL "${CATEGORY} ${_exeName}" )
-endmacro()
-
-
-macro( link_internal TRGTNAME )
-    foreach( LINKLIB ${ARGN} )
-        target_link_libraries( ${TRGTNAME} optimized "${LINKLIB}" debug "${RELATIVE_LIB_PATH}${LINKLIB}${CMAKE_DEBUG_POSTFIX}" )
-    endforeach()
 endmacro()

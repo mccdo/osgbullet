@@ -18,26 +18,27 @@
  *
  *************** <auto-copyright.pl END do not edit this line> ***************/
 
-#ifndef __OSGBBULLET_MOTIONSTATE_H__
-#define __OSGBBULLET_MOTIONSTATE_H__
+#ifndef __OSGBDYNAMICS_MOTIONSTATE_H__
+#define __OSGBDYNAMICS_MOTIONSTATE_H__
 
 #include <osg/MatrixTransform>
 
 #include <osgwTools/AbsoluteModelTransform.h>
 
 #include <btBulletCollisionCommon.h>
-#include <osgbBullet/Export.h>
+#include <osgbDynamics/Export.h>
 
 #include <vector>
 
 
-namespace osgbBullet {
+namespace osgbDynamics
+{
 
 
 
 // Derive a struct from MotionStateCallback and add it to the MotionState class.
 // The operator() method will get called whenever Buller sets the world transform.
-struct OSGBBULLET_EXPORT MotionStateCallback
+struct OSGBDYNAMICS_EXPORT MotionStateCallback
 {
     MotionStateCallback() {}
     virtual ~MotionStateCallback() {}
@@ -66,7 +67,7 @@ Typical usage:
 \li Call setCenterOfMass() to specify the xyz point corresponding
    to the origin of the Bullet collision shape used by the rigid body.
 */
-class OSGBBULLET_EXPORT MotionState : public btMotionState
+class OSGBDYNAMICS_EXPORT MotionState : public btMotionState
 {
 public:
     MotionState( const osg::Matrix& parentTransform = osg::Matrix::identity(),
@@ -122,7 +123,7 @@ public:
     // objects, which enables multithreaded physics simulation.
     //
     // Call to initially register the MotionState with the TripleBuffer.
-    void registerTripleBuffer( osgbBullet::TripleBuffer* tb );
+    void registerTripleBuffer( osgbDynamics::TripleBuffer* tb );
     //
     // Call to get the latest world transform value from the TripleBuffer
     // and push it out to the OSG Transform.
@@ -161,11 +162,14 @@ private:
 // the app should call TripleBufferMotionStateUpdate to update all MotionState
 // objects with data from the TripleBuffer (and push those matrices out to
 // the OSG scene graph Transform nodes).
-typedef std::vector< osgbBullet::MotionState* > MotionStateList;
+typedef std::vector< osgbDynamics::MotionState* > MotionStateList;
 
-bool OSGBBULLET_EXPORT TripleBufferMotionStateUpdate( osgbBullet::MotionStateList& msl, osgbBullet::TripleBuffer* tb );
+bool OSGBDYNAMICS_EXPORT TripleBufferMotionStateUpdate( osgbDynamics::MotionStateList& msl, osgbDynamics::TripleBuffer* tb );
 
 
-} // namespace osgbBullet
+// osgbDynamics
+}
 
-#endif // __OSGBBULLET_MOTIONSTATE_H__
+
+// __OSGBDYNAMICS_MOTIONSTATE_H__
+#endif

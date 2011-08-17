@@ -18,7 +18,7 @@
  *
  *************** <auto-copyright.pl END do not edit this line> ***************/
 
-#include <osgbBullet/TripleBuffer.h>
+#include <osgbDynamics/TripleBuffer.h>
 #include <OpenThreads/Thread>
 #include <osg/Timer>
 #include <iostream>
@@ -27,7 +27,7 @@
 class WriteThread : public OpenThreads::Thread
 {
 public:
-    WriteThread( osgbBullet::TripleBuffer* tb )
+    WriteThread( osgbDynamics::TripleBuffer* tb )
       : _tb( tb ),
         _count( 0 )
     {}
@@ -45,14 +45,14 @@ public:
     }
 
 protected:
-    osgbBullet::TripleBuffer* _tb;
+    osgbDynamics::TripleBuffer* _tb;
     unsigned int _count;
 };
 
 class ReadThread : public OpenThreads::Thread
 {
 public:
-    ReadThread( osgbBullet::TripleBuffer* tb )
+    ReadThread( osgbDynamics::TripleBuffer* tb )
       : _tb( tb )
     {}
 
@@ -71,7 +71,7 @@ public:
     }
 
 protected:
-    osgbBullet::TripleBuffer* _tb;
+    osgbDynamics::TripleBuffer* _tb;
     osg::Timer _timer;
 };
 
@@ -80,7 +80,7 @@ protected:
 int
 main( int argc, char * argv[] )
 {
-    osgbBullet::TripleBuffer tb;
+    osgbDynamics::TripleBuffer tb;
     WriteThread wt( &tb );
     ReadThread rt( &tb );
 

@@ -1,20 +1,20 @@
 
-#ifndef __OSGBBULLET_RIGIDBODY_H__
-#define __OSGBBULLET_RIGIDBODY_H__
+#ifndef __OSGBDYNAMICS_RIGIDBODY_H__
+#define __OSGBDYNAMICS_RIGIDBODY_H__
 
 #include <osg/Referenced>
 #include <BulletDynamics/Dynamics/btRigidBody.h>
 
-#include <osgbBullet/Export.h>
+#include <osgbDynamics/Export.h>
 
-namespace osgbBullet {
+namespace osgbDynamics {
 
 /** \brief A reference counted btRigidBody.
 
 RefRigidBody allows btRigidBody to be added as UserData to an OSG Node.
 \note Does \b not delete the rigid body in the destructor (could still be in use by Bullet).
 */
-class OSGBBULLET_EXPORT RefRigidBody : public osg::Referenced
+class OSGBDYNAMICS_EXPORT RefRigidBody : public osg::Referenced
 {
 public:
     RefRigidBody( void );
@@ -42,4 +42,4 @@ protected:
 
 } /* namespace */
 
-#endif // __OSGBBULLET_RIGIDBODY_H__
+#endif // __OSGBDYNAMICS_RIGIDBODY_H__

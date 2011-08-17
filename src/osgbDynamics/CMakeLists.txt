@@ -1,8 +1,4 @@
-set( LIB_NAME osgbBullet )
-
-if( BUILD_SHARED_LIBS )
-    add_definitions( -DOSGBBULLET_LIBRARY )
-endif()
+set( LIB_NAME osgbDynamics )
 
 
 set( HEADER_PATH ${PROJECT_SOURCE_DIR}/include/${LIB_NAME} )
@@ -45,7 +41,7 @@ if( BUILD_SHARED_LIBS )
     if( WIN32 )
         set( RELATIVE_LIB_PATH ../../lib/ )
     endif()
-    # osgbBullet depends on osgbCollision
+    # osgbDynamics depends on osgbCollision
     target_link_libraries( ${LIB_NAME}
         optimized "osgbCollision"
         debug "${RELATIVE_LIB_PATH}osgbCollision${CMAKE_DEBUG_POSTFIX}"

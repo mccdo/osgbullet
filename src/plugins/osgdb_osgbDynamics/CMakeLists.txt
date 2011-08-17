@@ -1,6 +1,6 @@
-SET( LIB_NAME osgdb_osgbBullet )
+set( LIB_NAME osgdb_osgbDynamics )
 
-ADD_OSGPLUGIN( ${LIB_NAME}
+_osgBulletPlugin( ${LIB_NAME}
     dotosgCreationRecord.cpp
     dotosgPhysicsData.cpp
 )

@@ -18,30 +18,22 @@
  *
  *************** <auto-copyright.pl END do not edit this line> ***************/
 
-#ifndef OSGBBULLET_EXPORT_
-#define OSGBBULLET_EXPORT_    1
+#ifndef __OSGBDYNAMICS_EXPORT_H__
+#define __OSGBDYNAMICS_EXPORT_H__ 1
 
-#if defined ( WIN32 ) && !( defined ( __CYGWIN__ ) || defined ( __MINGW32__ ) )
- //#pragma warning( disable : 4244 )
- //#pragma warning( disable : 4251 )
- //#pragma warning( disable : 4267 )
- //#pragma warning( disable : 4275 )
- //#pragma warning( disable : 4290 )
- //#pragma warning( disable : 4786 )
- //#pragma warning( disable : 4305 )
- //#pragma warning( disable : 4996 )
-#endif
 
 #if defined ( _MSC_VER ) || defined ( __CYGWIN__ ) || defined ( __MINGW32__ ) || defined ( __BCPLUSPLUS__ ) || defined ( __MWERKS__ )
-    #if defined ( OSGBBULLET_STATIC )
-        #define OSGBBULLET_EXPORT
-    #elif defined ( OSGBBULLET_LIBRARY )
-        #define OSGBBULLET_EXPORT    __declspec( dllexport )
+    #if defined ( OSGBULLET_STATIC )
+        #define OSGBDYNAMICS_EXPORT
+    #elif defined ( OSGBULLET_SHARED )
+        #define OSGBDYNAMICS_EXPORT    __declspec( dllexport )
     #else
-        #define OSGBBULLET_EXPORT    __declspec( dllimport )
+        #define OSGBDYNAMICS_EXPORT    __declspec( dllimport )
     #endif
 #else
-    #define OSGBBULLET_EXPORT
+    #define OSGBDYNAMICS_EXPORT
 #endif
 
+
+// __OSGBDYNAMICS_EXPORT_H__
 #endif

@@ -2,7 +2,7 @@
 cmake_minimum_required( VERSION 2.8 )
 project( osgBullet )
 
-set( OSGBULLET_VERSION 1.1.80
+set( OSGBULLET_VERSION 1.1.80 )
 
 
 set( CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/CMakeModules;${CMAKE_MODULE_PATH}" )
@@ -57,8 +57,10 @@ if( BULLET_DYNAMICS_FOUND )
 endif()
 
 option( BUILD_SHARED_LIBS "Set to ON to build osgBullet for dynamic linking. Use OFF for static." ON )
-if( NOT BUILD_SHARED_LIBS )
-    add_definitions( -DOSGBBULLET_STATIC )
+if( BUILD_SHARED_LIBS )
+    add_definitions( -DOSGBULLET_SHARED )
+else()
+    add_definitions( -DOSGBULLET_STATIC )
 endif()
 
 
@@ -90,7 +92,7 @@ endif()
 
 
 ADD_SUBDIRECTORY( src/osgbCollision )
-ADD_SUBDIRECTORY( src/osgbBullet )
+ADD_SUBDIRECTORY( src/osgbDynamics )
 ADD_SUBDIRECTORY( src/plugins )
 
 

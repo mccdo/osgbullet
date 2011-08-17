@@ -24,7 +24,7 @@
 #include <osg/ShapeDrawable>
 #include <osg/Geode>
 
-#include <osgbBullet/MotionState.h>
+#include <osgbDynamics/MotionState.h>
 #include <osgbCollision/CollisionShapes.h>
 #include <osgbCollision/Utils.h>
 
@@ -49,7 +49,7 @@ makeDie( btDynamicsWorld* bw )
     root->addChild( node );
 
     btCollisionShape* cs = osgbCollision::btBoxCollisionShapeFromOSG( node );
-    osgbBullet::MotionState* motion = new osgbBullet::MotionState();
+    osgbDynamics::MotionState* motion = new osgbDynamics::MotionState();
     motion->setTransform( root );
     btScalar mass( 1. );
     btVector3 inertia( 0, 0, 0 );
@@ -86,7 +86,7 @@ initPhysics()
 class ShakeManipulator : public osgGA::GUIEventHandler
 {
 public:
-    ShakeManipulator( osgbBullet::MotionState* motion )
+    ShakeManipulator( osgbDynamics::MotionState* motion )
       : _motion( motion )
     {}
 
@@ -151,7 +151,7 @@ public:
     }
 
 protected:
-    osgbBullet::MotionState* _motion;
+    osgbDynamics::MotionState* _motion;
     float _lastX, _lastY;
 };
 
@@ -247,7 +247,7 @@ main( int argc,
     }
     /* END: Create environment boxes */
 
-    osgbBullet::MotionState * shakeMotion = new osgbBullet::MotionState();
+    osgbDynamics::MotionState * shakeMotion = new osgbDynamics::MotionState();
     shakeMotion->setTransform( shakeBox );
     btScalar mass( 0.0 );
     btVector3 inertia( 0, 0, 0 );

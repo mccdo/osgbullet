@@ -18,7 +18,7 @@
  *
  *************** <auto-copyright.pl END do not edit this line> ***************/
 
-#include "osgbBullet/CreationRecord.h"
+#include <osgbDynamics/CreationRecord.h>
 
 #include <osgbCollision/CollisionShapes.h>
 
@@ -30,7 +30,8 @@
 #include <string>
 
 
-using namespace osgbBullet;
+namespace osgbDynamics
+{
 
 
 CreationRecord::CreationRecord()
@@ -77,3 +78,5 @@ CreationRecord::CreationRecord( const CreationRecord& rhs, osg::CopyOp copyop )
 }
 
 
+// osgbDynamics
+}

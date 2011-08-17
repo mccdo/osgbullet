@@ -18,8 +18,8 @@
  *
  *************** <auto-copyright.pl END do not edit this line> ***************/
 
-#include <osgbBullet/PhysicsThread.h>
-#include <osgbBullet/TripleBuffer.h>
+#include <osgbDynamics/PhysicsThread.h>
+#include <osgbDynamics/TripleBuffer.h>
 #include <OpenThreads/Thread>
 #include <OpenThreads/Mutex>
 #include <OpenThreads/ScopedLock>
@@ -32,10 +32,11 @@
 #include <string>
 
 
-using namespace osgbBullet;
+namespace osgbDynamics
+{
 
 
-PhysicsThread::PhysicsThread( btDynamicsWorld* bw, osgbBullet::TripleBuffer* tb )
+PhysicsThread::PhysicsThread( btDynamicsWorld* bw, osgbDynamics::TripleBuffer* tb )
   : _timeStep( btScalar( 0.0 ) ),
     _bw( bw ),
     _stopped( true ),
@@ -173,4 +174,8 @@ PhysicsThread::isPaused() const
 {
     OpenThreads::ScopedLock< OpenThreads::Mutex > lock( _pauseMutex );
     return( _pauseGate.numThreadsCurrentlyBlocked() > 0 );
+}
+
+
+// osgbDynamics
 }

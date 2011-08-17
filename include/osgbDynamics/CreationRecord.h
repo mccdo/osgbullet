@@ -18,11 +18,11 @@
  *
  *************** <auto-copyright.pl END do not edit this line> ***************/
 
-#ifndef __OSGBBULLET_CREATION_RECORD_H__
-#define __OSGBBULLET_CREATION_RECORD_H__ 1
+#ifndef __OSGBDYNAMICS_CREATION_RECORD_H__
+#define __OSGBDYNAMICS_CREATION_RECORD_H__ 1
 
 
-#include <osgbBullet/Export.h>
+#include <osgbDynamics/Export.h>
 #include <osgbCollision/CollisionShapes.h>
 
 #include <osg/Object>
@@ -34,7 +34,8 @@
 
 
 
-namespace osgbBullet {
+namespace osgbDynamics
+{
 
 
 
@@ -43,7 +44,7 @@ namespace osgbBullet {
 // and then get this record from it, and store it as UserData on
 // the rigid body subgraph root node to facilitate saving and
 // restoring physics state.
-struct OSGBBULLET_EXPORT CreationRecord : public osg::Object
+struct OSGBDYNAMICS_EXPORT CreationRecord : public osg::Object
 {
     CreationRecord();
     CreationRecord( const CreationRecord& rhs, osg::CopyOp copyop=osg::CopyOp::SHALLOW_COPY );
@@ -77,8 +78,8 @@ struct OSGBBULLET_EXPORT CreationRecord : public osg::Object
 };
 
 
-// namespace osgbBullet
+// osgbDynamics
 }
 
-// __OSGBBULLET_CREATION_RECORD_H__
+// __OSGBDYNAMICS_CREATION_RECORD_H__
 #endif

@@ -18,24 +18,22 @@
  *
  *************** <auto-copyright.pl END do not edit this line> ***************/
 
-#ifndef __OSGBBULLET_PHYSICS_STATE_H__
-#define __OSGBBULLET_PHYSICS_STATE_H__ 1
+#ifndef __OSGBDYNAMICS_PHYSICS_STATE_H__
+#define __OSGBDYNAMICS_PHYSICS_STATE_H__ 1
 
+#include <osgbDynamics/Export.h>
+#include <osgbDynamics/CreationRecord.h>
+#include <osgwTools/RefID.h>
 #include <osg/Object>
 #include <osg/Group>
-
-#include "osgbBullet/Export.h"
-#include "osgbBullet/CreationRecord.h"
-
-#include "osgwTools/RefID.h"
 
 #include <btBulletDynamicsCommon.h>
 
 
-namespace osgbBullet {
+namespace osgbDynamics {
 
 
-class OSGBBULLET_EXPORT PhysicsData : public osg::Object
+class OSGBDYNAMICS_EXPORT PhysicsData : public osg::Object
 {
 public:
     PhysicsData();
@@ -46,7 +44,7 @@ public:
     META_Object(osgbBullet,PhysicsData);
 
     std::string _fileName;
-    osg::ref_ptr< osgbBullet::CreationRecord > _cr;
+    osg::ref_ptr< osgbDynamics::CreationRecord > _cr;
     btRigidBody* _body;
 
     // For save / restore use only
@@ -66,11 +64,11 @@ protected:
     unsigned int _version;
 };
 
-class OSGBBULLET_EXPORT PhysicsState : public osg::Object
+class OSGBDYNAMICS_EXPORT PhysicsState : public osg::Object
 {
 public:
     PhysicsState();
-    PhysicsState( const osgbBullet::PhysicsState& rhs, osg::CopyOp copyop=osg::CopyOp::SHALLOW_COPY );
+    PhysicsState( const osgbDynamics::PhysicsState& rhs, osg::CopyOp copyop=osg::CopyOp::SHALLOW_COPY );
     ~PhysicsState();
 
     META_Object(osgbBullet,PhysicsState);
@@ -82,7 +80,7 @@ public:
     const DataMap& getDataMap() const;
 
     void addPhysicsData( const osgwTools::RefID* id, const btRigidBody* body );
-    void addPhysicsData( const osgwTools::RefID* id, const osgbBullet::CreationRecord* cr );
+    void addPhysicsData( const osgwTools::RefID* id, const osgbDynamics::CreationRecord* cr );
     void addPhysicsData( const osgwTools::RefID* id, const std::string& fileName );
 
     //void addPhysicsData( const osgwTools::RefID* id, const btConstraint& constraint );
@@ -91,8 +89,9 @@ protected:
     DataMap _dataMap;
 };
 
-// namespace osgbBullet
+
+// osgbDynamics
 }
 
-// __OSGBBULLET_PHYSICS_STATE_H__
+// __OSGBDYNAMICS_PHYSICS_STATE_H__
 #endif
