@@ -39,8 +39,8 @@
 class MoveManipulator : public osgGA::GUIEventHandler
 {
 public:
-    MoveManipulator() : _co( NULL ) {}
-    MoveManipulator( const MoveManipulator& mm, osg::CopyOp copyop ) : _co( mm._co ) {}
+    MoveManipulator() : _co( NULL ), _mt( NULL ) {}
+    MoveManipulator( const MoveManipulator& mm, osg::CopyOp copyop ) : _co( mm._co ), _mt( mm._mt ) {}
     ~MoveManipulator() {}
 #if( OSGWORKS_OSG_VERSION > 20800 )
     META_Object(osgBulletExample,MoveManipulator);
@@ -48,14 +48,41 @@ public:
 
     virtual bool handle( const osgGA::GUIEventAdapter& ea, osgGA::GUIActionAdapter& aa )
     {
-        //if( ea.getEventType() == osgGA::GUIEventAdapter::DRAG
+        if( ( ea.getModKeyMask() & osgGA::GUIEventAdapter::MODKEY_CTRL ) == 0 )
+        {
+            return( false );
+        }
+        else if( ea.getEventType() == osgGA::GUIEventAdapter::PUSH )
+        {
+            _lastX = ea.getXnormalized();
+            _lastY = ea.getYnormalized();
+            return( true );
+        }
+        else if( ea.getEventType() == osgGA::GUIEventAdapter::DRAG )
+        {
+            double deltaX = ea.getXnormalized() - _lastX;
+            double deltaY = ea.getYnormalized() - _lastY;
+            _lastX = ea.getXnormalized();
+            _lastY = ea.getYnormalized();
+
+            deltaX *= 6.;
+            deltaY *= 6.;
+            osg::Matrix trans = osgbCollision::asOsgMatrix( _co->getWorldTransform() );
+            trans = trans * osg::Matrix::translate( deltaX, deltaY, 0. );
+            _mt->setMatrix( trans );
+            _co->setWorldTransform( osgbCollision::asBtTransform( trans ) );
+            return( true );
+        }
         return( false );
     }
 
     void setCollisionObject( btCollisionObject* co ) { _co = co; }
+    void setMatrixTransform( osg::MatrixTransform* mt ) { _mt = mt; }
 
 protected:
     btCollisionObject* _co;
+    osg::MatrixTransform* _mt;
+    double _lastX, _lastY;
 };
 
 
@@ -72,7 +99,6 @@ btCollisionWorld* initCollision()
 
     return( collisionWorld );
 }
-
 
 
 osg::Node* createScene( btCollisionWorld* cw, MoveManipulator* mm, osg::ArgumentParser& arguments )
@@ -104,6 +130,7 @@ osg::Node* createScene( btCollisionWorld* cw, MoveManipulator* mm, osg::Argument
     btBoxObject->setWorldTransform( osgbCollision::asBtTransform( transMatrix ) );
     cw->addCollisionObject( btBoxObject );
     mm->setCollisionObject( btBoxObject );
+    mm->setMatrixTransform( mt );
 
 
     return( root.release() );
@@ -125,11 +152,19 @@ int main( int argc,
     viewer.setSceneData( root.get() );
 
 
+    unsigned int lastNumManifolds( 0 );
     while( !viewer.done() )
     {
         collisionWorld->performDiscreteCollisionDetection();
-        osg::notify( osg::ALWAYS ) <<
-            collisionWorld->getDispatcher()->getNumManifolds() << std::endl;
+        unsigned int numManifolds = collisionWorld->getDispatcher()->getNumManifolds();
+        if( lastNumManifolds != numManifolds )
+        {
+            lastNumManifolds = numManifolds;
+            if( numManifolds == 0 )
+                osg::notify( osg::ALWAYS ) << "No collision." << std::endl;
+            else
+                osg::notify( osg::ALWAYS ) << "Collision detected." << std::endl;
+        }
 
         viewer.frame();
     }
