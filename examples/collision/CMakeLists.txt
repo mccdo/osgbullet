@@ -1,3 +1,3 @@
-_osgBulletMakeDynamicsExe( collision
+_osgBulletMakeCollisionExe( collision
     collision.cpp
 )
