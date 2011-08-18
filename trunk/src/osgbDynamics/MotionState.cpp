@@ -241,8 +241,7 @@ MotionState::updateTripleBuffer( const char* addr )
     setWorldTransformInternal( trans );
 }
 
-bool
-osgbDynamics::TripleBufferMotionStateUpdate( osgbDynamics::MotionStateList& msl, osgbDynamics::TripleBuffer* tb )
+bool TripleBufferMotionStateUpdate( osgbDynamics::MotionStateList& msl, osgbDynamics::TripleBuffer* tb )
 {
     const char* addr = tb->beginRead();
     if( addr == NULL )
