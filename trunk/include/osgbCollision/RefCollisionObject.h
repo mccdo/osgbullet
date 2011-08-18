@@ -31,6 +31,7 @@ namespace osgbCollision {
 
 /** \class RefCollisionObject RefCollisionObject.h <osgbCollision/RefCollisionObject.h>
 \brief A reference-counted btCollisionObject (allows it to be added as UserData to an OSG Node).
+
 */
 class OSGBCOLLISION_EXPORT RefCollisionObject : public osg::Referenced
 {

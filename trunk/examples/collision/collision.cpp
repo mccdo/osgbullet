@@ -35,7 +35,7 @@
 #include <iostream>
 
 
-
+/* \cond */
 class MoveManipulator : public osgGA::GUIEventHandler
 {
 public:
@@ -68,7 +68,7 @@ public:
             deltaX *= 6.;
             deltaY *= 6.;
             osg::Matrix trans = osgbCollision::asOsgMatrix( _co->getWorldTransform() );
-            trans = trans * osg::Matrix::translate( deltaX, deltaY, 0. );
+            trans = trans * osg::Matrix::translate( deltaX, 0., deltaY );
             _mt->setMatrix( trans );
             _co->setWorldTransform( osgbCollision::asBtTransform( trans ) );
             return( true );
@@ -84,6 +84,7 @@ protected:
     osg::MatrixTransform* _mt;
     double _lastX, _lastY;
 };
+/* \endcond */
 
 
 btCollisionWorld* initCollision()

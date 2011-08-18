@@ -205,6 +205,12 @@ protected:
     btCollisionShape* _shape;
 };
 
+/* \cond */
+// This is more heavy-handed than osgUtil::Optimizer. It really flattens
+// the transforms, with no regard to static or dynamic variance, update
+// callbacks, or other things that would prevent the Optimizer from
+// flattening the transforms.
+// TBD How is multiparenting handled?
 class FlattenTransforms : public osg::NodeVisitor
 {
 public:
@@ -267,6 +273,7 @@ protected:
         }
     }
 };
+/* \endcond */
 
 
 OSGToCollada::OSGToCollada()

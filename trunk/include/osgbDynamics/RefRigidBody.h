@@ -19,7 +19,7 @@
  *************** <auto-copyright.pl END do not edit this line> ***************/
 
 #ifndef __OSGBDYNAMICS_RIGIDBODY_H__
-#define __OSGBDYNAMICS_RIGIDBODY_H__
+#define __OSGBDYNAMICS_RIGIDBODY_H__ 1
 
 #include <osg/Referenced>
 #include <BulletDynamics/Dynamics/btRigidBody.h>
@@ -28,7 +28,8 @@
 
 namespace osgbDynamics {
 
-/** \brief A reference counted btRigidBody.
+/** RefRigidBody RefRigidBody.h <osgbDynamics\RefRigidBody.h>
+\brief A reference counted btRigidBody.
 
 RefRigidBody allows btRigidBody to be added as UserData to an OSG Node.
 \note Does \b not delete the rigid body in the destructor (could still be in use by Bullet).
@@ -59,6 +60,10 @@ protected:
     btRigidBody* _rigidBody;
 };
 
-} /* namespace */
 
-#endif // __OSGBDYNAMICS_RIGIDBODY_H__
+// osgbDynamics
+}
+
+
+// __OSGBDYNAMICS_RIGIDBODY_H__
+#endif

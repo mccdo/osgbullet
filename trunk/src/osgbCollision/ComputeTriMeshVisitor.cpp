@@ -34,6 +34,7 @@ namespace osgbCollision
 {
 
 
+/* \cond */
 struct ComputeTriMeshFunc
 {
     ComputeTriMeshFunc()
@@ -52,6 +53,8 @@ struct ComputeTriMeshFunc
 
     osg::ref_ptr< osg::Vec3Array > vertices;
 };
+/* \endcond */
+
 
 ComputeTriMeshVisitor::ComputeTriMeshVisitor( osg::NodeVisitor::TraversalMode traversalMode )
     : osg::NodeVisitor( traversalMode )

@@ -40,6 +40,7 @@ namespace osgbCollision
 
 /** \class GLDebugDrawer GLDebugDrawer.h <osgbCollision/GLDebugDrawer.h>
 \brief Debug utility to render Bullet collision shapes.
+
 The class visualizes Bullet collision shapes. Use it as a debugging aid
 to ensure that Bullet collision shapes and OSG geometry are synchronized.
 */

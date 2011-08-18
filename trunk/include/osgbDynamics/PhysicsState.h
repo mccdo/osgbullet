@@ -35,6 +35,7 @@ namespace osgbDynamics {
 
 /** \class PhysicsData PhysicsState.h <osgbDynamics\PhysicsState.h>
 \brief TBD
+
 */
 class OSGBDYNAMICS_EXPORT PhysicsData : public osg::Object
 {
@@ -69,6 +70,7 @@ protected:
 
 /** \class PhysicsState PhysicsState.h <osgbDynamics\PhysicsState.h>
 \brief TBD
+
 */
 class OSGBDYNAMICS_EXPORT PhysicsState : public osg::Object
 {

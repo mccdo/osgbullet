@@ -32,6 +32,7 @@ namespace osgbCollision
 
 /** \class BoundingCylinder BoundingCylinder.h <osgbCollision/BoundingCylinder.h>
 \brief Used internally to store cylinder parameters.
+
 TBD Consider not encapsulating parameters in a class. */
 class OSGBCOLLISION_EXPORT BoundingCylinder
 {

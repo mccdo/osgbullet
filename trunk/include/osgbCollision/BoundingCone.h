@@ -32,6 +32,7 @@ namespace osgbCollision
 
 /** \class BoundingCone BoundingCone.h <osgbCollision/BoundingCone.h>
 \brief Used internally to store cone parameters.
+
 TBD Not currently used. when we do support cones, consider not encapsulating parameters in a class. */
 class OSGBCOLLISION_EXPORT BoundingCone
 {

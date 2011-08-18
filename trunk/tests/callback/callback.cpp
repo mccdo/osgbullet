@@ -127,6 +127,7 @@ enablePhysics( osg::Node* root, const std::string& nodeName, btDynamicsWorld* bw
 }
 
 
+/* \cond */
 class InteractionManipulator : public osgGA::GUIEventHandler
 {
 public:
@@ -222,6 +223,7 @@ protected:
         _world->addRigidBody( body );
     }
 };
+/* \endcond */
 
 
 int main( int argc,

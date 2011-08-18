@@ -37,6 +37,7 @@ namespace osgbCollision
 
 /** \class Chart Chart.h <osgbCollision/Chart.h>
 \brief Used by GLDebugDrawer to render a 2D HUD graph of intersection points.
+
 */
 class OSGBCOLLISION_EXPORT Chart : public osg::Referenced
 {

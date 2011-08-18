@@ -33,6 +33,7 @@ namespace osgbCollision
 
 /** \class ComputeTriMeshVisitor ComputeTriMeshVisitor.h <osgbCollision/ComputeTriMeshVisitor.h>
 \brief Creates a list of triangles from OSG data, suitable for constructing Bullet triangle mesh collision shapes.
+
 TBD Consider using OSG localtoworld method instead of keeping a matrix stack.
 */
 class ComputeTriMeshVisitor : public osg::NodeVisitor
