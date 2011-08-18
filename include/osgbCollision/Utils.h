@@ -37,6 +37,7 @@ namespace osgbCollision
 
 /** \defgroup conversionutils Conversion Utilities
 \brief Convenience functions for converting between OSG's and Bullet's vector and matrix classes.
+
 */
 /**@{*/
 

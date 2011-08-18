@@ -82,7 +82,7 @@ initPhysics()
 }
 
 
-
+/* \cond */
 class ShakeManipulator : public osgGA::GUIEventHandler
 {
 public:
@@ -154,7 +154,7 @@ protected:
     osgbDynamics::MotionState* _motion;
     float _lastX, _lastY;
 };
-
+/* \endcond */
 
 
 

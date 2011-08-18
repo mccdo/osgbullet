@@ -64,7 +64,7 @@ btDiscreteDynamicsWorld* initPhysics()
 }
 
 
-
+/* \cond */
 class InteractionManipulator : public osgGA::GUIEventHandler
 {
 public:
@@ -174,6 +174,8 @@ protected:
             _pt->pause( false );
     }
 };
+/**\end
+cond*/
 
 
 osg::ref_ptr< osg::Node > modelNode( NULL );

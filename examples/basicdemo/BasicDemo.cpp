@@ -140,6 +140,7 @@ btVector3 randomBVec3InRange( std::pair< btVector3, btVector3 > range =
 }
 
 
+/* \cond */
 class GliderUpdateCallback : public osg::NodeCallback
 {
 public:
@@ -169,6 +170,7 @@ private:
     btRigidBody *   body_;
     double          basetime_;
 };
+/* \endcond */
 
 
 osg::MatrixTransform * createModel( btDynamicsWorld * dynamicsWorld )

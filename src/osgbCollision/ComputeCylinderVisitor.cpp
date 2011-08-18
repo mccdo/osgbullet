@@ -32,6 +32,7 @@ namespace osgbCollision
 {
 
 
+/* \cond */
 struct ComputeCylinderBound : public osg::PrimitiveFunctor
 {
     ComputeCylinderBound()
@@ -322,6 +323,8 @@ struct ComputeCylinderBound : public osg::PrimitiveFunctor
     const Vec4d *     _vertices4d;
     BoundingCylinder _bb;
 };
+/* \endcond */
+
 
 ComputeCylinderVisitor::ComputeCylinderVisitor( osg::NodeVisitor::TraversalMode traversalMode )
     : osg::NodeVisitor( traversalMode )

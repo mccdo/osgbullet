@@ -33,6 +33,7 @@ namespace osgbCollision
 
 /** \class CollectVerticesVisitor CollectVerticesVisitor.h <osgbCollision/CollectVerticesVisitor.h>
 \brief A NodeVisitor to collect a set of transformed vertices.
+
 Used to create convex hull collision shapes from OSG data. */
 class OSGBCOLLISION_EXPORT CollectVerticesVisitor : public osg::NodeVisitor
 {

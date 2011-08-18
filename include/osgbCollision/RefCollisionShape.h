@@ -32,6 +32,7 @@ namespace osgbCollision
 
 /** \class RefCollisionShape RefCollisionShape.h <osgbCollision/RefCollisionShape.h>
 \brief A reference-counted btCollisionShape (allows it to be added as UserData to an OSG Node).
+
 */
 class OSGBCOLLISION_EXPORT RefCollisionShape : public osg::Referenced
 {

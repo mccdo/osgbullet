@@ -35,6 +35,7 @@ namespace osgbCollision
 
 /** \defgroup collisionshapes Collision Shapes
 \brief Low-level convenience routines for converting between OSG geometric data and Bullet collision shapes.
+
 */
 /**@{*/
 

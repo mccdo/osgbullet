@@ -32,6 +32,7 @@ namespace osgbCollision
 
 /** \class ComputeCylinderVisitor ComputeCylinderVisitor.h <osgbCollision/ComputeCylinderVisitor.h>
 \brief Computes the extents of a cylinder around specified OSG data.
+
 TBD Consider using OSG localtoworld method instead of keeping a matrix stack.
 */
 class ComputeCylinderVisitor : public osg::NodeVisitor

@@ -269,10 +269,7 @@ initPhysics()
 }
 
 
-
-
-
-
+/* \cond */
 class InteractionManipulator : public osgGA::GUIEventHandler
 {
 public:
@@ -368,6 +365,7 @@ protected:
         _world->addRigidBody( body );
     }
 };
+/* \endcond */
 
 
 osg::ref_ptr< osg::Node > modelNode( NULL );
