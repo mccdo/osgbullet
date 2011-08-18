@@ -40,44 +40,22 @@ class ComputeTriMeshVisitor : public osg::NodeVisitor
 {
 public:
     ComputeTriMeshVisitor( osg::NodeVisitor::TraversalMode traversalMode = TRAVERSE_ALL_CHILDREN );
-
 #if( OSGWORKS_OSG_VERSION >= 20800 )
     META_NodeVisitor(osgbCollision,ComputeTriMeshVisitor)
 #endif
 
     virtual void reset();
 
-
     osg::Vec3Array* getTriMesh()
     {
         return( mesh.get() );
     }
 
-    void apply( osg::Node & node );
-
-
-    void apply( osg::Transform & transform );
-
-
     void apply( osg::Geode & geode );
 
-
-    inline void pushMatrix( osg::Matrix & matrix )
-    {
-        stack.push_back( matrix );
-    }
-
-    inline void popMatrix()
-    {
-        stack.pop_back();
-    }
-
+protected:
     void applyDrawable( osg::Drawable * drawable );
 
-protected:
-    typedef std::vector< osg::Matrix >   MatrixStack;
-
-    MatrixStack stack;
     osg::ref_ptr< osg::Vec3Array > mesh;
 };
 

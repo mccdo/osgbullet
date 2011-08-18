@@ -59,43 +59,19 @@ struct ComputeTriMeshFunc
 ComputeTriMeshVisitor::ComputeTriMeshVisitor( osg::NodeVisitor::TraversalMode traversalMode )
     : osg::NodeVisitor( traversalMode )
 {
-    stack.push_back( osg::Matrix::identity() );
     mesh = new osg::Vec3Array;
 }
 
 void ComputeTriMeshVisitor::reset()
 {
-    stack.clear();
-    stack.push_back( osg::Matrix::identity() );
     mesh->clear();
-}
-
-void ComputeTriMeshVisitor::apply( osg::Node & node )
-{
-    traverse( node );
-}
-
-void ComputeTriMeshVisitor::apply( osg::Transform & transform )
-{
-    osg::Matrix matrix;
-
-    matrix = stack.back();
-
-    transform.computeLocalToWorldMatrix( matrix, this );
-
-    pushMatrix( matrix );
-
-    traverse( transform );
-
-    popMatrix();
 }
 
 void ComputeTriMeshVisitor::apply( osg::Geode & geode )
 {
-    for( unsigned int i = 0; i < geode.getNumDrawables(); ++i )
-    {
-        applyDrawable( geode.getDrawable( i ) );
-    }
+    unsigned int idx;
+    for( idx = 0; idx < geode.getNumDrawables(); idx++ )
+        applyDrawable( geode.getDrawable( idx ) );
 }
 
 void ComputeTriMeshVisitor::applyDrawable( osg::Drawable * drawable )
@@ -103,11 +79,11 @@ void ComputeTriMeshVisitor::applyDrawable( osg::Drawable * drawable )
     osg::TriangleFunctor< ComputeTriMeshFunc > functor;
     drawable->accept( functor );
 
-    const osg::Matrix& matrix = stack.back();
-    for( osg::Vec3Array::iterator iter = functor.vertices->begin();
-         iter != functor.vertices->end(); ++iter )
+    osg::Matrix m = osg::computeLocalToWorld( getNodePath() );
+    osg::Vec3Array::iterator iter;
+    for( iter = functor.vertices->begin(); iter != functor.vertices->end(); iter++ )
     {
-        mesh->push_back( *iter * matrix );
+        mesh->push_back( *iter * m );
     }
 }
 
