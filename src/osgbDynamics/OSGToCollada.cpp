@@ -339,8 +339,6 @@ bool OSGToCollada::convert()
 
     // Flatten all transforms so that we don't need to multiply geometry by the current
     // OSG local to world matrix during traversal.
-    // NOTE: Must remove loaded ProxyNodes in order to allow
-    //   all transforms to be flattened.
     osg::notify( osg::INFO ) << "OSGToCollada: Flattening transforms." << std::endl;
     FlattenTransforms ft;
     root->accept( ft );
