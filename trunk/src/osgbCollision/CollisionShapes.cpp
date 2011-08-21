@@ -26,6 +26,7 @@
 #include <osgbCollision/ComputeCylinderVisitor.h>
 #include <osgbCollision/CollectVerticesVisitor.h>
 #include <osgbCollision/Utils.h>
+#include <osgwTools/Shapes.h>
 
 #include <osg/ComputeBoundsVisitor>
 #include <osg/ShapeDrawable>
@@ -44,7 +45,6 @@ namespace osgbCollision
 
 btSphereShape* btSphereCollisionShapeFromOSG( osg::Node* node )
 {
-
     osg::BoundingSphere sphere = node->getBound();
     float radius = sphere.radius();
 
@@ -66,32 +66,24 @@ btBoxShape* btBoxCollisionShapeFromOSG( osg::Node* node, const osg::BoundingBox*
     }
 
     btBoxShape* shape = new btBoxShape( btVector3( ( bbox.xMax() - bbox.xMin() ) / 2.0,
-                                                   ( bbox.yMax() - bbox.yMin() ) / 2.0,
-                                                   ( bbox.zMax() - bbox.zMin() ) / 2.0 ) );
+        ( bbox.yMax() - bbox.yMin() ) / 2.0, ( bbox.zMax() - bbox.zMin() ) / 2.0 ) );
     return( shape );
 }
 
-btCylinderShape* btCylinderCollisionShapeFromOSG( osg::Node* node,
-                                                        AXIS axis )
+btCylinderShape* btCylinderCollisionShapeFromOSG( osg::Node* node, AXIS axis )
 {
     ComputeCylinderVisitor visitor;
-
     switch( axis )
     {
-        case _X:
-        case X:
-            visitor.setAxis( osg::X_AXIS );
-            break;
-
-        case _Y:
-        case Y:
-            visitor.setAxis( osg::Y_AXIS );
-            break;
-
-        case _Z:
-        case Z:
-            visitor.setAxis( osg::Z_AXIS );
-            break;
+    case X:
+        visitor.setAxis( osg::X_AXIS );
+        break;
+    case Y:
+        visitor.setAxis( osg::Y_AXIS );
+        break;
+    case Z:
+        visitor.setAxis( osg::Z_AXIS );
+        break;
     }
     node->accept( visitor );
 
@@ -105,17 +97,15 @@ btCylinderShape* btCylinderCollisionShapeFromOSG( osg::Node* node,
     btCylinderShape* shape = 0;
     switch( axis )
     {
-        case _X:
-        case X:
-            shape = new btCylinderShapeX( btVector3( cyl.getLength(), cyl.getRadius(), cyl.getRadius() ) );
-            break;
-        case _Y:
-        case Y:
-            shape = new btCylinderShape( btVector3( cyl.getRadius(), cyl.getLength(), cyl.getRadius() ) );
-            break;
-        case _Z:
-        case Z:
-            shape = new btCylinderShapeZ( btVector3( cyl.getRadius(), cyl.getRadius(), cyl.getLength() ) );
+    case X:
+        shape = new btCylinderShapeX( btVector3( cyl.getLength(), cyl.getRadius(), cyl.getRadius() ) );
+        break;
+    case Y:
+        shape = new btCylinderShape( btVector3( cyl.getRadius(), cyl.getLength(), cyl.getRadius() ) );
+        break;
+    case Z:
+        shape = new btCylinderShapeZ( btVector3( cyl.getRadius(), cyl.getRadius(), cyl.getLength() ) );
+        break;
     }
     return( shape );
 }
@@ -138,9 +128,8 @@ btTriangleMeshShape* btTriMeshCollisionShapeFromOSG( osg::Node* node )
         osg::Vec3& p1 = ( *vertices )[ i ];
         osg::Vec3& p2 = ( *vertices )[ i + 1 ];
         osg::Vec3& p3 = ( *vertices )[ i + 2 ];
-        mesh->addTriangle( btVector3( p1.x(), p1.y(), p1.z() ),
-                          btVector3( p2.x(), p2.y(), p2.z() ),
-                          btVector3( p3.x(), p3.y(), p3.z() ) );
+        mesh->addTriangle( osgbCollision::asBtVector3( p1 ),
+            osgbCollision::asBtVector3( p2 ), osgbCollision::asBtVector3( p3 ) );
     }
 
     btBvhTriangleMeshShape* meshShape = new btBvhTriangleMeshShape( mesh, true );
@@ -161,9 +150,8 @@ btConvexTriangleMeshShape* btConvexTriMeshCollisionShapeFromOSG( osg::Node* node
         p1 = vertices->at( i );
         p2 = vertices->at( i + 1 );
         p3 = vertices->at( i + 2 );
-        mesh->addTriangle( btVector3( p1.x(), p1.y(), p1.z() ),
-                          btVector3( p2.x(), p2.y(), p2.z() ),
-                          btVector3( p3.x(), p3.y(), p3.z() ) );
+        mesh->addTriangle( osgbCollision::asBtVector3( p1 ),
+            osgbCollision::asBtVector3( p2 ), osgbCollision::asBtVector3( p3 ) );
     }
 
     btConvexTriangleMeshShape* meshShape = new btConvexTriangleMeshShape( mesh );
@@ -176,7 +164,6 @@ btConvexHullShape* btConvexHullCollisionShapeFromOSG( osg::Node* node )
     node->accept( cvv );
     osg::Vec3Array* v = cvv.getVertices();
     osg::notify( osg::INFO ) << "CollectVerticesVisitor: " << v->size() << std::endl;
-
 
     // Convert verts to array of Bullet scalars.
     btScalar* btverts = new btScalar[ v->size() * 3 ];
@@ -198,9 +185,22 @@ btConvexHullShape* btConvexHullCollisionShapeFromOSG( osg::Node* node )
     btConvexHullShape* chs = new btConvexHullShape( btverts, v->size(), sizeof( btScalar ) * 3 );
     delete[] btverts;
 
-
     return( chs );
 }
+
+btCompoundShape* btCompoundShapeFromOSGGeodes( osg::Node* node )
+{
+    // TBD
+    return( NULL );
+}
+btCompoundShape* btCompoundShapeFromOSGGeometry( osg::Node* node )
+{
+    // TBD
+    return( NULL );
+}
+
+
+
 
 osg::Node* osgNodeFromBtCollisionShape( const btCollisionShape* btShape, const btTransform& trans )
 {
@@ -264,15 +264,8 @@ osg::Node* osgNodeFromBtCollisionShape( const btCollisionShape* btShape, const b
 
 osg::Node* osgNodeFromBtCollisionShape( const btBoxShape* btBox, const btTransform& trans )
 {
-    btVector3 halfs = btBox->getHalfExtentsWithMargin();
-
-    osg::Box* box = new osg::Box();
-    box->setHalfLengths( osg::Vec3( halfs.x(), halfs.y(), halfs.z() ) );
-
-    osg::ShapeDrawable* shape = new osg::ShapeDrawable( box );
-    shape->setColor( osg::Vec4( 1., 1., 1., 1. ) );
     osg::Geode* geode = new osg::Geode();
-    geode->addDrawable( shape );
+    geode->addDrawable( osgGeometryFromBtCollisionShape( btBox ) );
 
     osg::Matrix m = asOsgMatrix( trans );
     if (m.isIdentity())
@@ -286,18 +279,10 @@ osg::Node* osgNodeFromBtCollisionShape( const btBoxShape* btBox, const btTransfo
     }
 }
 
-osg::Node* osgNodeFromBtCollisionShape( const btSphereShape * btSphere, const btTransform& trans )
+osg::Node* osgNodeFromBtCollisionShape( const btSphereShape* btSphere, const btTransform& trans )
 {
-    osg::Sphere* sphere = new osg::Sphere();
-    sphere->setRadius( btSphere->getRadius() );
-
-    osg::TessellationHints* hints = new osg::TessellationHints();
-    hints->setDetailRatio( .2f );
-
-    osg::ShapeDrawable* shape = new osg::ShapeDrawable( sphere, hints );
-    shape->setColor( osg::Vec4( 1., 1., 1., 1. ) );
     osg::Geode* geode = new osg::Geode();
-    geode->addDrawable( shape );
+    geode->addDrawable( osgGeometryFromBtCollisionShape( btSphere ) );
 
     osg::Matrix m = asOsgMatrix( trans );
     if (m.isIdentity())
@@ -318,19 +303,14 @@ osg::Node* osgNodeFromBtCollisionShape( const btCylinderShape * btCylinder, cons
 
     switch( btCylinder->getUpAxis() )
     {
-        case _X:
         case X:
             cylinder->setHeight( 2 * btCylinder->getHalfExtentsWithMargin().getX() );
             cylinder->setRotation( osg::Quat( osg::PI_2, osg::Vec3( 0, 1, 0 ) ) );
             break;
-
-        case _Y:
         case Y:
             cylinder->setHeight( 2 * btCylinder->getHalfExtentsWithMargin().getY() );
             cylinder->setRotation( osg::Quat( osg::PI_2, osg::Vec3( 1, 0, 0 ) ) );
             break;
-
-        case _Z:
         case Z:
             cylinder->setHeight( 2 * btCylinder->getHalfExtentsWithMargin().getZ() );
     }
@@ -512,6 +492,42 @@ osg::Node* osgNodeFromBtCollisionShape( const btConvexHullShape* hull, const btT
         mt->addChild( geode.get() );
         return mt.release();
     }
+}
+
+
+osg::Geometry* osgGeometryFromBtCollisionShape( const btBoxShape* btBox )
+{
+    return( osgwTools::makeBox( osgbCollision::asOsgVec3( btBox->getHalfExtentsWithMargin() ) ) );
+}
+
+osg::Geometry* osgGeometryFromBtCollisionShape( const btSphereShape* btSphere )
+{
+    return( osgwTools::makeAltAzSphere( btSphere->getRadius() ) );
+}
+
+osg::Geometry* osgGeometryFromBtCollisionShape( const btCylinderShape* btCylinder )
+{
+    double length;
+    osg::Vec3 orientation;
+    const btVector3 halfExtents( btCylinder->getHalfExtentsWithMargin() );
+    switch( btCylinder->getUpAxis() )
+    {
+        case X:
+            orientation.set( 1., 0., 0. );
+            length = halfExtents.getX();
+            break;
+        case Y:
+            orientation.set( 0., 1., 0. );
+            length = halfExtents.getY();
+            break;
+        case Z:
+            orientation.set( 0., 0., 1. );
+            length = halfExtents.getZ();
+            break;
+    }
+    const double radius( btCylinder->getRadius() );
+
+    return( osgwTools::makeOpenCylinder( orientation, length, radius, radius ) );
 }
 
 

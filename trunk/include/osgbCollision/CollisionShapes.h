@@ -23,10 +23,14 @@
 
 
 #include <osgbCollision/Export.h>
-#include <osg/Node>
 #include <osg/BoundingBox>
 
 #include <btBulletCollisionCommon.h>
+
+namespace osg {
+    class Node;
+    class Geometry;
+}
 
 
 namespace osgbCollision
@@ -43,21 +47,56 @@ namespace osgbCollision
 */
 enum AXIS
 {
-    X,
-    Y,
-    Z,
-    _X,
-    _Y,
-    _Z
+    // These are the values that btCylinderShape::getUpAxis() returns
+    // for the three different cylinder major axes.
+    X=0, Y=1, Z=2
 };
 
-/** \brief Return a Bullet collision shape that approximates the specified OSG geometry. */
-OSGBCOLLISION_EXPORT btSphereShape*             btSphereCollisionShapeFromOSG( osg::Node* node );
-OSGBCOLLISION_EXPORT btBoxShape*                btBoxCollisionShapeFromOSG( osg::Node* node, const osg::BoundingBox* bb=NULL );
-OSGBCOLLISION_EXPORT btCylinderShape*           btCylinderCollisionShapeFromOSG( osg::Node*, AXIS axis = Y );
-OSGBCOLLISION_EXPORT btTriangleMeshShape*       btTriMeshCollisionShapeFromOSG( osg::Node * );
-OSGBCOLLISION_EXPORT btConvexTriangleMeshShape* btConvexTriMeshCollisionShapeFromOSG( osg::Node * );
-OSGBCOLLISION_EXPORT btConvexHullShape*         btConvexHullCollisionShapeFromOSG( osg::Node * );
+/** \brief Return a Bullet sphere collision shape that approximates the specified OSG geometry.
+
+The sphere is untransformed. Bullet's sphere collision shape uses the radius only.
+*/
+OSGBCOLLISION_EXPORT btSphereShape* btSphereCollisionShapeFromOSG( osg::Node* node );
+
+/** \brief Return a Bullet box collision shape that approximates the specified OSG geometry.
+
+The box is untransformed. Bullet's box collision shape uses the box extents only.
+
+If the calling code has already computed the bounding box extents, pass this information
+as the \c bb parameter, and this function will use that information to create the collision shape.
+If you do not pass a \c bb parameter, this function uses the \c osg::ComputeBoundsVisitor to
+determine the bounding box extents.
+*/
+OSGBCOLLISION_EXPORT btBoxShape* btBoxCollisionShapeFromOSG( osg::Node* node, const osg::BoundingBox* bb=NULL );
+
+/** \brief Return a Bullet cylinder collision shape that approximates the specified OSG geometry.
+
+The cylinder is untransformed. Bullet's cylinder collision shape uses the specified axis and computed radius only.
+*/
+OSGBCOLLISION_EXPORT btCylinderShape* btCylinderCollisionShapeFromOSG( osg::Node* node, AXIS axis = Y );
+
+/** \brief Return a Bullet triangle mesh collision shape that approximates the specified OSG geometry.
+
+This function collects all triangles and transforms them by any Transforms in the subgraph rootes at \c node.
+*/
+OSGBCOLLISION_EXPORT btTriangleMeshShape* btTriMeshCollisionShapeFromOSG( osg::Node* node );
+
+/** \brief Return a Bullet convex triangle mesh collision shape that approximates the specified OSG geometry.
+
+This function collects all triangles and transforms them by any Transforms in the subgraph rootes at \c node.
+*/
+OSGBCOLLISION_EXPORT btConvexTriangleMeshShape* btConvexTriMeshCollisionShapeFromOSG( osg::Node* node );
+
+/** \brief Return a Bullet convex hull collision shape that approximates the specified OSG geometry.
+
+This function collects all vertices and transforms them by any Transforms in the subgraph rootes at \c node.
+*/
+OSGBCOLLISION_EXPORT btConvexHullShape* btConvexHullCollisionShapeFromOSG( osg::Node* node );
+
+/** \brief Creates a collision shape for each Geode or Geometry in the scene graph,
+and assembles them into a single btCompoundShape. */
+OSGBCOLLISION_EXPORT btCompoundShape* btCompoundShapeFromOSGGeodes( osg::Node* node );
+OSGBCOLLISION_EXPORT btCompoundShape* btCompoundShapeFromOSGGeometry( osg::Node* node );
 
 
 /** \brief Return an OSG representation of the given bullet collision shape. */
@@ -69,6 +108,11 @@ OSGBCOLLISION_EXPORT osg::Node* osgNodeFromBtCollisionShape( const btTriangleMes
 OSGBCOLLISION_EXPORT osg::Node* osgNodeFromBtCollisionShape( const btConvexTriangleMeshShape* btShape, const btTransform& trans = btTransform::getIdentity() );
 OSGBCOLLISION_EXPORT osg::Node* osgNodeFromBtCollisionShape( const btConvexHullShape* btShape, const btTransform& trans = btTransform::getIdentity() );
 
+
+/** brief Returns an OSG Geometry to render the specified collision shape. */
+OSGBCOLLISION_EXPORT osg::Geometry* osgGeometryFromBtCollisionShape( const btBoxShape* btShape );
+OSGBCOLLISION_EXPORT osg::Geometry* osgGeometryFromBtCollisionShape( const btSphereShape* btSphere );
+OSGBCOLLISION_EXPORT osg::Geometry* osgGeometryFromBtCollisionShape( const btCylinderShape* btCylinder );
 
 /**@}*/
 
