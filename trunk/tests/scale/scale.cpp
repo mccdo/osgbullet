@@ -491,7 +491,7 @@ enablePhysics( osg::Node* root, const std::string& nodeName, btDynamicsWorld* bw
     osgbDynamics::OSGToCollada converter;
 #if 0
     // This currently crashes and has other issues. Many operations in
-    // OSGToCOllada don't adhere to this setting, e.h., auto compute COM
+    // OSGToCOllada don't adhere to this setting, e.g., auto compute COM
     // is done on the _whole_ sg, FlattenStatisTransforms is done on the
     // _whole_ sg, etc.
     converter.setSceneGraph( root );
