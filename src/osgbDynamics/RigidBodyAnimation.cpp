@@ -56,14 +56,14 @@ void RigidBodyAnimation::operator()( osg::Node* node, osg::NodeVisitor* nv )
         return;
     }
 
-    btRigidBody* body = rb->getBulletObject();
+    btRigidBody* body = rb->get();
     if( body->getInvMass() != 0.0 )
     {
         return;
     }
 
     osg::Matrix mat = matTrans->getMatrix();
-    rb->getBulletObject()->getMotionState()->setWorldTransform(
+    rb->get()->getMotionState()->setWorldTransform(
         osgbCollision::asBtTransform( mat ) );
 
     traverse( node, nv );

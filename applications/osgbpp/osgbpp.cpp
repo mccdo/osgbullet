@@ -380,7 +380,7 @@ int main( int argc,
     root->addChild( ground.get() );
     osgbCollision::RefBulletObject< btRigidBody >* body = dynamic_cast<
         osgbCollision::RefBulletObject< btRigidBody >* >( ground->getUserData() );
-    dynamicsWorld->addRigidBody( body->getBulletObject() );
+    dynamicsWorld->addRigidBody( body->get() );
 
 
     double currSimTime;
