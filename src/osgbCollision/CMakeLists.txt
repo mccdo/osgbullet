@@ -12,7 +12,7 @@ set( LIB_PUBLIC_HEADERS
     ${HEADER_PATH}/ComputeShapeVisitor.h
     ${HEADER_PATH}/ComputeTriMeshVisitor.h
     ${HEADER_PATH}/GLDebugDrawer.h
-    ${HEADER_PATH}/RefCollisionObject.h
+    ${HEADER_PATH}/RefBulletObject.h
     ${HEADER_PATH}/Utils.h
     ${HEADER_PATH}/Version.h
     ${HEADER_PATH}/Export.h

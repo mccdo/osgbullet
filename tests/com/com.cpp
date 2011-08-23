@@ -20,7 +20,7 @@
 
 #include <osgbDynamics/MotionState.h>
 #include <osgbCollision/CollisionShapes.h>
-#include <osgbCollision/RefCollisionObject.h>
+#include <osgbCollision/RefBulletObject.h>
 #include <osgbDynamics/RigidBodyAnimation.h>
 #include <btBulletDynamicsCommon.h>
 

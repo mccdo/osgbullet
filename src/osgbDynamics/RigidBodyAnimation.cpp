@@ -19,7 +19,7 @@
  *************** <auto-copyright.pl END do not edit this line> ***************/
 
 #include <osgbDynamics/RigidBodyAnimation.h>
-#include <osgbCollision/RefCollisionObject.h>
+#include <osgbCollision/RefBulletObject.h>
 #include <osgbCollision/Utils.h>
 #include <btBulletDynamicsCommon.h>
 #include <osg/MatrixTransform>

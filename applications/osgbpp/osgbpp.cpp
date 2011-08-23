@@ -31,7 +31,7 @@
 #include <osgbCollision/Version.h>
 #include <osgbDynamics/MotionState.h>
 #include <osgbCollision/CollisionShapes.h>
-#include <osgbCollision/RefCollisionObject.h>
+#include <osgbCollision/RefBulletObject.h>
 #include <osgbDynamics/OSGToCollada.h>
 #include <osgbCollision/Utils.h>
 
