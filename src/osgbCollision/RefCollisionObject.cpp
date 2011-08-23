@@ -26,16 +26,21 @@ namespace osgbCollision
 
 
 RefCollisionObject::RefCollisionObject( void )
+  : _doDelete( doDelete ),
+    _collisionObject( NULL )
 {
 }
 
 RefCollisionObject::RefCollisionObject( btCollisionObject* collisionObject )
-  : _collisionObject( collisionObject )
+  : _doDelete( doDelete ),
+    _collisionObject( collisionObject )
 {
 }
 
 RefCollisionObject::~RefCollisionObject( void )
 {
+    if( _doDelete )
+        delete _rigidBody;
 }
 
 

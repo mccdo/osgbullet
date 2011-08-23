@@ -21,6 +21,7 @@
 #ifndef __OSGBCOLLISION_COMPUTECYLINDERVISITOR_H__
 #define __OSGBCOLLISION_COMPUTECYLINDERVISITOR_H__ 1
 
+#include <osgbCollision/Export.h>
 #include <osg/NodeVisitor>
 #include <osgwTools/Version.h>
 
@@ -35,13 +36,13 @@ namespace osgbCollision
 
 TBD Consider using OSG localtoworld method instead of keeping a matrix stack.
 */
-class ComputeCylinderVisitor : public osg::NodeVisitor
+class OSGBCOLLISION_EXPORT ComputeCylinderVisitor : public osg::NodeVisitor
 {
 public:
     ComputeCylinderVisitor( osg::NodeVisitor::TraversalMode traversalMode = TRAVERSE_ALL_CHILDREN );
 
 #if( OSGWORKS_OSG_VERSION >= 20800 )
-    META_NodeVisitor(osgbCollision,ComputeCylinderVisitor)
+    META_NodeVisitor(osgbCollision,ComputeCylinderVisitor);
 #endif
 
     virtual void reset();

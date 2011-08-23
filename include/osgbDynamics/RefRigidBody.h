@@ -32,13 +32,16 @@ namespace osgbDynamics {
 \brief A reference counted btRigidBody.
 
 RefRigidBody allows btRigidBody to be added as UserData to an OSG Node.
-\note Does \b not delete the rigid body in the destructor (could still be in use by Bullet).
-*/
+
+This class derives from Referenced. When its reference count reaches zero, the
+base class invokes the destructor. By default, RefRigidBody doesn not delete the
+btRigidBody. Change the default behavior with the \c doDelete constuctor
+parameter. */
 class OSGBDYNAMICS_EXPORT RefRigidBody : public osg::Referenced
 {
 public:
-    RefRigidBody( void );
-    RefRigidBody( btRigidBody* rigidBody );
+    RefRigidBody( bool doDelete=false );
+    RefRigidBody( btRigidBody* rigidBody, bool doDelete=false );
 
     void setRigidBody( btRigidBody* rigidBody )
     {
@@ -57,6 +60,7 @@ public:
 protected:
     virtual ~RefRigidBody( void );
 
+    bool _doDelete;
     btRigidBody* _rigidBody;
 };
 

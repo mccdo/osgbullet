@@ -18,12 +18,13 @@
  *
  *************** <auto-copyright.pl END do not edit this line> ***************/
 
+#include <osgbDynamics/RigidBodyAnimation.h>
+#include <osgbCollision/RefCollisionObject.h>
+#include <osgbCollision/Utils.h>
+#include <btBulletDynamicsCommon.h>
 #include <osg/MatrixTransform>
 
-#include <osgbDynamics/RigidBodyAnimation.h>
-#include <osgbDynamics/RefRigidBody.h>
-#include <osgbCollision/Utils.h>
-
+#include <osg/Notify>
 #include <osg/io_utils>
 
 #include <iostream>
@@ -47,20 +48,22 @@ void RigidBodyAnimation::operator()( osg::Node* node, osg::NodeVisitor* nv )
         return;
     }
 
-    RefRigidBody* rb = dynamic_cast< RefRigidBody* >( matTrans->getUserData() );
+    osgbCollision::RefBulletObject< btRigidBody >* rb = dynamic_cast<
+        osgbCollision::RefBulletObject< btRigidBody >* >( matTrans->getUserData() );
     if( rb == NULL )
     {
+        osg::notify( osg::WARN ) << "RigidBodyAnimation requires RefBulletObject<btRigidBody> in Node::UserData." << std::endl;
         return;
     }
 
-    btRigidBody* body = rb->getRigidBody();
+    btRigidBody* body = rb->getBulletObject();
     if( body->getInvMass() != 0.0 )
     {
         return;
     }
 
     osg::Matrix mat = matTrans->getMatrix();
-    rb->getRigidBody()->getMotionState()->setWorldTransform(
+    rb->getBulletObject()->getMotionState()->setWorldTransform(
         osgbCollision::asBtTransform( mat ) );
 
     traverse( node, nv );

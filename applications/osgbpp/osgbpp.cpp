@@ -31,7 +31,7 @@
 #include <osgbCollision/Version.h>
 #include <osgbDynamics/MotionState.h>
 #include <osgbCollision/CollisionShapes.h>
-#include <osgbDynamics/RefRigidBody.h>
+#include <osgbCollision/RefCollisionObject.h>
 #include <osgbDynamics/OSGToCollada.h>
 #include <osgbCollision/Utils.h>
 
@@ -97,7 +97,7 @@ createGround( float w, float h, const osg::Vec3& center )
     motion->setParentTransform( m );
     body->setWorldTransform( osgbCollision::asBtTransform( m ) );
 
-    ground->setUserData( new osgbDynamics::RefRigidBody( body ) );
+    ground->setUserData( new osgbCollision::RefBulletObject< btRigidBody >( body ) );
 
     return ground;
 }
@@ -378,8 +378,9 @@ int main( int argc,
     cen[ 2 ] -= dim;
     osg::ref_ptr< osg::Node > ground = createGround( dim, dim, cen );
     root->addChild( ground.get() );
-    osgbDynamics::RefRigidBody* body = dynamic_cast< osgbDynamics::RefRigidBody* >( ground->getUserData() );
-    dynamicsWorld->addRigidBody( body->getRigidBody() );
+    osgbCollision::RefBulletObject< btRigidBody >* body = dynamic_cast<
+        osgbCollision::RefBulletObject< btRigidBody >* >( ground->getUserData() );
+    dynamicsWorld->addRigidBody( body->getBulletObject() );
 
 
     double currSimTime;

@@ -26,7 +26,7 @@
 #include <osg/PolygonMode>
 #include <osg/PolygonOffset>
 
-#include <osgbCollision/RefCollisionShape.h>
+#include <osgbCollision/RefCollisionObject.h>
 #include <osgbDynamics/MotionState.h>
 #include <osgbCollision/CollisionShapes.h>
 #include <osgbDynamics/RigidBodyAnimation.h>
@@ -415,7 +415,8 @@ public:
                 shape->accept( bsv );
                 if (bsv._shape)
                 {
-                    osgbCollision::RefCollisionShape* collision = new osgbCollision::RefCollisionShape( bsv._shape );
+                    osgbCollision::RefBulletObject< btCollisionShape >* collision =
+                        new osgbCollision::RefBulletObject< btCollisionShape >( bsv._shape );
                     node.setUserData( collision );
                 }
             }
@@ -448,13 +449,14 @@ protected:
             osg::Node* child = node.getChild( idx );
             if ( dynamic_cast< osg::MatrixTransform* >( child ) )
                 continue;
-            osgbCollision::RefCollisionShape* bcs = dynamic_cast< osgbCollision::RefCollisionShape* >( child->getUserData() );
+            osgbCollision::RefBulletObject< btCollisionShape >* bcs = dynamic_cast<
+                osgbCollision::RefBulletObject< btCollisionShape >* >( child->getUserData() );
             if (!bcs)
                 continue;
 
             btTransform xform;
             xform.setIdentity();
-            cs->addChildShape( xform, bcs->getCollisionShape() );
+            cs->addChildShape( xform, bcs->getBulletObject() );
         }
 
         return cs;
