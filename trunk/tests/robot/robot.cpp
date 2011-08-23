@@ -26,7 +26,7 @@
 #include <osg/PolygonMode>
 #include <osg/PolygonOffset>
 
-#include <osgbCollision/RefCollisionObject.h>
+#include <osgbCollision/RefBulletObject.h>
 #include <osgbDynamics/MotionState.h>
 #include <osgbCollision/CollisionShapes.h>
 #include <osgbDynamics/RigidBodyAnimation.h>
