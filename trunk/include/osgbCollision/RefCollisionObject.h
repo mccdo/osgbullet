@@ -29,34 +29,62 @@
 namespace osgbCollision {
 
 
-/** \class RefCollisionObject RefCollisionObject.h <osgbCollision/RefCollisionObject.h>
-\brief A reference-counted btCollisionObject (allows it to be added as UserData to an OSG Node).
+/** \class RefBulletObject RefBulletObject.h <osgbCollision/RefBulletObject.h>
+\brief A template class for maintaining reference-counted Bullet objects.
 
+This class overlays OSG's reference-counted memory system on top of Bullet objects.
+Use it to store a reference to a Bullet object in a scene graph Node's UserData pointer,
+for example, or in any OSG interactions that require a reference-counted entity.
+
+This class replaces RefCollisionShape, RefCollisionObject, and RefRigidBody.
+
+This class derives from Referenced. When its reference count reaches zero, the
+base class invokes the destructor. By default, RefBulletObject doesn't delete the
+managed object. Change the default behavior with the \c doDelete constuctor
+parameter.
+
+If you change the default behavior so that this class deletes the managed object,
+then calling setBulletObject() while an object is already managed will cause that
+object to be deleted.
 */
-class OSGBCOLLISION_EXPORT RefCollisionObject : public osg::Referenced
+template< class T >
+class RefBulletObject : public osg::Referenced
 {
 public:
-    RefCollisionObject( void );
-    RefCollisionObject( btCollisionObject* collisionObject );
+    RefBulletObject( bool doDelete=false )
+      : _doDelete( doDelete ),
+        _tPtr( NULL )
+    {}
+    RefBulletObject( T* tPtr, bool doDelete=false )
+      : _doDelete( doDelete ),
+        _tPtr( tPtr )
+    {}
 
-    void setCollisionObject( btCollisionObject* collisionObject )
+    void setBulletObject( const T* tPtr )
     {
-        _collisionObject = collisionObject;
+        if( doDelete && ( _tPtr != NULL ) )
+            delete _tPtr;
+        _tPtr = tPtr;
     }
 
-    btCollisionObject* getCollisionObject()
+    T* getBulletObject()
     {
-        return( _collisionObject );
+        return( _tPtr );
     }
-    const btCollisionObject* getCollisionObject() const
+    const T* getBulletObject() const
     {
-        return( _collisionObject );
+        return( _tPtr );
     }
 
 protected:
-    virtual ~RefCollisionObject( void );
+    virtual ~RefBulletObject()
+    {
+        if( _doDelete )
+            delete _tPtr;
+    }
 
-    btCollisionObject* _collisionObject;
+    bool _doDelete;
+    T* _tPtr;
 };
 
 

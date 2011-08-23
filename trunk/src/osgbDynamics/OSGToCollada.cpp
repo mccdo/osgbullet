@@ -41,6 +41,7 @@ namespace osgbDynamics
 {
 
 
+/* \cond */
 class ProcessSceneGraph : public osg::NodeVisitor
 {
 public:
@@ -205,7 +206,6 @@ protected:
     btCollisionShape* _shape;
 };
 
-/* \cond */
 // This is more heavy-handed than osgUtil::Optimizer. It really flattens
 // the transforms, with no regard to static or dynamic variance, update
 // callbacks, or other things that would prevent the Optimizer from

@@ -22,9 +22,11 @@
 #include <BulletCollision/CollisionShapes/btShapeHull.h>
 
 #include <osgbCollision/CollisionShapes.h>
+#include <osgbCollision/ComputeShapeVisitor.h>
 #include <osgbCollision/ComputeTriMeshVisitor.h>
 #include <osgbCollision/ComputeCylinderVisitor.h>
 #include <osgbCollision/CollectVerticesVisitor.h>
+#include <osgwTools/ForceFlattenTransforms.h>
 #include <osgbCollision/Utils.h>
 #include <osgwTools/Shapes.h>
 
@@ -188,10 +190,17 @@ btConvexHullShape* btConvexHullCollisionShapeFromOSG( osg::Node* node )
     return( chs );
 }
 
-btCompoundShape* btCompoundShapeFromOSGGeodes( osg::Node* node )
+btCompoundShape* btCompoundShapeFromOSGGeodes( osg::Node* node,
+    const BroadphaseNativeTypes shapeType, const osgbCollision::AXIS axis )
 {
-    // TBD
-    return( NULL );
+    osgwTools::ForceFlattenTransforms fft;
+    node->accept( fft );
+
+    ComputeShapeVisitor csv( shapeType, axis );
+    node->accept( csv );
+
+    btCompoundShape* cs = static_cast< btCompoundShape* >( csv.getShape() );
+    return( cs );
 }
 btCompoundShape* btCompoundShapeFromOSGGeometry( osg::Node* node )
 {

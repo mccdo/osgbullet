@@ -33,8 +33,7 @@ namespace osgbDynamics {
 
 This callback repositions an object within the Bullet simulation. Attach it as
 an update callback to an OSG MatrixTransform. The MatrixTransform must have an
-osgbDynamics::RefRigidBody attached as UserData.
-*/
+osgbCollision::RefBulletObject< btRigidBody > attached as UserData. */
 class OSGBDYNAMICS_EXPORT RigidBodyAnimation : public osg::NodeCallback
 {
 public:

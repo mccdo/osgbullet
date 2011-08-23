@@ -10,7 +10,6 @@ set( LIB_PUBLIC_HEADERS
     ${HEADER_PATH}/MotionState.h
     ${HEADER_PATH}/PhysicsState.h
     ${HEADER_PATH}/PhysicsThread.h
-    ${HEADER_PATH}/RefRigidBody.h
     ${HEADER_PATH}/RigidBodyAnimation.h
     ${HEADER_PATH}/TripleBuffer.h
 )
@@ -22,7 +21,6 @@ set( _osgBulletSourceFiles
     MotionState.cpp
     PhysicsState.cpp
     PhysicsThread.cpp
-    RefRigidBody.cpp
     RigidBodyAnimation.cpp
     TripleBuffer.cpp
 )

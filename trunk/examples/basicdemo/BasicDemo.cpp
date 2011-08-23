@@ -35,7 +35,7 @@
 
 #include <osgbDynamics/MotionState.h>
 #include <osgbCollision/CollisionShapes.h>
-#include <osgbDynamics/RefRigidBody.h>
+#include <osgbCollision/RefCollisionObject.h>
 #include <osgbDynamics/RigidBodyAnimation.h>
 
 osg::AnimationPath * createAnimationPath( const osg::Vec3 & center,
@@ -300,8 +300,8 @@ int main( int argc,
     dynamicsWorld->addRigidBody( boxBody );
 
     /* osgBullet Code */
-    osgbDynamics::RefRigidBody * boxRigid = new osgbDynamics::RefRigidBody();
-    boxRigid->setRigidBody( boxBody );
+    osgbCollision::RefBulletObject< btRigidBody >* boxRigid =
+        new osgbCollision::RefBulletObject< btRigidBody >( boxBody );
     box->setUserData( boxRigid );
 
     osgbDynamics::RigidBodyAnimation * rba = new osgbDynamics::RigidBodyAnimation;

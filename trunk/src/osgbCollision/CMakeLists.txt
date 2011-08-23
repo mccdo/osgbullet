@@ -6,13 +6,13 @@ set( LIB_PUBLIC_HEADERS
     ${HEADER_PATH}/BoundingCone.h
     ${HEADER_PATH}/BoundingCylinder.h
     ${HEADER_PATH}/Chart.h
+    ${HEADER_PATH}/CollectVerticesVisitor.h
     ${HEADER_PATH}/CollisionShapes.h
     ${HEADER_PATH}/ComputeCylinderVisitor.h
-    ${HEADER_PATH}/CollectVerticesVisitor.h
+    ${HEADER_PATH}/ComputeShapeVisitor.h
     ${HEADER_PATH}/ComputeTriMeshVisitor.h
     ${HEADER_PATH}/GLDebugDrawer.h
     ${HEADER_PATH}/RefCollisionObject.h
-    ${HEADER_PATH}/RefCollisionShape.h
     ${HEADER_PATH}/Utils.h
     ${HEADER_PATH}/Version.h
     ${HEADER_PATH}/Export.h
@@ -22,13 +22,12 @@ set( _osgBulletSourceFiles
     BoundingCone.cpp
     BoundingCylinder.cpp
     Chart.cpp
+    CollectVerticesVisitor.cpp
     CollisionShapes.cpp
     ComputeCylinderVisitor.cpp
-    CollectVerticesVisitor.cpp
+    ComputeShapeVisitor.cpp
     ComputeTriMeshVisitor.cpp
     GLDebugDrawer.cpp
-    RefCollisionObject.cpp
-    RefCollisionShape.cpp
     Utils.cpp
     Version.cpp
 )

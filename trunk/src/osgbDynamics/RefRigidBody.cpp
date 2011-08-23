@@ -23,18 +23,24 @@
 
 namespace osgbDynamics {
 
-RefRigidBody::RefRigidBody( void )
+RefRigidBody::RefRigidBody( bool doDelete )
+  : _doDelete( doDelete ),
+    _rigidBody( NULL )
 {
 }
 
-RefRigidBody::RefRigidBody( btRigidBody* rigidBody )
-  : _rigidBody( rigidBody )
+RefRigidBody::RefRigidBody( btRigidBody* rigidBody, bool doDelete )
+  : _doDelete( doDelete ),
+    _rigidBody( rigidBody )
 {
 }
 
 RefRigidBody::~RefRigidBody( void )
 {
+    if( _doDelete )
+        delete _rigidBody;
 }
+
 
 // osgbDynamics
 }

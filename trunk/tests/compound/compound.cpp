@@ -20,7 +20,7 @@
 
 #include <osgbDynamics/MotionState.h>
 #include <osgbCollision/CollisionShapes.h>
-#include <osgbDynamics/RefRigidBody.h>
+#include <osgbCollision/RefCollisionObject.h>
 #include <osgbDynamics/RigidBodyAnimation.h>
 #include <btBulletDynamicsCommon.h>
 
@@ -283,8 +283,8 @@ int main( int argc,
     dynamicsWorld->addRigidBody( animBody );
 
     //   Add osgBullet code to link OSG and Bullet representations.
-    osgbDynamics::RefRigidBody* animRB = new osgbDynamics::RefRigidBody();
-    animRB->setRigidBody( animBody );
+    osgbCollision::RefBulletObject< btRigidBody >* animRB =
+        new osgbCollision::RefBulletObject< btRigidBody >( animBody );
     animObj->setUserData( animRB );
 
     osgbDynamics::RigidBodyAnimation * rba = new osgbDynamics::RigidBodyAnimation;

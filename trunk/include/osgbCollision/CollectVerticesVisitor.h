@@ -39,8 +39,9 @@ class OSGBCOLLISION_EXPORT CollectVerticesVisitor : public osg::NodeVisitor
 {
 public:
     CollectVerticesVisitor( osg::NodeVisitor::TraversalMode traversalMode = osg::NodeVisitor::TRAVERSE_ALL_CHILDREN );
+
 #if( OSGWORKS_OSG_VERSION >= 20800 )
-    META_NodeVisitor(osgbCollision,CollectVerticesVisitor)
+    META_NodeVisitor(osgbCollision,CollectVerticesVisitor);
 #endif
 
     virtual void reset();
