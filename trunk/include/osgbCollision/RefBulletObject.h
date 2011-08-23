@@ -26,6 +26,12 @@
 #include <BulletCollision/CollisionDispatch/btCollisionObject.h>
 
 
+// Forwaed declarations
+class btCollisionShape;
+class btCollisionObject;
+class btRigidBody;
+
+
 namespace osgbCollision {
 
 
@@ -60,18 +66,18 @@ public:
         _tPtr( tPtr )
     {}
 
-    void setBulletObject( const T* tPtr )
+    void set( const T* tPtr )
     {
         if( doDelete && ( _tPtr != NULL ) )
             delete _tPtr;
         _tPtr = tPtr;
     }
 
-    T* getBulletObject()
+    T* get()
     {
         return( _tPtr );
     }
-    const T* getBulletObject() const
+    const T* get() const
     {
         return( _tPtr );
     }
@@ -86,6 +92,21 @@ protected:
     bool _doDelete;
     T* _tPtr;
 };
+
+
+
+/** For backwards compatibility with osgBullet v1.x.
+\relates RefBulletObject */
+typedef RefBulletObject< btCollisionShape > RefCollisionShape;
+
+/** For backwards compatibility with osgBullet v1.x.
+\relates RefBulletObject */
+typedef RefBulletObject< btCollisionObject > RefCollisionObject;
+
+/** For backwards compatibility with osgBullet v1.x.
+\relates RefBulletObject */
+typedef RefBulletObject< btRigidBody > RefRigidBody;
+
 
 
 // namespace osgbCollision

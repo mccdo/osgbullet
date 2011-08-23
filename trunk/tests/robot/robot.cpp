@@ -456,7 +456,7 @@ protected:
 
             btTransform xform;
             xform.setIdentity();
-            cs->addChildShape( xform, bcs->getBulletObject() );
+            cs->addChildShape( xform, bcs->get() );
         }
 
         return cs;
