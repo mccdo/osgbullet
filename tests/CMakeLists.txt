@@ -2,7 +2,7 @@ SET( CATEGORY Test )
 
 ADD_SUBDIRECTORY( com )
 ADD_SUBDIRECTORY( compound )
-ADD_SUBDIRECTORY( cylinder )
+# ADD_SUBDIRECTORY( cylinder )
 ADD_SUBDIRECTORY( triplebuf )
 ADD_SUBDIRECTORY( callback )
 ADD_SUBDIRECTORY( robot )
