@@ -64,77 +64,126 @@ of an OSG subgraph corresponding to a rigid body.
 This class can interface with an osg::MatrixTransform
 or an osgwTools::AbsoluteModelTransform.
 
-Typical usage:
-\li Call setTransform() to attach the root node of a subgraph.
-   The node must be a MatrixTransform or AbsoluteModelTransform.
+In typical usage, your application uses the \ref rigidbody routines to create
+a rigid body, which implicitly creates a MotionState. However, if your application
+doesn't use the \ref rigidbody routines, you will need to explicitly create
+a MotionState in order to keep your visual and physical representations in sync.
+
+To attache a MotionState to your OSG subgraph:
+\li Call setTransform() and pass in the root node of your subgraph.
+   The node must be an osg::MatrixTransform or an osgwTools::AbsoluteModelTransform.
 \li Call setParentTransform() to specify the initial transformation
-   for the subgraph.
+   for the subgraph (usually the OSG local to world matrix from the
+   subgraph parent's NodePath).
 \li Call setCenterOfMass() to specify the xyz point corresponding
    to the origin of the Bullet collision shape used by the rigid body.
 */
 class OSGBDYNAMICS_EXPORT MotionState : public btMotionState
 {
 public:
+    /** \brief Constructor.
+
+    \param parentTransform See setParentTransform().
+    \param centerOfMass See setCenterOfMass().
+    */
     MotionState( const osg::Matrix& parentTransform = osg::Matrix::identity(),
         const osg::Vec3& centerOfMass = osg::Vec3( 0., 0., 0. ) );
+    /** \brief Destructor. */
     virtual ~MotionState( void ) { }
 
 
-    // Bullet interface routines. To be used by Bullet only.
-    // Note that setWorldTransform is called by resetTransform.
+    /** \brief Bullet interface routine for changing the rigid body (and corresponding
+    OSG visual representation) transformation.
+    
+    Bullet sets and gets the rigid body world transformation using
+    these routines (setWorldTransform() and getWorldTransform() ). They are
+    promarily for use by Bullet only, but setWorldTransform() is also called
+    internally by resetTransform. */
     virtual void setWorldTransform(const btTransform& worldTrans);
+    /** \copybrief setWorldTransform */
     virtual void getWorldTransform(btTransform& worldTrans ) const;
 
-    void setWorldTransformInternal( const btTransform& worldTrans );
 
+    /** \brief Set and get a subgraph that corresponds to the rigid body owning this MotionState.
 
-    // Attach a subgraph that corresponds to the rigid body owning
-    // this MotionState. MotionState removes the center of mass
-    // offset from its transformation before driving this subgraph.
+    \param transform The osg::Transform root of the subgraph. Bullet will use MotionState
+    to set this transformation directly. \c transform must be an osg::MatrixTransform
+    or an (osgWorls) osgwTools::AbsoluteModelTransform. */
     void setTransform( osg::Transform* transform );
+    /** \copybrief setTransform */
     osg::Transform* getTransform();
+    /** \copybrief setTransform */
     const osg::Transform* getTransform() const;
 
-    // Set the initial transformation for the subgraph. Typically,
-    // this is the accumulated model transformations of ancestor nodes.
+    /** \brief Set and get the initial transformation for the MotionState.
+
+    When making a subgraph into a rigid body, use this function to specify the initial local
+    to world transformation of the subgraph so that the physics simultation starts with the
+    rigid body in its correct initial location and orientation.
+
+    \param m The initial transformation is typically the accumulated OSG local to world
+    transformation obtained from the NodePath leading up to (but not including) the
+    subgraph root passed to setTransform(). */
     void setParentTransform( const osg::Matrix m );
+    /** \copybrief setParentTransform */
     osg::Matrix getParentTransform() const;
 
-    // Set the center of mass. This is an xyz point in the subgraph's
-    // local coordinates that corresponds to the origin in the
-    // collision shape's local coordinates.
+    /** Set and get the center of mass.
+
+    Bullet assume the origin is the rigid body center of mass. This can
+    be problematic for rigid bodies constructed from arbitrary OSG models. Use this function
+    to specify a non-origin center of mass.
+    \param com An \e xyz point in the subgraph's local coordinates that corresponds to
+    the origin in the collision shape's local coordinates. */
     void setCenterOfMass( const osg::Vec3& com );
+    /** \copybrief setCenterOfMass */
     osg::Vec3 getCenterOfMass() const;
 
+    /** Set and get the geometric scale.
+
+    Unlike OSG, Bullet does not support non-unit scaling. This can be problematic for
+    rigid bodies constructed from OSG models that employ scale transforms. Use this function
+    to specify a non-unit scale factor.
+    \param scale An \e xyz scale vector, usually extracted by decomposing the parent
+    transformation matrix. */
     void setScale( const osg::Vec3& scale );
+    /** \copybrief setScale */
     osg::Vec3 getScale() const;
 
-    // Allows application code to get modified when Bullet updates the
-    // position of a rigid body.
+    /** \brief Support for application notification of changes to the world transformation.
+
+    Derive a class from MotionStateCallback and override MotionStateCallback::operator()()
+    with the code that you want to be executed when Bullet calls setWorldTransform(). Then
+    push an instance of your callback onto this list. Your callback will be executed at
+    the beginning of the setWorldTransform() function. */
     MotionStateCallbackList& getCallbackList();
 
-    // This is a convenience routine that calls setWorldTransform with
-    // the concatenation of the center of mass and parent transform.
-    // It is called by setCenterOfMass and setParentTransform to set the
-    // initial world transformation. See setWorldTransformation for more
-    // details.
-    // Apps can call this method directly to invoke setWorldTransform() with
-    // the concatentation of the center of mass and parent transforms.
+    /** Transformation reset due to changes in center of mass and parent transformation.
+
+    This is a convenience routine that calls setWorldTransform with the
+    concatenation of the center of mass and parent transform. It is called by
+    setCenterOfMass() and setParentTransform() to set the initial world
+    transformation. See also setWorldTransformation().
+    
+    Applications typically do not need to call this function. */
     void resetTransform();
 
 
-    // TripleBuffer support. The following methods allow MotionState
-    // to keep its btTransform world transform mechanism in a TripleBuffer
-    // objects, which enables multithreaded physics simulation.
-    //
-    // Call to initially register the MotionState with the TripleBuffer.
+    /** \brief Register a MotionState for use with a TripleBuffer.
+    
+    Allows a MotionState to keep its world transform in a TripleBuffer object,
+    which enables multithreaded physics simulation. */
     void registerTripleBuffer( osgbDynamics::TripleBuffer* tb );
-    //
-    // Call to get the latest world transform value from the TripleBuffer
-    // and push it out to the OSG Transform.
+
+    /** \brief Gets the latest updated world transform value from the TripleBuffer
+    and pushes it out to the MotionState object's OSG Transform.
+    
+    Called by TripleBufferMotionStateUpdate() and not inteded for application use. */
     void updateTripleBuffer( const char* addr );
 
 private:
+    void setWorldTransformInternal( const btTransform& worldTrans );
+
     // One or the other of these will be valid, depending on whether the
     // MotionState is associated with an AbsoluteModelTransform or a
     // plain old MatrixTransform.

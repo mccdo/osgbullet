@@ -201,7 +201,8 @@ btCompoundShape* btCompoundShapeFromOSGGeodes( osg::Node* node,
 }
 btCompoundShape* btCompoundShapeFromOSGGeometry( osg::Node* node )
 {
-    // TBD
+    osg::notify( osg::WARN ) << "btCompoundShapeFromOSGGeometry: This function is not currently implemented." << std::endl;
+    throw( std::string( "btCompoundShapeFromOSGGeometry not implemented" ) );
     return( NULL );
 }
 
@@ -221,6 +222,7 @@ btCompoundShape* btCompoundShapeFromBounds( osg::Node* node,
         shape = btCylinderCollisionShapeFromOSG( node, axis );
         break;
     default:
+        osg::notify( osg::WARN ) << "btCompoundShapeFromBounds: Unsupported shapeType: " << (int)shapeType << std::endl;
         break;
     }
 

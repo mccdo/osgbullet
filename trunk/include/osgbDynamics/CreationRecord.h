@@ -91,10 +91,6 @@ struct OSGBDYNAMICS_EXPORT CreationRecord : public osg::Object
     float _reducerGroupThreshold;
     float _reducerMaxEdgeError;
     // END Reserved for future use.
-
-    // TBD remove, deprecated
-    bool _overall;
-    std::string _nodeName;
 };
 
 

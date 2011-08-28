@@ -30,6 +30,21 @@ namespace osgbDynamics
 {
 
 
+/** \defgroup rigidbody Rigid Body Creation
+\brief Convenience routines for creating Bullet rigid bodies from scene graphs.
+
+Note that these are merely convenience routines. They are based on the CreationRecord class,
+which supports the dot OSG file format. If you have no need for the CreationRecord, you can
+interface directly with Bullet to create the rigid bodies.
+
+These routines also implicitly create a MotionState to keep the OSG visual representation
+in sync with the Bullet physics representation. In order for this to work correctly, the
+root node of the subgraph stored in CreationRecord::_sceneGraph must be either an
+osg::MatrixTransform or an osgwTools::AbsoluteModelTransform (from the osgWorks project).
+*/
+/*@{*/
+
+
 /** \brief Creates a compound collision shape and rigid body from the CreationRecord data.
 
 Uses the ComputeShapeVisitor to create a btCompoundShape from the CreationRecord's scene graph.
@@ -37,9 +52,16 @@ Currently, a shape per Geode is created. CreationRecord specifies the shape type
 */
 OSGBDYNAMICS_EXPORT btRigidBody* createRigidBody( osgbDynamics::CreationRecord* cr );
 
-/** \brief Creates a rigid body from the collision shape and CreationRecord data.
+/** \overload
+<p>
+Use this function to create a rigid body if you have already created the collision shape.
+This is useful for sharing collision shapes.
+</p>
 */
 OSGBDYNAMICS_EXPORT btRigidBody* createRigidBody( osgbDynamics::CreationRecord* cr, btCollisionShape* shape );
+
+
+/**@}*/
 
 
 // osgbDynamics
