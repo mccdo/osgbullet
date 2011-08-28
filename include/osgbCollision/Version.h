@@ -31,7 +31,7 @@ namespace osgbCollision {
 // Please keep in sync with top-level CMakeLists.txt OSGBULLET_VERSION variable.
 #define OSGBCOLLISION_MAJOR_VERSION 1
 #define OSGBCOLLISION_MINOR_VERSION 1
-#define OSGBCOLLISION_SUB_VERSION 80
+#define OSGBCOLLISION_SUB_VERSION 81
 
 // C preprocessor integrated version number.
 // The form is Mmmss, where:

@@ -148,23 +148,25 @@ bool Creation_readLocalData( osg::Object& obj, osgDB::Input& fr )
         fr+=5;
         advance = true;
     }
-    else if( fr.matchSequence( "Overall" ) )
-    {
-        cr._overall = fr[1].matchString( "true" );
-        fr+=2;
-        advance = true;
-    }
-    else if( fr.matchSequence( "Node name" ) )
-    {
-        cr._nodeName = fr[2].getStr();
-        fr+=3;
-        advance = true;
-    }
     else if( fr.matchSequence( "Cylinder axis %i" ) )
     {
         unsigned int uint;
         fr[2].getUInt( uint );
         cr._axis = (osgbCollision::AXIS)( uint );
+        fr+=3;
+        advance = true;
+    }
+
+    // Version 1, for backwards compatibility
+    else if( ( cr._version < 2 ) && ( fr.matchSequence( "Overall" ) ) )
+    {
+        cr._overall = fr[1].matchString( "true" );
+        fr+=2;
+        advance = true;
+    }
+    else if( ( cr._version < 2 ) && ( fr.matchSequence( "Node name" ) ) )
+    {
+        cr._nodeName = fr[2].getStr();
         fr+=3;
         advance = true;
     }
@@ -192,9 +194,14 @@ bool Creation_writeLocalData( const osg::Object& obj, osgDB::Output& fw )
     fw.indent() << "Reducer group threshold " << cr._reducerGroupThreshold << std::endl;
     fw.indent() << "Reducer max edge error " << cr._reducerMaxEdgeError << std::endl;
 
-    fw.indent() << "Overall " << cr._overall << std::endl;
-    if( !cr._nodeName.empty() )
-        fw.indent() << "Node name " << cr._nodeName << std::endl;
+    if( cr._version < 2 )
+    {
+        // _overall and _nodeName were remived in version 2.
+        fw.indent() << "Overall " << cr._overall << std::endl;
+        if( !cr._nodeName.empty() )
+            fw.indent() << "Node name " << cr._nodeName << std::endl;
+    }
+
     fw.indent() << "Cylinder axis " << cr._axis << std::endl;
 
     return( true );

@@ -23,16 +23,18 @@
 #include <osgDB/FileNameUtils>
 #include <osgDB/FileUtils>
 #include <osgGA/TrackballManipulator>
+#include <osgGA/GUIEventHandler>
 #include <osg/ShapeDrawable>
 #include <osg/Geode>
 
 #include <btBulletDynamicsCommon.h>
 
+#include <osgbCollision/GLDebugDrawer.h>
 #include <osgbCollision/Version.h>
 #include <osgbDynamics/MotionState.h>
 #include <osgbCollision/CollisionShapes.h>
 #include <osgbCollision/RefBulletObject.h>
-#include <osgbDynamics/OSGToCollada.h>
+#include <osgbDynamics/RigidBody.h>
 #include <osgbCollision/Utils.h>
 
 #include <osgwTools/AbsoluteModelTransform.h>
@@ -41,6 +43,40 @@
 #include <iostream>
 #include <sstream>
 
+
+
+/** \cond */
+class ResetHandler : public osgGA::GUIEventHandler
+{
+public:
+    ResetHandler( btRigidBody* rb )
+      : _rb( rb )
+    {}
+
+    virtual bool handle( const osgGA::GUIEventAdapter& ea, osgGA::GUIActionAdapter& aa )
+    {
+        if( ( ea.getEventType() == osgGA::GUIEventAdapter::KEYDOWN ) &&
+            ( ea.getKey() == osgGA::GUIEventAdapter::KEY_BackSpace ) )
+        {
+            osgbDynamics::MotionState* motion = static_cast< osgbDynamics::MotionState* >( _rb->getMotionState() );
+            osg::Vec3& com = motion->getCenterOfMass();
+
+            btTransform wt; wt.setIdentity();
+            wt.setOrigin( osgbCollision::asBtVector3( com ) );
+            _rb->setWorldTransform( wt );
+
+            btVector3 zero( 0., 0., 0. );
+            _rb->setAngularVelocity( zero );
+            _rb->setLinearVelocity( zero );
+            return( true );
+        }
+        return( false );
+    }
+
+protected:
+    btRigidBody* _rb;
+};
+/** \endcond */
 
 
 btDynamicsWorld* initPhysics()
@@ -79,27 +115,24 @@ osg::Transform* createOSGBox( osg::Vec3 size )
 osg::Node*
 createGround( float w, float h, const osg::Vec3& center )
 {
-    osg::Transform* ground = createOSGBox( osg::Vec3( w, h, .01 ) );
+    osg::Transform* ground = createOSGBox( osg::Vec3( w, h, .05 ) );
 
-    osgbDynamics::OSGToCollada converter;
-    converter.setSceneGraph( ground );
-    converter.setShapeType( BOX_SHAPE_PROXYTYPE );
-    converter.setMass( 0.f );
-    converter.convert();
+    osg::ref_ptr< osgbDynamics::CreationRecord > cr = new osgbDynamics::CreationRecord;
+    cr->_sceneGraph = ground;
+    cr->_shapeType = BOX_SHAPE_PROXYTYPE;
+    cr->_mass = 0.f;
+    btRigidBody* body = osgbDynamics::createRigidBody( cr.get(),
+        osgbCollision::btBoxCollisionShapeFromOSG( ground ) );
 
-    btRigidBody* body = converter.getRigidBody();
-
-    // OSGToCollada flattens transformation to transform all
-    // verts, but that doesn't work with ShapeDrawables, so we must
-    // transform the box explicitly.
-    osgbDynamics::MotionState* motion = dynamic_cast< osgbDynamics::MotionState* >( body->getMotionState() );
+    // Transform the box explicitly.
+    osgbDynamics::MotionState* motion = static_cast< osgbDynamics::MotionState* >( body->getMotionState() );
     osg::Matrix m( osg::Matrix::translate( center ) );
     motion->setParentTransform( m );
     body->setWorldTransform( osgbCollision::asBtTransform( m ) );
 
-    ground->setUserData( new osgbCollision::RefBulletObject< btRigidBody >( body ) );
+    ground->setUserData( new osgbCollision::RefRigidBody( body ) );
 
-    return ground;
+    return( ground );
 }
 
 int main( int argc,
@@ -119,31 +152,14 @@ int main( int argc,
     arguments.getApplicationUsage()->addCommandLineOption( "--triMesh", "It creates a tri mesh collision shape (suitable for static objects)." );
     arguments.getApplicationUsage()->addCommandLineOption( "--convexTM", "Creates a convex tri mesh collision shape." );
     arguments.getApplicationUsage()->addCommandLineOption( "--convexHull", "Creates a convex hull collision shape." );
-
-    arguments.getApplicationUsage()->addCommandLineOption( "--overall", "Creates a single collision shape for the entire input scene graph or named subgraph (see --name), rather than a collision shape per Geode, which is the default." );
-    arguments.getApplicationUsage()->addCommandLineOption( "--name <name>", "Interprets the scene graph from the first occurence of the named node. If not specified, the entire scene graph is processed." );
     arguments.getApplicationUsage()->addCommandLineOption( "--mass <n>", "Specifies the desired rigid body mass value. The default is 1.0." );
+    arguments.getApplicationUsage()->addCommandLineOption( "--debug", "Use the GLDebugDrawer class to display collision shapes." );
+
+    arguments.getApplicationUsage()->addCommandLineOption( "--overall", "Creates a single collision shape for the entire input scene graph, rather than a collision shape per Geode, which is the default." );
+
     arguments.getApplicationUsage()->addCommandLineOption( "-h or --help", "Displays help text and command line documentation." );
     arguments.getApplicationUsage()->addCommandLineOption( "-v or --version", "Display the osgBullet version string." );
 
-
-    if( arguments.read( "-h" ) || arguments.read( "--help" ) )
-    {
-        arguments.getApplicationUsage()->write( osg::notify( osg::ALWAYS ), osg::ApplicationUsage::COMMAND_LINE_OPTION );
-        return 1;
-    }
-
-    if (arguments.errors())
-    {
-        arguments.writeErrorMessages( osg::notify( osg::FATAL ) );
-        return 1;
-    }
-
-    if ( arguments.argc() <= 1 )
-    {
-        arguments.getApplicationUsage()->write( osg::notify( osg::FATAL ), osg::ApplicationUsage::COMMAND_LINE_OPTION );
-        return 1;
-    }
 
     if( arguments.read( "-v" ) || arguments.read( "--version" ) )
     {
@@ -153,6 +169,22 @@ int main( int argc,
         osg::notify( osg::ALWAYS ) << " double precision";
 #endif
         osg::notify( osg::ALWAYS ) << ")" << std::endl << std::endl;
+    }
+
+    const bool briefHelp = arguments.read( "-h" );
+    const bool fullHelp = arguments.read( "--help" );
+    if( briefHelp )
+        osg::notify( osg::ALWAYS ) << "Usage: " << arguments.getApplicationUsage()->getCommandLineUsage() << std::endl;
+    else if( fullHelp )
+        arguments.getApplicationUsage()->write( osg::notify( osg::ALWAYS ), osg::ApplicationUsage::COMMAND_LINE_OPTION );
+    if( briefHelp || fullHelp )
+        osg::notify( osg::ALWAYS ) << "Use the backspace key to reset the physics simultation." << std::endl;
+
+    if( arguments.argc() <= 1 )
+    {
+        if( !briefHelp && !fullHelp )
+            arguments.getApplicationUsage()->write( osg::notify( osg::FATAL ), osg::ApplicationUsage::COMMAND_LINE_OPTION );
+        return 1;
     }
 
     // Get all arguments.
@@ -274,14 +306,6 @@ int main( int argc,
     if (vertexAggMaxVerts > 0 )
         osg::notify( osg::INFO ) << "osgbpp: VertexAggOp: " << vertexAggMaxVerts << ", " << vertexAggMinCellSize << std::endl;
 
-    const bool overall( arguments.read( "--overall" ) );
-    if (overall)
-        osg::notify( osg::INFO ) << "osgbpp: Overall" << std::endl;
-
-    std::string nodeName;
-    if ( arguments.read( "--name", nodeName ) )
-        osg::notify( osg::INFO ) << "osgbpp: Node name: " << nodeName << std::endl;
-
     float mass( 1.f );
     if ( arguments.read( "--mass", str ) )
     {
@@ -306,80 +330,128 @@ int main( int argc,
     }
 
 
+    const bool overall( arguments.read( "--overall" ) );
+    if (overall)
+        osg::notify( osg::INFO ) << "osgbpp: Overall" << std::endl;
+
+
+    osgbCollision::GLDebugDrawer dbgDraw;
+    const bool debug( arguments.read( "--debug" ) );
+    if( debug )
+    {
+        osg::notify( osg::INFO ) << "osgbpp: Debug" << std::endl;
+        dbgDraw.setDebugMode( ~btIDebugDraw::DBG_DrawText );
+    }
+
+    osgViewer::Viewer viewer( arguments );
+
+    arguments.reportRemainingOptionsAsUnrecognized();
+    arguments.writeErrorMessages( osg::notify( osg::WARN ) );
+
 
     osg::ref_ptr< osg::Node > model = osgDB::readNodeFiles( arguments );
     if( !model )
     {
         osg::notify( osg::FATAL ) << "Can't load input file(s)." << std::endl;
+        osg::notify( osg::ALWAYS ) << "Usage: " << arguments.getApplicationUsage()->getCommandLineUsage() << std::endl;
         return 1;
     }
     osg::notify( osg::INFO ) << "osgbpp: Loaded model(s)." << std::endl;
 
+    osg::BoundingSphere bs = model->getBound();
 
-    osgbDynamics::OSGToCollada converter;
+
+
+    osg::ref_ptr< osgwTools::AbsoluteModelTransform > amtRoot( new osgwTools::AbsoluteModelTransform );
+    amtRoot->addChild( model.get() );
+
+    osg::ref_ptr< osgbDynamics::CreationRecord > cr = new osgbDynamics::CreationRecord;
+    cr->_sceneGraph = amtRoot.get();
     if( comSpecified )
-        converter.setCenterOfMass( com );
-    converter.setSceneGraph( model.get() );
-    converter.setShapeType( shapeType );
-    converter.setMass( mass );
+        cr->setCenterOfMass( com );
+    cr->_shapeType = shapeType;
+    cr->_mass = mass;
+    cr->_axis = axis;
 
-    converter.setOverall( overall );
-    converter.setNodeName( nodeName );
-    converter.setAxis( axis );
-
-    converter.convert();
-    osg::notify( osg::INFO ) << "osgbpp: Completed Collada conversion." << std::endl;
-
-    // TBD we can deallocate 'model' here, but don't want to deallocate 'converter' yet...
-
-
-    osg::ref_ptr< osgwTools::AbsoluteModelTransform > loadedModel( new osgwTools::AbsoluteModelTransform );
+    btRigidBody* rb( NULL );
+    if( overall )
     {
-        osg::Node* load = osgDB::readNodeFiles( arguments );
-        if( !load )
+        osg::Matrix m;
+        if( comSpecified )
+            m.setTrans( -com );
+        else
+            m.setTrans( -bs.center() );
+        osg::ref_ptr< osg::MatrixTransform > mt = new osg::MatrixTransform( m );
+        mt->addChild( model.get() );
+
+        btCollisionShape* shape( NULL );
+        switch( shapeType )
         {
-            osg::notify( osg::FATAL ) << "Can't load input file(s)." << std::endl;
-            return 1;
+        case BOX_SHAPE_PROXYTYPE:
+            shape = osgbCollision::btCompoundShapeFromBounds( mt.get(), BOX_SHAPE_PROXYTYPE );
+            //shape = osgbCollision::btBoxCollisionShapeFromOSG( mt.get() );
+            break;
+        case SPHERE_SHAPE_PROXYTYPE:
+            shape = osgbCollision::btCompoundShapeFromBounds( mt.get(), SPHERE_SHAPE_PROXYTYPE );
+            //shape = osgbCollision::btSphereCollisionShapeFromOSG( mt.get() );
+            break;
+        case CYLINDER_SHAPE_PROXYTYPE:
+            shape = osgbCollision::btCompoundShapeFromBounds( mt.get(), CYLINDER_SHAPE_PROXYTYPE, axis );
+            //shape = osgbCollision::btCylinderCollisionShapeFromOSG( mt.get(), axis );
+            break;
+        case TRIANGLE_MESH_SHAPE_PROXYTYPE:
+            shape = osgbCollision::btTriMeshCollisionShapeFromOSG( mt.get() );
+            break;
+        case CONVEX_TRIANGLEMESH_SHAPE_PROXYTYPE:
+            shape = osgbCollision::btConvexTriMeshCollisionShapeFromOSG( mt.get() );
+            break;
+        case CONVEX_HULL_SHAPE_PROXYTYPE:
+            shape = osgbCollision::btConvexHullCollisionShapeFromOSG( mt.get() );
+            break;
         }
-        loadedModel->addChild( load );
-        if( mass != 0)
-            loadedModel->setDataVariance( osg::Object::DYNAMIC );
+        if( shape != NULL )
+            rb = osgbDynamics::createRigidBody( cr.get(), shape );
     }
-    osg::notify( osg::INFO ) << "osgbpp: Reloaded model(s) for display." << std::endl;
-
-    btRigidBody* rb = converter.getRigidBody();
-    osgbDynamics::MotionState* motion = new osgbDynamics::MotionState;
-    motion->setTransform( loadedModel.get() );
-    osg::BoundingSphere bs = loadedModel->getBound();
-
-    if( comSpecified )
-        motion->setCenterOfMass( com );
     else
-        motion->setCenterOfMass( bs.center() );
-    rb->setMotionState( motion );
+    {
+        rb = osgbDynamics::createRigidBody( cr.get() );
+    }
+    if( rb == NULL )
+    {
+        osg::notify( osg::FATAL ) << "osgbpp: NULL rigid body." << std::endl;
+        return( 1 );
+    }
+    rb->setActivationState( DISABLE_DEACTIVATION );
 
 
-    osgViewer::Viewer viewer( arguments );
+
     viewer.setUpViewInWindow( 10, 30, 800, 600 );
 
     osgGA::TrackballManipulator* tb = new osgGA::TrackballManipulator();
     viewer.setCameraManipulator( tb );
+    viewer.addEventHandler( new ResetHandler( rb ) );
 
     osg::ref_ptr<osg::Group> root = new osg::Group();
-    root->addChild( loadedModel.get() );
+    root->addChild( amtRoot.get() );
 
 
     btDynamicsWorld* dynamicsWorld = initPhysics();
     dynamicsWorld->addRigidBody( rb );
 
+    if( debug )
+    {
+        root->addChild( dbgDraw.getSceneGraph() );
+        dynamicsWorld->setDebugDrawer( &dbgDraw );
+    }
+
     // Compute a reasonable ground plane size based on the bounding sphere radius.
-    float dim = loadedModel->getBound()._radius * 1.5;
-    osg::Vec3 cen = loadedModel->getBound()._center;
+    float dim = bs._radius * 1.5;
+    osg::Vec3 cen = bs._center;
     cen[ 2 ] -= dim;
     osg::ref_ptr< osg::Node > ground = createGround( dim, dim, cen );
     root->addChild( ground.get() );
-    osgbCollision::RefBulletObject< btRigidBody >* body = dynamic_cast<
-        osgbCollision::RefBulletObject< btRigidBody >* >( ground->getUserData() );
+    osgbCollision::RefRigidBody* body = dynamic_cast<
+        osgbCollision::RefRigidBody* >( ground->getUserData() );
     dynamicsWorld->addRigidBody( body->get() );
 
 
@@ -387,13 +459,23 @@ int main( int argc,
     double prevSimTime = viewer.getFrameStamp()->getSimulationTime();
 
     viewer.setSceneData( root.get() );
-    viewer.realize();
+    viewer.realize(); // So that init time doesn't count against physics sim.
 
     while( !viewer.done())
     {
+        if( debug )
+            dbgDraw.BeginDraw();
+
         currSimTime = viewer.getFrameStamp()->getSimulationTime();
         dynamicsWorld->stepSimulation( currSimTime - prevSimTime );
         prevSimTime = currSimTime;
+
+        if( debug )
+        {
+            dynamicsWorld->debugDrawWorld();
+            dbgDraw.EndDraw();
+        }
+
         viewer.frame();
     }
 

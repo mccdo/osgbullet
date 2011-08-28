@@ -29,10 +29,16 @@
 #include <osg/Geometry>
 
 #include <osgwTools/AbsoluteModelTransform.h>
-#include <osgwTools/Version.h>
+#include <osgwTools/InsertRemove.h>
 #include <osgwTools/Shapes.h>
+#include <osgwTools/Version.h>
 
+#define NEW_RB
+#ifdef NEW_RB
+#include <osgbDynamics/RigidBody.h>
+#else
 #include <osgbDynamics/OSGToCollada.h>
+#endif
 #include <osgbDynamics/MotionState.h>
 #include <osgbCollision/Utils.h>
 #include <osgbCollision/GLDebugDrawer.h>
@@ -464,6 +470,7 @@ findScale( osg::NodePath& np )
 void
 enablePhysics( osg::Node* root, const std::string& nodeName, btDynamicsWorld* bw, const osg::Vec3& com )
 {
+#ifdef NEW_RB
     bool useCom( com != osg::Vec3( 0., 0., 0. ) );
 
     osgwTools::FindNamedNode fnn( nodeName );
@@ -474,9 +481,59 @@ enablePhysics( osg::Node* root, const std::string& nodeName, btDynamicsWorld* bw
         return;
     }
     osg::Node* node = fnn._napl[ 0 ].first;
+    osg::NodePath np = fnn._napl[ 0 ].second;
+    osg::BoundingSphere bs( node->getBound() );
+    const osg::Matrix parentTrans = osg::computeLocalToWorld( np ); // Note that this might contain a scale.
+
+    // Find out if we are scaled, and if so, what is the xyz scale vector.
+    const osg::Vec3 sVec = findScale( np );
+
+    osg::ref_ptr< osgwTools::AbsoluteModelTransform > amt = new osgwTools::AbsoluteModelTransform;
+    amt->setDataVariance( osg::Object::DYNAMIC );
+    osgwTools::insertAbove( node, amt.get() );
+
+
+    osg::ref_ptr< osgbDynamics::CreationRecord > cr = new osgbDynamics::CreationRecord;
+    cr->_sceneGraph = amt.get();
+    cr->_shapeType = CONVEX_HULL_SHAPE_PROXYTYPE;
+    if( useCom )
+        cr->setCenterOfMass( com );
+    cr->_mass = 1.;
+    cr->_scale = sVec;
+    btRigidBody* rb = osgbDynamics::createRigidBody( cr.get() );
+
+    osgbDynamics::MotionState* motion = static_cast< osgbDynamics::MotionState* >( rb->getMotionState() );
+
+
+    // The scaling factor will either be (1,1,1) or the scale that we found in the NodePath.
+    // Either way, just go ahead and set it here, though MotionState defaults the scale to
+    // (1,1,1) so we really don't need to set it in that case.
+    motion->setScale( sVec );
+    // The parent transform (the local to world matrix extracted from the NodePath) might contain
+    // a scale. However, the setParentTransform function orthonormalizes the matrix, which
+    // eliminates any scale. So, even though Bullet doesn't support scaling, you can still pass in
+    // a parent transform with a scale, and MotionState will just ignore it. (You must pass in any
+    // parent scale transform using setScale.)
+    motion->setParentTransform( parentTrans );
+
+    rb->setWorldTransform( osgbCollision::asBtTransform( parentTrans ) );
+    bw->addRigidBody( rb );
+
+#else
+
+    bool useCom( com != osg::Vec3( 0., 0., 0. ) );
+
+    osgwTools::FindNamedNode fnn( nodeName );
+    root->accept( fnn );
+    if( fnn._napl.empty() )
+    {
+        osg::notify( osg::WARN ) << "Can't find node \"" << nodeName << "\"" << std::endl;
+        return;
+    }
+    osg::Node* node = fnn._napl[ 0 ].first;
+    osg::NodePath np = fnn._napl[ 0 ].second;
     osg::BoundingSphere bs( node->getBound() );
     osg::Group* parent = node->getParent( 0 );
-    osg::NodePath np = fnn._napl[ 0 ].second;
     const osg::Matrix parentTrans = osg::computeLocalToWorld( np ); // Note that this might contain a scale.
 
     // Find out if we are scaled, and if so, what is the xyz scale vector.
@@ -545,6 +602,7 @@ enablePhysics( osg::Node* root, const std::string& nodeName, btDynamicsWorld* bw
 
     parent->addChild( model.get() );
     parent->removeChild( node );
+#endif
 }
 
 
@@ -566,10 +624,10 @@ main( int argc,
     viewer.setCameraManipulator( tb );
 
 
-    osgbCollision::GLDebugDrawer* dbgDraw = new osgbCollision::GLDebugDrawer();
-    dbgDraw->setDebugMode( ~btIDebugDraw::DBG_DrawText );
-    bulletWorld->setDebugDrawer( dbgDraw );
-    root->addChild( dbgDraw->getSceneGraph() );
+    osgbCollision::GLDebugDrawer dbgDraw;
+    dbgDraw.setDebugMode( ~btIDebugDraw::DBG_DrawText );
+    bulletWorld->setDebugDrawer( &dbgDraw );
+    root->addChild( dbgDraw.getSceneGraph() );
 
     double currSimTime = viewer.getFrameStamp()->getSimulationTime();
     double prevSimTime = viewer.getFrameStamp()->getSimulationTime();
@@ -577,14 +635,14 @@ main( int argc,
 
     while( !viewer.done() )
     {
-        dbgDraw->BeginDraw();
+        dbgDraw.BeginDraw();
 
         currSimTime = viewer.getFrameStamp()->getSimulationTime();
         bulletWorld->stepSimulation( currSimTime - prevSimTime );
         prevSimTime = currSimTime;
 
         bulletWorld->debugDrawWorld();
-        dbgDraw->EndDraw();
+        dbgDraw.EndDraw();
 
         viewer.frame();
     }

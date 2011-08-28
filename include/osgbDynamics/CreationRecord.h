@@ -42,12 +42,14 @@ namespace osgbDynamics
 /** \class CreationRecord CreationRecord.h <osgbDynamics/CreationRecord.h>
 \brief Data record for rigid body construction information.
 
-Fill in this struct and pass it to the OSGToCollada constructor
-as a one-step config process, or first configure OSGToCollada
-and then get this record from it, and store it as UserData on
-the rigid body subgraph root node to facilitate saving and
-restoring physics state.
-*/
+Fill in this struct and pass it to the createRigidBody functions
+to specify rigid body (and collision shape) construction parameters.
+
+This record can be stored in UserData on the rigid body subgraph
+root node to facilitate saving and restoring physics state.
+
+This struct can be serialized to/from the .osg file format. See the
+osgdb_osgbDynamics plugin. */
 struct OSGBDYNAMICS_EXPORT CreationRecord : public osg::Object
 {
     CreationRecord();
@@ -57,15 +59,29 @@ struct OSGBDYNAMICS_EXPORT CreationRecord : public osg::Object
 
     osg::Node* _sceneGraph;
 
+    /** The dot OSG representation of this class maintains a version number for
+    debugging purposes, allow deprecation or old data, and allow introduction
+    of new data. Do not explicitly set this value. The constructor initializes
+    this to the current version, and the dot OSG read function Creation_readLocalData()
+    will set it based on the value found in the dot OSG file being loaded. */
     unsigned int _version;
 
+    /** Specify the center of mass. If not set, osgbDynamics::createRigidBody
+    will use the scene graph bounding volume center as the center of mass. */
+    void setCenterOfMass( const osg::Vec3& com );
     osg::Vec3 _com;
     bool _comSet;
+
     osg::Vec3 _scale;
     BroadphaseNativeTypes _shapeType;
     float _mass;
 
+    /** For _shapeType == CYLINDER_SHAPE_PROXYTYPE only. */
+    osgbCollision::AXIS _axis;
+
     // Reserved for future use.
+    // TBD need to incorporate new ShortEdgeOp and ReducerOp tools.
+    // Looks like Reducer is already used below...
     float _decimatorPercent;
     float _decimatorMaxError;
     bool  _decimatorIgnoreBoundaries;
@@ -76,9 +92,9 @@ struct OSGBDYNAMICS_EXPORT CreationRecord : public osg::Object
     float _reducerMaxEdgeError;
     // END Reserved for future use.
 
+    // TBD remove, deprecated
     bool _overall;
     std::string _nodeName;
-    osgbCollision::AXIS _axis;
 };
 
 

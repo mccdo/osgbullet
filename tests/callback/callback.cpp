@@ -23,7 +23,7 @@
 #include <osgGA/TrackballManipulator>
 #include <osg/ShapeDrawable>
 
-#include <osgbDynamics/OSGToCollada.h>
+#include <osgbDynamics/RigidBody.h>
 #include <osgbDynamics/MotionState.h>
 #include <osgbDynamics/GroundPlane.h>
 #include <osgbCollision/CollisionShapes.h>
@@ -82,46 +82,29 @@ enablePhysics( osg::Node* root, const std::string& nodeName, btDynamicsWorld* bw
         return;
     }
     osg::Node* node = fnn._napl[ 0 ].first;
+    osg::NodePath& np = fnn._napl[ 0 ].second;
     osg::BoundingSphere bs( node->getBound() );
-    osg::Group* parent = node->getParent( 0 );
-    osg::NodePath np = fnn._napl[ 0 ].second;
     const osg::Matrix parentTrans = osg::computeLocalToWorld( np ); // Note that this might contain a scale.
 
-
-    // Copy the subgraph for use with OSGToCollada.
-    osg::Group* asGrp = node->asGroup();
-    osg::ref_ptr< osg::Group > copyGrp = new osg::Group( *asGrp, osg::CopyOp::DEEP_COPY_ALL );
-
-    osgbDynamics::OSGToCollada converter;
-    converter.setSceneGraph( copyGrp.get() );
-    converter.setShapeType( BOX_SHAPE_PROXYTYPE );
-    converter.setMass( 1. );
-    converter.setOverall( true );
-
-    converter.convert();
 
     osg::ref_ptr< osgwTools::AbsoluteModelTransform > model( new osgwTools::AbsoluteModelTransform );
     model->setDataVariance( osg::Object::DYNAMIC );
     osgwTools::insertAbove( node, model.get() );
 
-    btRigidBody* rb = converter.getRigidBody();
-    osgbDynamics::MotionState* motion = new osgbDynamics::MotionState;
+    btBoxShape* shape = osgbCollision::btBoxCollisionShapeFromOSG( model.get() );
 
-    // Test callback
-    motion->getCallbackList().push_back( new MyCallback );
-
-    motion->setTransform( model.get() );
+    osg::ref_ptr< osgbDynamics::CreationRecord > cr = new osgbDynamics::CreationRecord;
+    cr->_sceneGraph = model.get();
     if( bs.center() != osg::Vec3( 0., 0., 0. ) )
-        // If we don't have an explicit COM, and OSGToCollada auto compute was enabled (default),
-        // then we need to explicitly set the COM here to be the bounding sphere center.
-        motion->setCenterOfMass( bs.center() );
-    // The parent transform (the local to world matrix extracted from the NodePath) might contain
-    // a scale. However, the setParentTransform function orthonormalizes the matrix, which
-    // eliminates any scale. So, even though Bullet doesn't support scaling, you can still pass in
-    // a parent transform with a scale, and MotionState will just ignore it. (You must pass in any
-    // parent scale transform using setScale.)
+        cr->setCenterOfMass( bs.center() );
+    cr->_shapeType = BOX_SHAPE_PROXYTYPE;
+    cr->_mass = 3.;
+    btRigidBody* rb = osgbDynamics::createRigidBody( cr.get(), shape );
+
+    osgbDynamics::MotionState* motion = static_cast< osgbDynamics::MotionState* >( rb->getMotionState() );
+    motion->getCallbackList().push_back( new MyCallback );
     motion->setParentTransform( parentTrans );
-    rb->setMotionState( motion );
+
     rb->setAngularVelocity( btVector3( 3., 5., 0. ) );
     bw->addRigidBody( rb );
 }

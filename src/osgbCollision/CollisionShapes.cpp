@@ -193,9 +193,6 @@ btConvexHullShape* btConvexHullCollisionShapeFromOSG( osg::Node* node )
 btCompoundShape* btCompoundShapeFromOSGGeodes( osg::Node* node,
     const BroadphaseNativeTypes shapeType, const osgbCollision::AXIS axis )
 {
-    osgwTools::ForceFlattenTransforms fft;
-    node->accept( fft );
-
     ComputeShapeVisitor csv( shapeType, axis );
     node->accept( csv );
 
@@ -206,6 +203,37 @@ btCompoundShape* btCompoundShapeFromOSGGeometry( osg::Node* node )
 {
     // TBD
     return( NULL );
+}
+
+btCompoundShape* btCompoundShapeFromBounds( osg::Node* node,
+    const BroadphaseNativeTypes shapeType, const osgbCollision::AXIS axis )
+{
+    btCollisionShape* shape( NULL );
+    switch( shapeType )
+    {
+    case BOX_SHAPE_PROXYTYPE:
+        shape = btBoxCollisionShapeFromOSG( node );
+        break;
+    case SPHERE_SHAPE_PROXYTYPE:
+        shape = btSphereCollisionShapeFromOSG( node );
+        break;
+    case CYLINDER_SHAPE_PROXYTYPE:
+        shape = btCylinderCollisionShapeFromOSG( node, axis );
+        break;
+    default:
+        break;
+    }
+
+    osg::ComputeBoundsVisitor cbv;
+    node->accept( cbv );
+    btVector3 center( osgbCollision::asBtVector3( cbv.getBoundingBox().center() ) );
+
+    btTransform wt; wt.setIdentity();
+    wt.setOrigin( center );
+
+    btCompoundShape* xformShape = new btCompoundShape;
+    xformShape->addChildShape( wt, shape );
+    return( xformShape );
 }
 
 

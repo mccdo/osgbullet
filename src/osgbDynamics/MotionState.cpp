@@ -110,14 +110,12 @@ MotionState::getWorldTransform(btTransform& worldTrans ) const
 void
 MotionState::setWorldTransformInternal( const btTransform& worldTrans )
 {
-    // This OSG matrix will be used to transform OSG debug geometry, if enabled.
-    osg::Matrix dt = osgbCollision::asOsgMatrix( worldTrans );
-
     // Compute the transformation of the OSG visual representation.
+    const osg::Matrix dt = osgbCollision::asOsgMatrix( worldTrans );
     const osg::Vec3 cs( _com[0]*_scale[0], _com[1]*_scale[1], _com[2]*_scale[2] );
-    osg::Matrix negCS = osg::Matrix::translate( -cs );
-    osg::Matrix scale = osg::Matrix::scale( _scale );
-    osg::Matrix t = scale * negCS * dt;
+    const osg::Matrix negCS = osg::Matrix::translate( -cs );
+    const osg::Matrix scale = osg::Matrix::scale( _scale );
+    const osg::Matrix t = scale * negCS * dt;
 
     if( _mt.valid() )
         _mt->setMatrix( t );

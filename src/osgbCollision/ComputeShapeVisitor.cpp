@@ -22,7 +22,9 @@
 #include <osg/ComputeBoundsVisitor>
 #include <osg/Geode>
 #include <osg/Notify>
+#include <osgwTools/Transform.h>
 #include <osgbCollision/Utils.h>
+#include <osgwTools/AbsoluteModelTransform.h>
 
 
 namespace osgbCollision
@@ -34,16 +36,28 @@ ComputeShapeVisitor::ComputeShapeVisitor( const BroadphaseNativeTypes shapeType,
   : osg::NodeVisitor( traversalMode ),
     _shapeType( shapeType ),
     _axis( axis ),
-    _shape( NULL )
+    _shape( new btCompoundShape() )
 {
-    _shape = new btCompoundShape();
+}
+
+void ComputeShapeVisitor::apply( osg::Transform& node )
+{
+    const bool nonAMT = ( dynamic_cast< osgwTools::AbsoluteModelTransform* >( &node ) == NULL );
+    if( nonAMT )
+        _localNodePath.push_back( &node );
+
+    traverse( node );
+
+    if( nonAMT )
+        _localNodePath.pop_back();
 }
 
 void ComputeShapeVisitor::apply( osg::Geode& node )
 {
     osg::notify( osg::DEBUG_INFO ) << "Geode" << std::endl;
 
-    createAndAddShape( node );
+    osg::Matrix m = osg::computeLocalToWorld( _localNodePath );
+    createAndAddShape( node, m );
 }
 
 btCollisionShape* ComputeShapeVisitor::getShape()
@@ -55,11 +69,11 @@ const btCollisionShape* ComputeShapeVisitor::getShape() const
     return( _shape );
 }
 
-void ComputeShapeVisitor::createAndAddShape( osg::Node& node )
+void ComputeShapeVisitor::createAndAddShape( osg::Node& node, const osg::Matrix& m )
 {
     osg::notify( osg::DEBUG_INFO ) << "In createAndAddShape" << std::endl;
 
-    btCollisionShape* child = createShape( node );
+    btCollisionShape* child = createShape( node, m );
     if( child )
     {
         btCompoundShape* master = static_cast< btCompoundShape* >( _shape );
@@ -67,9 +81,23 @@ void ComputeShapeVisitor::createAndAddShape( osg::Node& node )
         master->addChildShape( transform, child );
     }
 }
-btCollisionShape* ComputeShapeVisitor::createShape( osg::Node& node )
+btCollisionShape* ComputeShapeVisitor::createShape( osg::Node& node, const osg::Matrix& m )
 {
     osg::notify( osg::DEBUG_INFO ) << "In createShape" << std::endl;
+
+    // Make a copy of the incoming node and its date, then
+    // transform the copy by the specified matrix.
+    osg::Node* nodeCopy;
+    if( node.asGeode() != NULL )
+    {
+        nodeCopy = new osg::Geode( *( node.asGeode() ), osg::CopyOp::DEEP_COPY_ALL );
+        osgwTools::transform( m, nodeCopy->asGeode() );
+    }
+    else
+    {
+        osg::notify( osg::WARN ) << "ComputeShapeVisitor encountered non-Geode." << std::endl;
+        return( NULL );
+    }
 
     btCollisionShape* collision( NULL );
     osg::Vec3 center;
@@ -79,47 +107,47 @@ btCollisionShape* ComputeShapeVisitor::createShape( osg::Node& node )
     case BOX_SHAPE_PROXYTYPE:
     {
         osg::ComputeBoundsVisitor cbv;
-        node.accept( cbv );
+        nodeCopy->accept( cbv );
         osg::BoundingBox bb = cbv.getBoundingBox();
         center = bb.center();
-        collision = osgbCollision::btBoxCollisionShapeFromOSG( &node, &bb );
+        collision = osgbCollision::btBoxCollisionShapeFromOSG( nodeCopy, &bb );
         break;
     }
     case SPHERE_SHAPE_PROXYTYPE:
     {
-        osg::BoundingSphere bs = node.getBound();
+        osg::BoundingSphere bs = nodeCopy->getBound();
         center = bs.center();
-        collision = osgbCollision::btSphereCollisionShapeFromOSG( &node );
+        collision = osgbCollision::btSphereCollisionShapeFromOSG( nodeCopy );
         break;
     }
     case CYLINDER_SHAPE_PROXYTYPE:
     {
-        osg::BoundingSphere bs = node.getBound();
+        osg::BoundingSphere bs = nodeCopy->getBound();
         center = bs.center();
-        collision = osgbCollision::btCylinderCollisionShapeFromOSG( &node, _axis );
+        collision = osgbCollision::btCylinderCollisionShapeFromOSG( nodeCopy, _axis );
         break;
     }
     case TRIANGLE_MESH_SHAPE_PROXYTYPE:
     {
         // Do _not_ compute center of bounding sphere for tri meshes.
-        collision = osgbCollision::btTriMeshCollisionShapeFromOSG( &node );
+        collision = osgbCollision::btTriMeshCollisionShapeFromOSG( nodeCopy );
         break;
     }
     case CONVEX_TRIANGLEMESH_SHAPE_PROXYTYPE:
     {
         // Do _not_ compute center of bounding sphere for tri meshes.
-        collision = osgbCollision::btConvexTriMeshCollisionShapeFromOSG( &node );
+        collision = osgbCollision::btConvexTriMeshCollisionShapeFromOSG( nodeCopy );
         break;
     }
     case CONVEX_HULL_SHAPE_PROXYTYPE:
     {
         // Do _not_ compute center of bounding sphere for tri meshes.
-        collision = osgbCollision::btConvexHullCollisionShapeFromOSG( &node );
+        collision = osgbCollision::btConvexHullCollisionShapeFromOSG( nodeCopy );
         break;
     }
     default:
     {
-        osg::notify( osg::FATAL ) << "OSGToCollada: Error, unknown shape type, using tri mesh." << std::endl;
+        osg::notify( osg::FATAL ) << "ComputeShapeVisitor: Error, unknown shape type, using tri mesh." << std::endl;
         break;
     }
     }

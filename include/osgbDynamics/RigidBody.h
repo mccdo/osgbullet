@@ -18,36 +18,33 @@
  *
  *************** <auto-copyright.pl END do not edit this line> ***************/
 
-#include <osgbCollision/Version.h>
-#include <string>
-#include <sstream>
+#ifndef __OSGBDYNAMICS_RIGID_BODY_H__
+#define __OSGBDYNAMICS_RIGID_BODY_H__ 1
 
-namespace osgbCollision {
+#include <osgbDynamics/Export.h>
+#include <osgbDynamics/CreationRecord.h>
+#include <btBulletDynamicsCommon.h>
 
 
-unsigned int getVersionNumber()
+namespace osgbDynamics
 {
-    return( OSGBCOLLISION_VERSION );
+
+
+/** \brief Creates a compound collision shape and rigid body from the CreationRecord data.
+
+Uses the ComputeShapeVisitor to create a btCompoundShape from the CreationRecord's scene graph.
+Currently, a shape per Geode is created. CreationRecord specifies the shape type created per Geode.
+*/
+OSGBDYNAMICS_EXPORT btRigidBody* createRigidBody( osgbDynamics::CreationRecord* cr );
+
+/** \brief Creates a rigid body from the collision shape and CreationRecord data.
+*/
+OSGBDYNAMICS_EXPORT btRigidBody* createRigidBody( osgbDynamics::CreationRecord* cr, btCollisionShape* shape );
+
+
+// osgbDynamics
 }
 
 
-static std::string s_osgcollision_version( "" );
-
-std::string getVersionString()
-{
-    if( s_osgcollision_version.empty() )
-    {
-        std::ostringstream oStr;
-        oStr << std::string( "osgBullet version " ) <<
-            OSGBCOLLISION_MAJOR_VERSION << "." <<
-            OSGBCOLLISION_MINOR_VERSION << "." <<
-            OSGBCOLLISION_SUB_VERSION << " (" <<
-            getVersionNumber() << ").";
-        s_osgcollision_version = oStr.str();
-    }
-    return( s_osgcollision_version );
-}
-
-
-// namespace osgbCollision
-}
+// __OSGBDYNAMICS_RIGID_BODY_H__
+#endif

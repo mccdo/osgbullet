@@ -47,19 +47,22 @@ public:
     META_NodeVisitor(osgbCollision,ComputeShapeVisitor);
 #endif
 
+    void apply( osg::Transform& node );
     void apply( osg::Geode& node );
 
     btCollisionShape* getShape();
     const btCollisionShape* getShape() const;
 
 protected:
-    void createAndAddShape( osg::Node& node );
-    btCollisionShape* createShape( osg::Node& node );
+    void createAndAddShape( osg::Node& node, const osg::Matrix& m );
+    btCollisionShape* createShape( osg::Node& node, const osg::Matrix& m );
 
     const BroadphaseNativeTypes _shapeType;
     const osgbCollision::AXIS _axis;
 
     btCollisionShape* _shape;
+
+    osg::NodePath _localNodePath;
 };
 
 

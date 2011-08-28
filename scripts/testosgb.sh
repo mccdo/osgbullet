@@ -2,7 +2,7 @@
 
 echo
 echo Turn-on tests. Does it work at all?
-echo Run BasicDemo, RobotArm, fountain.
+echo Run BasicDemo, RobotArm.
 echo
 BasicDemo
 robot
