@@ -36,7 +36,7 @@ namespace osgbDynamics
 
 CreationRecord::CreationRecord()
   : _sceneGraph( NULL ),
-    _version( 1 ),
+    _version( 2 ),
     _com( 0., 0., 0. ),
     _comSet( false ),
     _scale( osg::Vec3( 1., 1., 1. ) ),
@@ -50,8 +50,6 @@ CreationRecord::CreationRecord()
     _vertexAggMinCellSize( osg::Vec3( 0., 0., 0.) ),
     _reducerGroupThreshold( 360.f ),
     _reducerMaxEdgeError( 360.f ),
-    _overall( true ),
-    _nodeName( "" ),
     _axis( osgbCollision::Z )
 {
 }
@@ -71,10 +69,14 @@ CreationRecord::CreationRecord( const CreationRecord& rhs, osg::CopyOp copyop )
     _vertexAggMinCellSize( rhs._vertexAggMinCellSize ),
     _reducerGroupThreshold( rhs._reducerGroupThreshold ),
     _reducerMaxEdgeError( rhs._reducerMaxEdgeError ),
-    _overall( rhs._overall ),
-    _nodeName( rhs._nodeName ),
     _axis( rhs._axis )
 {
+}
+
+void CreationRecord::setCenterOfMass( const osg::Vec3& com )
+{
+    _com = com;
+    _comSet = true;
 }
 
 

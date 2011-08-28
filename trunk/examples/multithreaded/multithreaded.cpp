@@ -26,7 +26,7 @@
 #include <osg/ShapeDrawable>
 #include <osg/Geode>
 
-#include <osgbDynamics/OSGToCollada.h>
+#include <osgbDynamics/RigidBody.h>
 #include <osgbDynamics/MotionState.h>
 #include <osgbDynamics/GroundPlane.h>
 #include <osgbCollision/CollisionShapes.h>
@@ -180,14 +180,12 @@ cond*/
 
 osg::ref_ptr< osg::Node > modelNode( NULL );
 
-osg::MatrixTransform*
+osg::Transform*
 makeModel( const std::string& fileName, btDynamicsWorld* bw, osg::Vec3 pos, InteractionManipulator* im )
 {
     osg::Matrix m( osg::Matrix::translate( pos ) );
-    osg::MatrixTransform* root = new osg::MatrixTransform();// m );
-    osgwTools::AbsoluteModelTransform* amt = new osgwTools::AbsoluteModelTransform;
+    osg::ref_ptr< osgwTools::AbsoluteModelTransform > amt = new osgwTools::AbsoluteModelTransform;
     amt->setDataVariance( osg::Object::DYNAMIC );
-    root->addChild( amt );
 
     if( !modelNode.valid() )
 	{
@@ -200,30 +198,26 @@ makeModel( const std::string& fileName, btDynamicsWorld* bw, osg::Vec3 pos, Inte
 	}
     amt->addChild( modelNode.get() );
 
-    osgbDynamics::OSGToCollada converter;
-    converter.setSceneGraph( modelNode.get() );
-    converter.setShapeType( BOX_SHAPE_PROXYTYPE );
-    converter.setMass( .2 );
-    converter.setOverall( false );
-    converter.convert();
 
-    btRigidBody* rb = converter.getRigidBody();
-    osgbDynamics::MotionState* motion = new osgbDynamics::MotionState;
-    motion->setTransform( amt );
+    osg::ref_ptr< osgbDynamics::CreationRecord > cr = new osgbDynamics::CreationRecord;
+    cr->_sceneGraph = amt.get();
+    cr->_shapeType = BOX_SHAPE_PROXYTYPE;
+    cr->_mass = .2;
+    btRigidBody* rb = osgbDynamics::createRigidBody( cr.get() );
+
+    osgbDynamics::MotionState* motion = static_cast< osgbDynamics::MotionState* >( rb->getMotionState() );
     motion->setParentTransform( m );
-    rb->setMotionState( motion );
+    rb->setWorldTransform( osgbCollision::asBtTransform( m ) );
+
 
     // Set up for multithreading and triple buffering.
     motion->registerTripleBuffer( &tBuf );
     msl.push_back( motion );
 
-    btVector3 inertia( 0., 0., 0. );
-    rb->getCollisionShape()->calculateLocalInertia( 1., inertia );
-    rb->setActivationState( DISABLE_DEACTIVATION );
     im->setInitialTransform( rb, m );
     bw->addRigidBody( rb );
 
-    return( root );
+    return( amt.release() );
 }
 
 osg::MatrixTransform*

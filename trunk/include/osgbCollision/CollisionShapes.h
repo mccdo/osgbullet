@@ -52,6 +52,7 @@ enum AXIS
     X=0, Y=1, Z=2
 };
 
+
 /** \brief Return a Bullet sphere collision shape that approximates the specified OSG geometry.
 
 The sphere is untransformed. Bullet's sphere collision shape uses the radius only.
@@ -73,7 +74,7 @@ OSGBCOLLISION_EXPORT btBoxShape* btBoxCollisionShapeFromOSG( osg::Node* node, co
 
 The cylinder is untransformed. Bullet's cylinder collision shape uses the specified axis and computed radius only.
 */
-OSGBCOLLISION_EXPORT btCylinderShape* btCylinderCollisionShapeFromOSG( osg::Node* node, AXIS axis = Y );
+OSGBCOLLISION_EXPORT btCylinderShape* btCylinderCollisionShapeFromOSG( osg::Node* node, AXIS axis=Y );
 
 /** \brief Return a Bullet triangle mesh collision shape that approximates the specified OSG geometry.
 
@@ -95,8 +96,15 @@ OSGBCOLLISION_EXPORT btConvexHullShape* btConvexHullCollisionShapeFromOSG( osg::
 
 /** \brief Creates a collision shape for each Geode or Geometry in the scene graph,
 and assembles them into a single btCompoundShape. */
-OSGBCOLLISION_EXPORT btCompoundShape* btCompoundShapeFromOSGGeodes( osg::Node* node );
+OSGBCOLLISION_EXPORT btCompoundShape* btCompoundShapeFromOSGGeodes( osg::Node* node,
+    const BroadphaseNativeTypes shapeType, const osgbCollision::AXIS axis=Y );
+
 OSGBCOLLISION_EXPORT btCompoundShape* btCompoundShapeFromOSGGeometry( osg::Node* node );
+
+/** */
+OSGBCOLLISION_EXPORT btCompoundShape* btCompoundShapeFromBounds( osg::Node* node,
+    const BroadphaseNativeTypes shapeType, const osgbCollision::AXIS axis=Y );
+
 
 
 /** \brief Return an OSG representation of the given bullet collision shape. */
