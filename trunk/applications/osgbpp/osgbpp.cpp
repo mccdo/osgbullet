@@ -144,11 +144,11 @@ int main( int argc,
     arguments.getApplicationUsage()->setDescription( arguments.getApplicationName() + " creates physics data for model files and stores that data to COLLADA files." );
     arguments.getApplicationUsage()->setCommandLineUsage( arguments.getApplicationName() + " [options] filename ..." );
 
-    arguments.getApplicationUsage()->addCommandLineOption( "--com <x>,<y>,<z>", "Specifies the center of mass. If not specifies, osgbpp uses the center of the OSG bounding sphere." );
+    arguments.getApplicationUsage()->addCommandLineOption( "--com <x>,<y>,<z>", "Specifies the center of mass. If not specified, osgbpp uses the center of the OSG bounding sphere." );
     arguments.getApplicationUsage()->addCommandLineOption( "--box", "This is the default. Creates a box collision shape." );
     arguments.getApplicationUsage()->addCommandLineOption( "--sphere", "Creates a sphere collision shape." );
     arguments.getApplicationUsage()->addCommandLineOption( "--cylinder", "Creates a cylinder collision shape." );
-    arguments.getApplicationUsage()->addCommandLineOption( "--axis <x>", "This argument is ignored if --cylinder is not specified. Use this option to specify the cylinder axis X, Y, or Z. Default is Z." );
+    arguments.getApplicationUsage()->addCommandLineOption( "--axis <a>", "Use this option to specify the cylinder axis X, Y, or Z. Default is Z. This argument is ignored if --cylinder is not specified." );
     arguments.getApplicationUsage()->addCommandLineOption( "--triMesh", "It creates a tri mesh collision shape (suitable for static objects)." );
     arguments.getApplicationUsage()->addCommandLineOption( "--convexTM", "Creates a convex tri mesh collision shape." );
     arguments.getApplicationUsage()->addCommandLineOption( "--convexHull", "Creates a convex hull collision shape." );
@@ -389,15 +389,12 @@ int main( int argc,
         {
         case BOX_SHAPE_PROXYTYPE:
             shape = osgbCollision::btCompoundShapeFromBounds( mt.get(), BOX_SHAPE_PROXYTYPE );
-            //shape = osgbCollision::btBoxCollisionShapeFromOSG( mt.get() );
             break;
         case SPHERE_SHAPE_PROXYTYPE:
             shape = osgbCollision::btCompoundShapeFromBounds( mt.get(), SPHERE_SHAPE_PROXYTYPE );
-            //shape = osgbCollision::btSphereCollisionShapeFromOSG( mt.get() );
             break;
         case CYLINDER_SHAPE_PROXYTYPE:
-            shape = osgbCollision::btCompoundShapeFromBounds( mt.get(), CYLINDER_SHAPE_PROXYTYPE, axis );
-            //shape = osgbCollision::btCylinderCollisionShapeFromOSG( mt.get(), axis );
+            shape = osgbCollision::btCompoundShapeFromBounds( mt.get(), CYLINDER_SHAPE_PROXYTYPE, axis );            //shape = osgbCollision::btCylinderCollisionShapeFromOSG( mt.get(), axis );
             break;
         case TRIANGLE_MESH_SHAPE_PROXYTYPE:
             shape = osgbCollision::btTriMeshCollisionShapeFromOSG( mt.get() );
@@ -481,3 +478,115 @@ int main( int argc,
 
     return( 0 );
 }
+
+
+
+/** \page osgbpp The osgBullet Physics Preview Application
+osgbpp creates rigid bodies from OSG data and drops them on a platform. Use
+this application to test rigid body creation with a variety of control
+parameters.
+
+\section su Simple Usage
+Use osgbpp to create a rigid body from \c dice.osg, one of the osgBullet data files:
+
+\code
+C:\Projects>osgbpp dice.osg
+\endcode
+
+To see the model fall again, hit the backspace key.
+
+By default, osgbpp creates a Bullet box collision shape. You can visualize the
+collision shape with the --debug command line option:
+
+\code
+C:\Projects>osgbpp dice.osg --debug
+\endcode
+
+osgbpp supports command line patameters to control the collision shape type. For example:
+
+\code
+C:\Projects>osgbpp dice.osg --debug --cylinder
+C:\Projects>osgbpp dice.osg --debug --convexHull
+\endcode
+
+\section au Advanced Usage
+osgbpp lets you specify a non-origin center of mass with the --com command line option.
+For example, you can simulate a loaded die with this command:
+
+\code
+C:\Projects>osgbpp dice.osg --com 1.1,0,0
+\endcode
+
+osgBullet can create a compound shape from Geodes in your scene graph, or can create
+a single non-compound shape encompassing your entire scene graph. Use the \c --overall
+option to create a single non-compound shape.
+
+For example, compare the results of these two commands:
+
+\code
+C:\Projects>osgbpp dice.osg block.osg.(2,0,2.5).trans
+C:\Projects>osgbpp dice.osg block.osg.(2,0,2.5).trans --overall
+\endcode
+
+In the first command, osgBullet creates two box shapes, one for each model, and assebled them
+into a single btCompoundShape. In the second example, osgBullet creates a single box shape
+around both models.
+
+\section clp Command Line Parameters
+<table border="0">
+  <tr>
+    <td><b>--axis &lt;a&gt;</b></td>
+    <td>Use this option to specify the cylinder axis X, Y, or Z. Default is Z. This argument is ignored if \c --cylinder is not specified.</td>
+  </tr>
+  <tr>
+    <td><b>--box</b></td>
+    <td>This is the default. Creates a box collision shape.</td>
+  </tr>
+  <tr>
+    <td width=150><b>--com&nbsp;&lt;x&gt;,&lt;y&gt;,&lt;z&gt;</b></td>
+    <td>Specifies the center of mass. If not specified, osgbpp uses the center of the OSG bounding sphere.
+    Example: <b>--com 5.5,3,-1.</b> Do not include spaces in the center of mass vector.</td>
+  </tr>
+  <tr>
+    <td><b>--convexHull</b></td>
+    <td>Creates a convex hull collision shape.</td>
+  </tr>
+  <tr>
+    <td><b>--convexTM</b></td>
+    <td>Creates a convex tri mesh collision shape.</td>
+  </tr>
+  <tr>
+    <td><b>--cylinder</b></td>
+    <td>Creates a cylinder collision shape. See the <b>--axis</b> parameter.</td>
+  </tr>
+  <tr>
+    <td><b>--debug</b></td>
+    <td>Use the GLDebugDrawer class to display collision shapes.</td>
+  </tr>
+  <tr>
+    <td><b>--mass &lt;n&gt;</b></td>
+    <td>Specifies the desired rigid body mass value. The default is 1.0.</td>
+  </tr>
+  <tr>
+    <td><b>--overall</b></td>
+    <td>Creates a single collision shape for the entire input scene graph, rather than a collision shape per Geode, which is the default.</td>
+  </tr>
+  <tr>
+    <td><b>--sphere</b></td>
+    <td>Creates a sphere collision shape.</td>
+  </tr>
+  <tr>
+    <td><b>--triMesh</b></td>
+    <td>It creates a tri mesh collision shape (suitable for static objects).</td>
+  </tr>
+  <tr>
+    <td><b>-v/--version</b></td>
+    <td>Display the osgBullet version string.</td>
+  </tr>
+  <tr>
+    <td><b>-h/--help</b></td>
+    <td>Displays help text and command line documentation.</td>
+  </tr>
+</table>
+
+*/
