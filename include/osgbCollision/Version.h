@@ -73,21 +73,86 @@ std::string OSGBCOLLISION_EXPORT getVersionString();
 
 \section Introduction Introduction
 
-TBD
+osgBullet is a set of software tools for applications that use both
+<a href="http://www.openscenegraph.org/">OpenSceneGraph (OSG)</a> and
+<a href="http://code.google.com/p/bullet/">Bullet</a>. The osgBullet library
+is the result of collaborative work between Paul Martz
+(<a href="http://www.skew-matrix.com/">Skew Matrix Software</a>),
+<a href="http://www.ameslab.gov/">Ames Lab</a>, and
+<a href="http://www.pica.army.mil/PicatinnyPublic/index.asp">ARDEC</a>.
+It's used as part of the 
+<a href="http://www.ve-suite.org/">VE-Suite</a> project, as well as
+other applications and software projects. osgBullet is open source and
+available under the GNU LGPL v2.1 software license. 
 
-\section Libraries Libraries
+osgBullet <a href="http://code.google.com/p/osgbullet/">source and
+issue tracking</a> are on Google Code.
 
-\subsection osgbCollision osgbCollision
+An osgBullet <a href="http://groups.google.com/group/osgbullet-users?hl=en">discussion
+group</a> is available on Google Groups.
+
+
+\subsection phil Philosophy
+
+osgBullet is a set of tools to facilitate developing software that uses Bullet
+for physics simultation and collision detection, and uses OSG for rendering.
+osgBullet doesn't attempt to wrap either OSG or Bullet. Instead, it allows you
+(the programmer) direct access to both APIs. osgBullet gets out of your way
+so that your application can use the full feature set of both OSG and Bullet.
+
+osgBullet plays a key role in this scenario by providing useful tools for applications
+that use both APIs.
+
+\subsection feat Features
+
+osgBullet's most useful feature is its ability to accomodate Bullet's strict coordinate
+system and transformation requirements and still support the arbitrary coordinate systems
+and transformations often encountered in OSG (and other 3D) applications. Bullet collision
+shapes must be created so that the center of mass corresponds to the coordinate origin,
+but this is not how most 3D models are built. Bullet doesn't support scaling, but 3D models
+are often scaled up or down to match a world coordinate system. OSG transformations are
+hierarchical, but Bullet wants to completely own the local-to-world transformation. All
+of these issues are handled by the
+\link collisionshapes
+collision shape creation utilities
+\endlink
+in combination with the \ref osgbDynamics::MotionState "MotionState" class. osgBullet also provides
+\link rigidbody
+rigid body creation utilities
+\endlink
+that wrap collision shape and \ref osgbDynamics::MotionState "MotionState" creation.
+
+Other features include the following.
+
+\li An implementation of \c btMotionState for synchronizing the transformation
+of an OSG subgraph with a Bullet collision object.
+\li Support for running physics and rendering in separate threads.
+\li Supports using Bullet for both rigid body dynamics as well as collision detection only.
+\li Routines for creating Bullet collision shapes from OSG geometry.
+\li An OSG-based implementation of \c \c btIDebugDraw.
+\li OSG reference counting for Bullet objects.
+\li Functions to convert between OSG and Bullet matrices and vectors.
+
+
+\section appsexamples Applications and Examples
+
+\li The \ref osgbpp "osgbpp" application allows you to preview a physics simultation on a model.
+\li The \ref collision "collision" example demonstrates using osgBullet and Bullet for collision detection only.
+
+
+\section libraries Libraries
+
+\subsection osgbcollision osgbCollision
 
 Collision detection and collision shape support. Facilities for
 creating Bullet collision shapes from OSG scene graphs, and vice
 versa.
 
-\subsection osgbDynamics osgbDynamics
+\subsection osgbdynamics osgbDynamics
 
 Rigid body dynamics and constraints support.
 
-\subsection osgdb_osgbDynamics osgdb_osgbDynamics
+\subsection osgdbosgbdynamics osgdb_osgbDynamics
 
 Dot OSG file support for classes and objects in the osgbDynamics library.
 
