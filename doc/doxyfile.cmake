@@ -103,7 +103,7 @@ WARN_LOGFILE           =
 INPUT                  = "${osgBullet_SOURCE_DIR}/applications " \
                          "${osgBullet_SOURCE_DIR}/examples " \
                          "${osgBullet_SOURCE_DIR}/include " \
-                         "${osgBullet_SOURCE_DIR}/src "
+                         "${osgBullet_SOURCE_DIR}/src " \
                          "${osgBullet_SOURCE_DIR}/tests "
 INPUT_ENCODING         = UTF-8
 FILE_PATTERNS          = *.cpp \
@@ -273,7 +273,7 @@ PERL_PATH              = /usr/bin/perl
 # Configuration options related to the dot tool
 #---------------------------------------------------------------------------
 
-DOT_PATH               = ${DOXYGEN_DOT_PATH}
+DOT_PATH               = "${DOXYGEN_DOT_PATH}"
 HAVE_DOT               = ${HAVE_DOT}
 CLASS_DIAGRAMS         = NO
 MSCGEN_PATH            = 

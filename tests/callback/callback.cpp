@@ -56,6 +56,7 @@ btDynamicsWorld * initPhysics()
 }
 
 
+/* \cond */
 struct MyCallback : public osgbDynamics::MotionStateCallback
 {
     unsigned int _count;
@@ -69,6 +70,7 @@ struct MyCallback : public osgbDynamics::MotionStateCallback
         osg::notify( osg::ALWAYS ) << "Callback has been called " << ++_count << " times. Current x: " << worldTrans.getOrigin()[0] << std::endl;
     }
 };
+/* \endcond */
 
 
 void
