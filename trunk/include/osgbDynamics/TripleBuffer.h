@@ -32,25 +32,26 @@ namespace osgbDynamics {
 
 
 /** \class TripleBuffer TripleBuffer.h <osgbDynamics/TripleBuffer.h>
-\brief TBD
+\brief A triple buffer mechanism to support physics and rendering in separate threads.
 
-A generic triple buffer mechanism. Allows the read
+This class allows the read
 thread to always access the latest complete set of updated
-data without blocking. Allows the write thread to always 
+data without blocking, and allows the write thread to always 
 switch to an available buffer to write the next set of data
 without blocking.
 
 Multiple heterogeneous chunks of data may be stored in buffers
 by using reserve() to specify a data size and retrieve back the
-unsigned int index into the buffer(s). This index is a count of
+unsigned int index into the TripleBuffer storage. This index is a count of
 least-resolvable machine units (usually bytes).
 
 In a typical usage case, each MotionState has a matrix
-stored in the triple buffer object. During a physics sim step, the
-physics sim thread calls beginWrite, access the matrices for current
-rigid body location and updates them, then calls endWrite. Concurrently,
-the rendering update thread calls beginRead, uses the data to update
-matrices in the scene graph, then calls endRead.
+stored in the triple buffer object. The physics sim thread wraps the
+stepSimulation call with beginWrite() and endWrite(). When Bullet sets the
+world transform of the collision objects, MotionState intercepts the
+transforms and stores them in the current write buffer. Concurrently,
+during the scene graph update phase, the rendering thread calls beginRead(),
+uses the data to update matrices in the scene graph, then calls endRead().
 */
 class OSGBDYNAMICS_EXPORT TripleBuffer
 {
@@ -58,17 +59,47 @@ public:
     TripleBuffer( unsigned int initialSize=8192 );
     ~TripleBuffer();
 
+    /** \brief Sets the maximum size of all three buffers.
+
+    This function reallocates the TripleBuffer storage by calling reallocate()
+    on all three buffers so that
+    they contain \c size bytes of contiguous memory. Because reallocation
+    can be expensive, applications should avoid repeated resize() calls.
+    In typical usage, applications call resize() once at init time. */
     void resize( unsigned int size );
+
+    /** \brief Reserve a chunk of memory.
+
+    Applications should call reserve() whenever they want to access a chunk of
+    data by two threads. For example, MotionState calls reserve() to allocate
+    space for a btTransform. The \c size parameter is set to sizeof(btTransform).
+    The return value is used by the Physics thread to write the transform, and
+    used by the MotionState to update the matrix of the OSG Transform node it manages.
+
+    \param size The size of memory to reserve. If the currently allocated
+        mrmory plus \c size exceeds the total storage specified with resize(),
+        this function reallocates the TripleBuffer storage to accomodate the request.
+    \param data If specified, \c size bytes of data from this address are
+        copied into the allocation location.
+    \return The byte offset into the TripleBuffer storage.
+    */
     unsigned int reserve( unsigned int size, char* data=NULL );
 
+    /** \brief Mark an INVALID buffer as WRITE and return its address. */
     char* beginWrite();
+    /** \brief Return the address of the current WRITE buffer. */
     char* writeAddress();
+    /** \brief Mark the current WRITE buffer as UPDATED. */
     void endWrite();
 
+    /** \brief Mark an UPDATED buffer as READ and return its address. */
     char* beginRead();
+    /** \brief Return the address of the current READ buffer. */
     char* readAddress();
+    /** \brief Mark the current READ buffer as INVALID. */
     void endRead();
 
+    /** \brief Useful during development. */
     void debugDump( const std::string& msg, std::ostream& oStr ) const;
 
 protected:
@@ -87,7 +118,15 @@ protected:
     char* _writeAddress;
     char* _readAddress;
 
+    /** \brief Returns the buffer with the specified status.
+    \return 0, 1, or 2, if a buffer is found. -1 otherwise. */
     int get( BufferStatus status );
+
+    /** \brief reallocate a single buffer.
+
+    Uses \c new to allocate the buffer, \c memcpy to copy date from the old
+    location to the new, then uses \c delete to deallocate the old buffer.
+    */
     void reallocate( unsigned int index, unsigned int size );
 
     OpenThreads::Mutex _lock;
