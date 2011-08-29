@@ -59,7 +59,7 @@ public:
             ( ea.getKey() == osgGA::GUIEventAdapter::KEY_BackSpace ) )
         {
             osgbDynamics::MotionState* motion = static_cast< osgbDynamics::MotionState* >( _rb->getMotionState() );
-            osg::Vec3& com = motion->getCenterOfMass();
+            const osg::Vec3 com = motion->getCenterOfMass();
 
             btTransform wt; wt.setIdentity();
             wt.setOrigin( osgbCollision::asBtVector3( com ) );
