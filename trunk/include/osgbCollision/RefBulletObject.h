@@ -68,7 +68,7 @@ public:
 
     void set( const T* tPtr )
     {
-        if( doDelete && ( _tPtr != NULL ) )
+        if( _doDelete && ( _tPtr != NULL ) )
             delete _tPtr;
         _tPtr = tPtr;
     }
