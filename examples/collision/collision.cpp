@@ -172,3 +172,38 @@ int main( int argc,
 
     return( 0 );
 }
+
+
+
+/** \page collision Using osgBullet For Collision Detection
+osgBullet consists of two libraries, osgbCollision and osgbDynamics. This
+library split allows your application to use Bullet for collision detection
+with no dependency on libBulletDynamics, and render your results with OSG.
+osgBullet contains an example program, \c collision, to demonstrate this usage.
+
+\c collision renders two boxes. You can view them from any angle using the
+OSG TrackballManipulator, but the example behaves more intuitively if you
+use the default home position.
+
+Move the box on the right by holding down the control key and dragging
+with your left mouse button. If you drag the right box so that it is in
+collision with the left box, the following message appears on the console:
+
+\code
+Collision detected.
+\endcode
+
+Drag the right box away from the left box and the following message appears
+on the console:
+
+\code
+No collision.
+\endcode
+
+Using osgBullet, your application interfaces directly with
+the Bullet API to determine if a collision has occurred, and if so, which
+collision objects are in collision. The \c collision
+example detects collisions by examining the manifold count in the Bullet collision
+dispatcher, but Bullet provides other ways to detect collisions, as
+discussed in the Bullet documentation and online forum.
+*/
