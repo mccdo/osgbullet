@@ -35,7 +35,8 @@ namespace osgbCollision
 
 
 /** \class ComputeShapeVisitor ComputeShapeVisitor.h <osgbCollision/ComputeShapeVisitor.h>
-\brief TBD
+\brief A NodeVisitor that creates Bullet collision shapes for each Geode and assembles them
+into a single btCompoundShape.
 */
 class OSGBCOLLISION_EXPORT ComputeShapeVisitor : public osg::NodeVisitor
 {
