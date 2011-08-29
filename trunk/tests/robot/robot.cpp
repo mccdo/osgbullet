@@ -42,6 +42,7 @@
 
 btCompoundShape* _artShape;
 
+/* \cond */
 struct Joint
 {
     Joint()
@@ -498,6 +499,7 @@ protected:
 		return body;
 	}
 };
+/* \endcond */
 
 osg::Group*
 createArm()

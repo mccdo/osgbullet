@@ -174,8 +174,7 @@ protected:
             _pt->pause( false );
     }
 };
-/**\end
-cond*/
+/* \endcond */
 
 
 osg::ref_ptr< osg::Node > modelNode( NULL );

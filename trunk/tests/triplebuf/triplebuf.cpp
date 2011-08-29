@@ -24,6 +24,7 @@
 #include <iostream>
 
 
+/* \cond */
 class WriteThread : public OpenThreads::Thread
 {
 public:
@@ -74,6 +75,7 @@ protected:
     osgbDynamics::TripleBuffer* _tb;
     osg::Timer _timer;
 };
+/* \endcond */
 
 
 
