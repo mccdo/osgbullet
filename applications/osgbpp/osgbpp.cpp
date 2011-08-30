@@ -135,14 +135,14 @@ createGround( float w, float h, const osg::Vec3& center )
     return( ground );
 }
 
-int main( int argc,
-          char* argv[] )
+int main( int argc, char* argv[] )
 {
     osg::ArgumentParser arguments( &argc, argv );
 
-    arguments.getApplicationUsage()->setApplicationName( arguments.getApplicationName() );
-    arguments.getApplicationUsage()->setDescription( arguments.getApplicationName() + " creates physics data for model files and stores that data to COLLADA files." );
-    arguments.getApplicationUsage()->setCommandLineUsage( arguments.getApplicationName() + " [options] filename ..." );
+    const std::string appName = osgDB::getSimpleFileName( arguments.getApplicationName() );
+    arguments.getApplicationUsage()->setApplicationName( appName );
+    arguments.getApplicationUsage()->setDescription( appName + " creates a rigid body from model files and tests it in a physics simulation." );
+    arguments.getApplicationUsage()->setCommandLineUsage( appName + " [options] filename ..." );
 
     arguments.getApplicationUsage()->addCommandLineOption( "--com <x>,<y>,<z>", "Specifies the center of mass. If not specified, osgbpp uses the center of the OSG bounding sphere." );
     arguments.getApplicationUsage()->addCommandLineOption( "--box", "This is the default. Creates a box collision shape." );
@@ -173,6 +173,8 @@ int main( int argc,
 
     const bool briefHelp = arguments.read( "-h" );
     const bool fullHelp = arguments.read( "--help" );
+    if( briefHelp || fullHelp )
+        osg::notify( osg::ALWAYS ) << arguments.getApplicationUsage()->getDescription() << std::endl;
     if( briefHelp )
         osg::notify( osg::ALWAYS ) << "Usage: " << arguments.getApplicationUsage()->getCommandLineUsage() << std::endl;
     else if( fullHelp )
