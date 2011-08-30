@@ -54,9 +54,9 @@ makeDie( btDynamicsWorld* bw )
     btScalar mass( 1. );
     btVector3 inertia( 0, 0, 0 );
     cs->calculateLocalInertia( mass, inertia );
-    btRigidBody::btRigidBodyConstructionInfo rb( mass, motion, cs, inertia );
-    btRigidBody* body = new btRigidBody( rb );
-    //body->setActivationState( DISABLE_DEACTIVATION );
+    btRigidBody::btRigidBodyConstructionInfo rbci( mass, motion, cs, inertia );
+    rbci.m_restitution = btScalar( .6 );
+    btRigidBody* body = new btRigidBody( rbci );
     bw->addRigidBody( body );
 
     return( root );
