@@ -6,9 +6,15 @@
 
 *Release date: Expected late 2011
 
-*Status:* Not yet started.
+*Status:* In progress.
 
-This non-backwards compatible release will remove all portions of osgBullet that depend on the Bullet !ColladaConverter library. It will also split the existing osgbBullet library into two libraries, osgbCollision and osgbDynamics, so that osgBullet can be used for collision detection without a dependency on libBulletDynamics.
+This non-backwards compatible release will remove all portions of osgBullet that depend on the Bullet !ColladaConverter library.
+
+It will also split the existing osgbBullet library into two libraries, osgbCollision and osgbDynamics, so that osgBullet can be used for collision detection without a dependency on libBulletDynamics.
+
+The OSGToCollada class will be replaced with a new interface for rigid body creation. The need to make a deep copy of your scene graph before creating a rigid body will be removed.
+
+New Doxygen documentation will be created.
 
 = v1.1 =
 
