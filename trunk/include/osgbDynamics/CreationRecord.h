@@ -43,8 +43,10 @@ namespace osgbDynamics
 /** \class CreationRecord CreationRecord.h <osgbDynamics/CreationRecord.h>
 \brief Data record for rigid body construction information.
 
-Fill in this struct and pass it to the createRigidBody functions
+Fill in this struct and pass it to the createRigidBody() functions
 to specify rigid body (and collision shape) construction parameters.
+See the \link rigidbody rigid body creation utilities \endlink
+for more information.
 
 This record can be stored in UserData on the rigid body subgraph
 root node to facilitate saving and restoring physics state.

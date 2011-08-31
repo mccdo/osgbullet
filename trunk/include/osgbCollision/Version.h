@@ -113,13 +113,9 @@ but this is not how most 3D models are built. Bullet doesn't support scaling, bu
 are often scaled up or down to match a world coordinate system. OSG transformations are
 hierarchical, but Bullet wants to completely own the local-to-world transformation. All
 of these issues are handled by the
-\link collisionshapes
-collision shape creation utilities
-\endlink
+\link collisionshapes collision shape creation utilities \endlink
 in combination with the \ref osgbDynamics::MotionState "MotionState" class. osgBullet also provides
-\link rigidbody
-rigid body creation utilities
-\endlink
+\link rigidbody rigid body creation utilities \endlink
 that wrap collision shape and \ref osgbDynamics::MotionState "MotionState" creation.
 
 Other features include the following.
@@ -138,6 +134,7 @@ of an OSG subgraph with a Bullet collision object.
 
 \li The \ref osgbpp "osgbpp" application allows you to preview a physics simultation on a model.
 \li The \ref collision "collision" example demonstrates using osgBullet and Bullet for collision detection only.
+\li The \ref examplecom "centerofmass" example demonstrates application-specified center of mass.
 
 
 \section libraries Libraries

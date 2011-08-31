@@ -86,7 +86,7 @@ btCollisionShape* ComputeShapeVisitor::createShape( osg::Node& node, const osg::
 {
     osg::notify( osg::DEBUG_INFO ) << "In createShape" << std::endl;
 
-    // Make a copy of the incoming node and its date, then
+    // Make a copy of the incoming node and its data, then
     // transform the copy by the specified matrix.
     if( node.asGeode() == NULL )
     {
