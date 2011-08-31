@@ -121,6 +121,7 @@ createGround( float w, float h, const osg::Vec3& center )
     cr->_sceneGraph = ground;
     cr->_shapeType = BOX_SHAPE_PROXYTYPE;
     cr->_mass = 0.f;
+    cr->_restitution = 1.f;
     btRigidBody* body = osgbDynamics::createRigidBody( cr.get(),
         osgbCollision::btBoxCollisionShapeFromOSG( ground ) );
 

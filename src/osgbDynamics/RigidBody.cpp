@@ -54,29 +54,27 @@ btRigidBody* createRigidBody( osgbDynamics::CreationRecord* cr )
     // Translate this subgraph so it is centered on the COM.
     osg::notify( osg::DEBUG_FP ) << "createRigidBody: ";
     osg::Vec3 com;
-    if( !( cr->_comSet ) )
-    {
-        // Compute from bounding sphere.
-        com = bs.center();
-        osg::notify( osg::DEBUG_FP ) << "Bounding sphere ";
-    }
-    else
+    if( cr->_comSet )
     {
         // Use user-specified center of mass.
         com = cr->_com;
         osg::notify( osg::DEBUG_FP ) << "User-defined ";
     }
+    else
+    {
+        // Compute from bounding sphere.
+        com = bs.center();
+        osg::notify( osg::DEBUG_FP ) << "Bounding sphere ";
+    }
     osg::notify( osg::DEBUG_FP ) << "center of mass: " << com << std::endl;
 
     osg::Matrix m( osg::Matrix::translate( -com ) * osg::Matrix::scale( cr->_scale ) );
-    osg::ref_ptr< osg::MatrixTransform > mtRoot = new osg::MatrixTransform( m );
-    mtRoot->setDataVariance( osg::Object::STATIC );
-    mtRoot->setName( "CenterOfMass+Scale" );
-    mtRoot->addChild( root );
+    osg::ref_ptr< osg::MatrixTransform > tempMtRoot = new osg::MatrixTransform( m );
+    tempMtRoot->addChild( root );
 
 
     osg::notify( osg::DEBUG_FP ) << "createRigidBody: Creating collision shape." << std::endl;
-    btCompoundShape* shape = osgbCollision::btCompoundShapeFromOSGGeodes( mtRoot.get(),
+    btCompoundShape* shape = osgbCollision::btCompoundShapeFromOSGGeodes( tempMtRoot.get(),
         cr->_shapeType, cr->_axis );
     if( shape == NULL )
     {
@@ -103,8 +101,24 @@ btRigidBody* createRigidBody( osgbDynamics::CreationRecord* cr, btCollisionShape
 	if( isDynamic )
 		shape->calculateLocalInertia( cr->_mass, localInertia );
 
-    btRigidBody::btRigidBodyConstructionInfo rbInfo( cr->_mass, NULL, shape, localInertia );
-    rbInfo.m_friction = btScalar( 1. );
+    osgbDynamics::MotionState* motion = new osgbDynamics::MotionState();
+    osg::Transform* trans = dynamic_cast< osg::Transform* >( root );
+    if( trans != NULL )
+        motion->setTransform( trans );
+
+    osg::Vec3 com;
+    if( cr->_comSet )
+        com = cr->_com;
+    else
+        com = root->getBound().center();
+    motion->setCenterOfMass( com );
+
+    motion->setScale( cr->_scale );
+    motion->setParentTransform( cr->_parentTransform );
+
+    btRigidBody::btRigidBodyConstructionInfo rbInfo( cr->_mass, motion, shape, localInertia );
+    rbInfo.m_friction = btScalar( cr->_friction );
+    rbInfo.m_restitution = btScalar( cr->_restitution );
 	btRigidBody* rb = new btRigidBody( rbInfo );
     if( rb == NULL )
     {
@@ -112,20 +126,9 @@ btRigidBody* createRigidBody( osgbDynamics::CreationRecord* cr, btCollisionShape
         return( NULL );
     }
 
-    osg::Transform* trans = dynamic_cast< osg::Transform* >( root );
-    if( trans != NULL )
-    {
-        osgbDynamics::MotionState* motion = new osgbDynamics::MotionState();
-        motion->setTransform( trans );
-
-        osg::Vec3 com;
-        if( !( cr->_comSet ) )
-            com = root->getBound().center();
-        else
-            com = cr->_com;
-        motion->setCenterOfMass( com );
-        rb->setMotionState( motion );
-    }
+    btTransform wt;
+    motion->getWorldTransform( wt );
+    rb->setWorldTransform( wt );
 
     return( rb );
 }

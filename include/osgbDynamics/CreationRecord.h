@@ -26,6 +26,7 @@
 #include <osgbCollision/CollisionShapes.h>
 
 #include <osg/Object>
+#include <osg/Matrix>
 #include <osg/Vec3>
 
 #include <btBulletDynamicsCommon.h>
@@ -73,8 +74,12 @@ struct OSGBDYNAMICS_EXPORT CreationRecord : public osg::Object
     bool _comSet;
 
     osg::Vec3 _scale;
+    osg::Matrix _parentTransform;
+
     BroadphaseNativeTypes _shapeType;
     float _mass;
+    float _restitution;
+    float _friction;
 
     /** For _shapeType == CYLINDER_SHAPE_PROXYTYPE only. */
     osgbCollision::AXIS _axis;

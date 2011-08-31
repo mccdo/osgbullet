@@ -131,8 +131,15 @@ protected:
         for( it=_posMap.begin(); it!=_posMap.end(); it++ )
         {
             btRigidBody* rb = it->first;
+            osgbDynamics::MotionState* motion = static_cast< osgbDynamics::MotionState* >( rb->getMotionState() );
+
             btTransform t = osgbCollision::asBtTransform( it->second );
+            motion->setWorldTransform( t );
             rb->setWorldTransform( t );
+
+            btVector3 zero( 0., 0., 0. );
+            rb->setAngularVelocity( zero );
+            rb->setLinearVelocity( zero );
         }
     }
 
@@ -201,15 +208,16 @@ makeModel( const std::string& fileName, btDynamicsWorld* bw, osg::Vec3 pos, Inte
     osg::ref_ptr< osgbDynamics::CreationRecord > cr = new osgbDynamics::CreationRecord;
     cr->_sceneGraph = amt.get();
     cr->_shapeType = BOX_SHAPE_PROXYTYPE;
-    cr->_mass = .2;
+    cr->_mass = .2f;
+    cr->_restitution = 0.3f;
+    cr->_parentTransform = m;
     btRigidBody* rb = osgbDynamics::createRigidBody( cr.get() );
 
-    osgbDynamics::MotionState* motion = static_cast< osgbDynamics::MotionState* >( rb->getMotionState() );
-    motion->setParentTransform( m );
-    rb->setWorldTransform( osgbCollision::asBtTransform( m ) );
+    rb->setActivationState( DISABLE_DEACTIVATION );
 
 
     // Set up for multithreading and triple buffering.
+    osgbDynamics::MotionState* motion = static_cast< osgbDynamics::MotionState* >( rb->getMotionState() );
     motion->registerTripleBuffer( &tBuf );
     msl.push_back( motion );
 

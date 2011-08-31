@@ -42,6 +42,7 @@ ComputeShapeVisitor::ComputeShapeVisitor( const BroadphaseNativeTypes shapeType,
 
 void ComputeShapeVisitor::apply( osg::Transform& node )
 {
+    /* Override apply(Transform&) solely to avoid processing AMT nodes. */
     const bool nonAMT = ( dynamic_cast< osgwTools::AbsoluteModelTransform* >( &node ) == NULL );
     if( nonAMT )
         _localNodePath.push_back( &node );
@@ -87,17 +88,13 @@ btCollisionShape* ComputeShapeVisitor::createShape( osg::Node& node, const osg::
 
     // Make a copy of the incoming node and its date, then
     // transform the copy by the specified matrix.
-    osg::Node* nodeCopy;
-    if( node.asGeode() != NULL )
-    {
-        nodeCopy = new osg::Geode( *( node.asGeode() ), osg::CopyOp::DEEP_COPY_ALL );
-        osgwTools::transform( m, nodeCopy->asGeode() );
-    }
-    else
+    if( node.asGeode() == NULL )
     {
         osg::notify( osg::WARN ) << "ComputeShapeVisitor encountered non-Geode." << std::endl;
         return( NULL );
     }
+    osg::Geode* geodeCopy = new osg::Geode( *( node.asGeode() ), osg::CopyOp::DEEP_COPY_ALL );
+    osgwTools::transform( m, geodeCopy->asGeode() );
 
     btCollisionShape* collision( NULL );
     osg::Vec3 center;
@@ -107,42 +104,42 @@ btCollisionShape* ComputeShapeVisitor::createShape( osg::Node& node, const osg::
     case BOX_SHAPE_PROXYTYPE:
     {
         osg::ComputeBoundsVisitor cbv;
-        nodeCopy->accept( cbv );
+        geodeCopy->accept( cbv );
         osg::BoundingBox bb = cbv.getBoundingBox();
         center = bb.center();
-        collision = osgbCollision::btBoxCollisionShapeFromOSG( nodeCopy, &bb );
+        collision = osgbCollision::btBoxCollisionShapeFromOSG( geodeCopy, &bb );
         break;
     }
     case SPHERE_SHAPE_PROXYTYPE:
     {
-        osg::BoundingSphere bs = nodeCopy->getBound();
+        osg::BoundingSphere bs = geodeCopy->getBound();
         center = bs.center();
-        collision = osgbCollision::btSphereCollisionShapeFromOSG( nodeCopy );
+        collision = osgbCollision::btSphereCollisionShapeFromOSG( geodeCopy );
         break;
     }
     case CYLINDER_SHAPE_PROXYTYPE:
     {
-        osg::BoundingSphere bs = nodeCopy->getBound();
+        osg::BoundingSphere bs = geodeCopy->getBound();
         center = bs.center();
-        collision = osgbCollision::btCylinderCollisionShapeFromOSG( nodeCopy, _axis );
+        collision = osgbCollision::btCylinderCollisionShapeFromOSG( geodeCopy, _axis );
         break;
     }
     case TRIANGLE_MESH_SHAPE_PROXYTYPE:
     {
         // Do _not_ compute center of bounding sphere for tri meshes.
-        collision = osgbCollision::btTriMeshCollisionShapeFromOSG( nodeCopy );
+        collision = osgbCollision::btTriMeshCollisionShapeFromOSG( geodeCopy );
         break;
     }
     case CONVEX_TRIANGLEMESH_SHAPE_PROXYTYPE:
     {
         // Do _not_ compute center of bounding sphere for tri meshes.
-        collision = osgbCollision::btConvexTriMeshCollisionShapeFromOSG( nodeCopy );
+        collision = osgbCollision::btConvexTriMeshCollisionShapeFromOSG( geodeCopy );
         break;
     }
     case CONVEX_HULL_SHAPE_PROXYTYPE:
     {
         // Do _not_ compute center of bounding sphere for tri meshes.
-        collision = osgbCollision::btConvexHullCollisionShapeFromOSG( nodeCopy );
+        collision = osgbCollision::btConvexHullCollisionShapeFromOSG( geodeCopy );
         break;
     }
     default:
