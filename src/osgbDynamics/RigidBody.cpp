@@ -68,6 +68,8 @@ btRigidBody* createRigidBody( osgbDynamics::CreationRecord* cr )
     }
     osg::notify( osg::DEBUG_FP ) << "center of mass: " << com << std::endl;
 
+    // Create a temporary Transform node containing the center of mass offset and scale vector.
+    // Use this as the root of the scene graph for conversion to a collision shape.
     osg::Matrix m( osg::Matrix::translate( -com ) * osg::Matrix::scale( cr->_scale ) );
     osg::ref_ptr< osg::MatrixTransform > tempMtRoot = new osg::MatrixTransform( m );
     tempMtRoot->addChild( root );
@@ -101,6 +103,12 @@ btRigidBody* createRigidBody( osgbDynamics::CreationRecord* cr, btCollisionShape
 	if( isDynamic )
 		shape->calculateLocalInertia( cr->_mass, localInertia );
 
+    // Create MotionState to control OSG subgraph visual reprentation transform
+    // from a Bullet world transform. To do this, the MotionState need the address
+    // of the Transform node (must be either AbsoluteModelTransform or
+    // MatrixTransform), center of mass, scale vector, and the parent (or initial)
+    // transform (usually the non-scaled OSG local-to-world matrix obtained from
+    // the parent node path).
     osgbDynamics::MotionState* motion = new osgbDynamics::MotionState();
     osg::Transform* trans = dynamic_cast< osg::Transform* >( root );
     if( trans != NULL )
@@ -116,6 +124,7 @@ btRigidBody* createRigidBody( osgbDynamics::CreationRecord* cr, btCollisionShape
     motion->setScale( cr->_scale );
     motion->setParentTransform( cr->_parentTransform );
 
+    // Finally, create rigid body.
     btRigidBody::btRigidBodyConstructionInfo rbInfo( cr->_mass, motion, shape, localInertia );
     rbInfo.m_friction = btScalar( cr->_friction );
     rbInfo.m_restitution = btScalar( cr->_restitution );
@@ -126,6 +135,11 @@ btRigidBody* createRigidBody( osgbDynamics::CreationRecord* cr, btCollisionShape
         return( NULL );
     }
 
+    // Last thing to do: Position the rigid body in the world coordinate system. The
+    // MotionState has the initial (parent) transform, and also knows how to account
+    // for center of mass and scaling. Get the world transform from the MotionState,
+    // then set it on the rigid body, which in turn sets the world transform on the
+    // MotionState, which in turn transforms the OSG subgraph visual representation.
     btTransform wt;
     motion->getWorldTransform( wt );
     rb->setWorldTransform( wt );

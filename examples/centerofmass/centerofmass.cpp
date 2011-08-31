@@ -44,6 +44,7 @@ btRigidBody* createObject( osg::Group* parent, const osg::Matrix& m, const osg::
     parent->addChild( mt );
     mt->addChild( node );
 
+    // Begin_doxygen example code block
     osg::ref_ptr< osgbDynamics::CreationRecord > cr = new osgbDynamics::CreationRecord;
     if( setCom )
         cr->setCenterOfMass( com );
@@ -52,6 +53,7 @@ btRigidBody* createObject( osg::Group* parent, const osg::Matrix& m, const osg::
     cr->_parentTransform = m;
     cr->_restitution = 1.f;
     btRigidBody* rb = osgbDynamics::createRigidBody( cr.get() );
+    // End_doxygen example code block
 
     rb->setAngularVelocity( btVector3( 0., .2, 0. ) );
 
@@ -83,10 +85,26 @@ int main( int argc, char** argv )
     osg::Group* root = new osg::Group;
 
     osg::Matrix m;
+
+    // Left object:
+    // Create the object on the left, which has center of mass at the model origin.
+    // In this case, that's the lower-left front of the model. This is almost certainly
+    // NOT what you want, but is what you would get with a naive conversion of OSG data
+    // into a collision shape.
     m = osg::Matrix::rotate( .4, 0., 0., 1. ) * osg::Matrix::translate( -24., 0., 10. );
     bw->addRigidBody( createObject( root, m, osg::Vec3( 0., 0., 0. ), true ) );
+
+    // Center object:
+    // Specify the actual center of the mass of the model, in the model's own coordinate
+    // space. In the case of this model, the COM is approx ( 2.15, 3., 2. ). This results
+    // in much more realistic dynamics.
     m = osg::Matrix::rotate( .4, 0., 0., 1. ) * osg::Matrix::translate( -4., 0., 10. );
     bw->addRigidBody( createObject( root, m, osg::Vec3( 2.15, 3., 2. ), true ) );
+
+    // Right object:
+    // If you don't specify the center of mass, osgBullet tries to do you a favor, and
+    // uses the bounding volume center as the COM. This works well in a lot of cases, but
+    // for a model such as com.osg, you really should specify the COM expliticly.
     m = osg::Matrix::rotate( .4, 0., 0., 1. ) * osg::Matrix::translate( 16., 0., 10. );
     bw->addRigidBody( createObject( root, m ) );
 
@@ -111,3 +129,60 @@ int main( int argc, char** argv )
 
     return( 0 );
 }
+
+
+/** \page examplecom Support For Non-Origin Center Of Mass
+Bullet dynamics always assumes the collision shape origin is the center of mass (COM).
+However, 3D model origins rarely coincide with the COM. A simple conversion of OSG
+geometric data into a collision shape would almost certainly result in incorrect
+dynamics due to this issue.
+
+osgBullet supports 3D models with non-origin COM. The support is implemented in the
+\ref osgbDynamics::MotionState "MotionState" class and the
+\link collisionshapes collision shape creation utilities. \endlink
+If your application uses the
+\link rigidbody rigid body creation utilities, \endlink
+then you merely specify the COM in the
+\ref osgbDynamics::CreationRecord "CreationRecord".
+
+\dontinclude centerofmass.cpp
+\skipline Begin_doxygen
+\until createRigidBody
+
+Note that the call to setCenterOfMass() is conditional; if you
+don't call it, osgBullet will use the bounding volume center
+as the COM. However, osgBullet never uses the origin as the COM,
+unless you specify it directly with a call to setCenterOfMass(),
+or it just happens to coincide with the model origin.
+
+If your application doesn't use the
+\link rigidbody rigid body creation utilities, \endlink
+then you should emulate the RigidBody.cpp source code.
+
+\section examdescrip The centerofmass Example
+
+The \c centerofmass example demonstrates setting COM on
+a 3D model. It uses the \c com.osg model file, which has
+its origin at the lower-left front corner. To see the
+model origin, use the osgWorks utility \c osgwbvv:
+
+\code
+osgwbvv com.osg --box --origin
+\endcode
+
+Clearly, using the model origin as the COM would be incorrect. You can
+see this incorrect behavior when you run the example; look at the model
+on the left. If osgBullet (or your application) were to do a naive
+comversion of OSG geometric data to a Bullet collision shape, this is
+what you'd get.
+
+If you don't specify a COM at all (that is, your application doesn't call
+osgbDynamics::CreationRecord::setCenterOfMass() ), osgBullet uses the
+subgraph bounding volume center as the center of mass. This works well for
+many models, but not for \c com.osg. To see this incorrect behavior, run
+the example and look at the model on the right.
+
+The object in the center of the example has a correct COM, which produces
+correct rigid body dynamics. This was accomplished using the code above.
+
+*/

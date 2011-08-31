@@ -125,29 +125,17 @@ OSGBCOLLISION_EXPORT btCompoundShape* btCompoundShapeFromBounds( osg::Node* node
 
 This is useful for Bullet applications being ported to visualize the physics simulation with OSG. */
 OSGBCOLLISION_EXPORT osg::Node* osgNodeFromBtCollisionShape( const btCollisionShape* btShape, const btTransform& trans = btTransform::getIdentity() );
-/** \brief Return an OSG representation of the given bullet collision shape.
-
-This is useful for Bullet applications being ported to visualize the physics simulation with OSG. */
+/** \overload */
 OSGBCOLLISION_EXPORT osg::Node* osgNodeFromBtCollisionShape( const btBoxShape* btShape, const btTransform& trans = btTransform::getIdentity() );
-/** \brief Return an OSG representation of the given bullet collision shape.
-
-This is useful for Bullet applications being ported to visualize the physics simulation with OSG. */
+/** \overload */
 OSGBCOLLISION_EXPORT osg::Node* osgNodeFromBtCollisionShape( const btSphereShape* btShape, const btTransform& trans = btTransform::getIdentity() );
-/** \brief Return an OSG representation of the given bullet collision shape.
-
-This is useful for Bullet applications being ported to visualize the physics simulation with OSG. */
+/** \overload */
 OSGBCOLLISION_EXPORT osg::Node* osgNodeFromBtCollisionShape( const btCylinderShape* btShape, const btTransform& trans = btTransform::getIdentity() );
-/** \brief Return an OSG representation of the given bullet collision shape.
-
-This is useful for Bullet applications being ported to visualize the physics simulation with OSG. */
+/** \overload */
 OSGBCOLLISION_EXPORT osg::Node* osgNodeFromBtCollisionShape( const btTriangleMeshShape* btShape, const btTransform& trans = btTransform::getIdentity() );
-/** \brief Return an OSG representation of the given bullet collision shape.
-
-This is useful for Bullet applications being ported to visualize the physics simulation with OSG. */
+/** \overload */
 OSGBCOLLISION_EXPORT osg::Node* osgNodeFromBtCollisionShape( const btConvexTriangleMeshShape* btShape, const btTransform& trans = btTransform::getIdentity() );
-/** \brief Return an OSG representation of the given bullet collision shape.
-
-This is useful for Bullet applications being ported to visualize the physics simulation with OSG. */
+/** \overload */
 OSGBCOLLISION_EXPORT osg::Node* osgNodeFromBtCollisionShape( const btConvexHullShape* btShape, const btTransform& trans = btTransform::getIdentity() );
 /*@}*/
 
