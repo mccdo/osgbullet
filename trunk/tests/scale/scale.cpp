@@ -47,9 +47,11 @@
 #include <osg/io_utils>
 
 
+const bool showSimple( false );
 const bool showOrig( true );
 const bool showCube( false );
 const bool showTruck( false );
+const bool enableSimple( showSimple && true );
 const bool enableOrig( showOrig && true );
 const bool enableCube( showCube && true );
 const bool enableTruck( showTruck && true );
@@ -116,16 +118,38 @@ makeScene( btDynamicsWorld* bw )
 	}
 
 
+    osg::MatrixTransform* mt0;
+    osg::MatrixTransform* mt1;
+    osg::MatrixTransform* mt2;
+    osg::Group* grp;
+
+
+    osg::Group* simpleGrp = new osg::Group;
+
+    // Cube, local scale, off-origin COM
+    mt0 = new osg::MatrixTransform(
+        osg::Matrix::translate( osg::Vec3( 0, 0, 9 ) ) );
+    grp = new osg::Group;
+    grp->setName( "offcube0" );
+    grp->getOrCreateStateSet()->setMode( GL_NORMALIZE, osg::StateAttribute::ON );
+    simpleGrp->addChild( mt0 );
+    mt0->addChild( grp );
+    grp->addChild( cubeNode.get() );
+
+    const unsigned int simpleGrpIdx( root->getNumChildren() );
+    root->addChild( simpleGrp );
+
+
     osg::Group* origGrp = new osg::Group;
 
     // Cow, not scaled, off-origin COM.
-    osg::MatrixTransform* mt0 = new osg::MatrixTransform(
+    mt0 = new osg::MatrixTransform(
         osg::Matrix::translate( osg::Vec3( -7, 7, 13 ) ) );
-    osg::MatrixTransform* mt1 = new osg::MatrixTransform(
+    mt1 = new osg::MatrixTransform(
         osg::Matrix::rotate( 2., osg::Vec3( 0, 1, 0 ) ) );
-    osg::MatrixTransform* mt2 = new osg::MatrixTransform(
+    mt2 = new osg::MatrixTransform(
         osg::Matrix::scale( osg::Vec3( 1., 1., 1. ) ) );
-    osg::Group* grp = new osg::Group;
+    grp = new osg::Group;
     grp->setName( "cow0" );
     origGrp->addChild( mt0 );
     mt0->addChild( mt1 );
@@ -371,9 +395,15 @@ makeScene( btDynamicsWorld* bw )
     root->addChild( truckGrp );
 
 
+    root->setValue( simpleGrpIdx, showSimple );
     root->setValue( origGrpIdx, showOrig );
     root->setValue( cubeGrpIdx, showCube );
     root->setValue( truckGrpIdx, showTruck );
+
+    if( enableSimple )
+    {
+        enablePhysics( root, "offcube0", bw );
+    }
 
     if( enableOrig )
     {
@@ -494,23 +524,9 @@ enablePhysics( osg::Node* root, const std::string& nodeName, btDynamicsWorld* bw
         cr->setCenterOfMass( com );
     cr->_mass = 1.;
     cr->_scale = sVec;
+    cr->_parentTransform = parentTrans;
     btRigidBody* rb = osgbDynamics::createRigidBody( cr.get() );
 
-    osgbDynamics::MotionState* motion = static_cast< osgbDynamics::MotionState* >( rb->getMotionState() );
-
-
-    // The scaling factor will either be (1,1,1) or the scale that we found in the NodePath.
-    // Either way, just go ahead and set it here, though MotionState defaults the scale to
-    // (1,1,1) so we really don't need to set it in that case.
-    motion->setScale( sVec );
-    // The parent transform (the local to world matrix extracted from the NodePath) might contain
-    // a scale. However, the setParentTransform function orthonormalizes the matrix, which
-    // eliminates any scale. So, even though Bullet doesn't support scaling, you can still pass in
-    // a parent transform with a scale, and MotionState will just ignore it. (You must pass in any
-    // parent scale transform using setScale.)
-    motion->setParentTransform( parentTrans );
-
-    rb->setWorldTransform( osgbCollision::asBtTransform( parentTrans ) );
     bw->addRigidBody( rb );
 }
 

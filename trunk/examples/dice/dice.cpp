@@ -26,6 +26,7 @@
 
 #include <osgbDynamics/MotionState.h>
 #include <osgbCollision/CollisionShapes.h>
+#include <osgbDynamics/RigidBody.h>
 #include <osgbCollision/Utils.h>
 
 #include <btBulletDynamicsCommon.h>
@@ -49,14 +50,13 @@ makeDie( btDynamicsWorld* bw )
     root->addChild( node );
 
     btCollisionShape* cs = osgbCollision::btBoxCollisionShapeFromOSG( node );
-    osgbDynamics::MotionState* motion = new osgbDynamics::MotionState();
-    motion->setTransform( root );
-    btScalar mass( 1. );
-    btVector3 inertia( 0, 0, 0 );
-    cs->calculateLocalInertia( mass, inertia );
-    btRigidBody::btRigidBodyConstructionInfo rbci( mass, motion, cs, inertia );
-    rbci.m_restitution = btScalar( .6 );
-    btRigidBody* body = new btRigidBody( rbci );
+    
+    osg::ref_ptr< osgbDynamics::CreationRecord > cr = new osgbDynamics::CreationRecord;
+    cr->_sceneGraph = root;
+    cr->_shapeType = BOX_SHAPE_PROXYTYPE;
+    cr->_mass = 1.f;
+    cr->_restitution = 1.f;
+    btRigidBody* body = osgbDynamics::createRigidBody( cr.get(), cs );
     bw->addRigidBody( body );
 
     return( root );

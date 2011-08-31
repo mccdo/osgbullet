@@ -1,6 +1,7 @@
 SET( CATEGORY Example )
 
-ADD_SUBDIRECTORY( basicdemo )
+ADD_SUBDIRECTORY( BasicDemo )
+ADD_SUBDIRECTORY( centerofmass )
 ADD_SUBDIRECTORY( collision )
 ADD_SUBDIRECTORY( dice )
 ADD_SUBDIRECTORY( multithreaded )

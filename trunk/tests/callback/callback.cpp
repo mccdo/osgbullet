@@ -70,49 +70,7 @@ struct MyCallback : public osgbDynamics::MotionStateCallback
         osg::notify( osg::ALWAYS ) << "Callback has been called " << ++_count << " times. Current x: " << worldTrans.getOrigin()[0] << std::endl;
     }
 };
-/* \endcond */
 
-
-void
-enablePhysics( osg::Node* root, const std::string& nodeName, btDynamicsWorld* bw )
-{
-    osgwTools::FindNamedNode fnn( nodeName );
-    root->accept( fnn );
-    if( fnn._napl.empty() )
-    {
-        osg::notify( osg::WARN ) << "Can't find node \"" << nodeName << "\"" << std::endl;
-        return;
-    }
-    osg::Node* node = fnn._napl[ 0 ].first;
-    osg::NodePath& np = fnn._napl[ 0 ].second;
-    osg::BoundingSphere bs( node->getBound() );
-    const osg::Matrix parentTrans = osg::computeLocalToWorld( np ); // Note that this might contain a scale.
-
-
-    osg::ref_ptr< osgwTools::AbsoluteModelTransform > model( new osgwTools::AbsoluteModelTransform );
-    model->setDataVariance( osg::Object::DYNAMIC );
-    osgwTools::insertAbove( node, model.get() );
-
-    btBoxShape* shape = osgbCollision::btBoxCollisionShapeFromOSG( model.get() );
-
-    osg::ref_ptr< osgbDynamics::CreationRecord > cr = new osgbDynamics::CreationRecord;
-    cr->_sceneGraph = model.get();
-    if( bs.center() != osg::Vec3( 0., 0., 0. ) )
-        cr->setCenterOfMass( bs.center() );
-    cr->_shapeType = BOX_SHAPE_PROXYTYPE;
-    cr->_mass = 3.;
-    btRigidBody* rb = osgbDynamics::createRigidBody( cr.get(), shape );
-
-    osgbDynamics::MotionState* motion = static_cast< osgbDynamics::MotionState* >( rb->getMotionState() );
-    motion->getCallbackList().push_back( new MyCallback );
-    motion->setParentTransform( parentTrans );
-
-    rb->setAngularVelocity( btVector3( 3., 5., 0. ) );
-    bw->addRigidBody( rb );
-}
-
-
-/* \cond */
 class InteractionManipulator : public osgGA::GUIEventHandler
 {
 public:
@@ -179,6 +137,8 @@ protected:
             btRigidBody* rb = it->first;
             btTransform t = osgbCollision::asBtTransform( it->second );
             rb->setWorldTransform( t );
+            rb->setAngularVelocity( btVector3( 3., 5., 0. ) );
+            rb->setActivationState( DISABLE_DEACTIVATION );
         }
     }
 
@@ -210,6 +170,42 @@ protected:
 };
 /* \endcond */
 
+void
+enablePhysics( osg::Node* root, const std::string& nodeName, btDynamicsWorld* bw,
+              InteractionManipulator& im )
+{
+    osgwTools::FindNamedNode fnn( nodeName );
+    root->accept( fnn );
+    if( fnn._napl.empty() )
+    {
+        osg::notify( osg::WARN ) << "Can't find node \"" << nodeName << "\"" << std::endl;
+        return;
+    }
+    osg::Node* node = fnn._napl[ 0 ].first;
+    osg::NodePath& np = fnn._napl[ 0 ].second;
+    osg::BoundingSphere bs( node->getBound() );
+    const osg::Matrix parentTrans = osg::computeLocalToWorld( np ); // Note that this might contain a scale.
+
+
+    osg::ref_ptr< osgwTools::AbsoluteModelTransform > model( new osgwTools::AbsoluteModelTransform );
+    model->setDataVariance( osg::Object::DYNAMIC );
+    osgwTools::insertAbove( node, model.get() );
+
+    osg::ref_ptr< osgbDynamics::CreationRecord > cr = new osgbDynamics::CreationRecord;
+    cr->_sceneGraph = model.get();
+    cr->_shapeType = BOX_SHAPE_PROXYTYPE;
+    cr->_mass = 3.;
+    cr->_parentTransform = parentTrans;
+    btRigidBody* rb = osgbDynamics::createRigidBody( cr.get() );
+
+    osgbDynamics::MotionState* motion = static_cast< osgbDynamics::MotionState* >( rb->getMotionState() );
+    motion->getCallbackList().push_back( new MyCallback );
+
+    rb->setAngularVelocity( btVector3( 3., 5., 0. ) );
+    bw->addRigidBody( rb );
+
+    im.setInitialTransform( rb, parentTrans );
+}
 
 int main( int argc,
           char * argv[] )
@@ -234,7 +230,7 @@ int main( int argc,
 
 	block->setName( "block" );
     mt->addChild( block );
-    enablePhysics( root.get(), "block", bw );
+    enablePhysics( root.get(), "block", bw, *im );
 
 
 
