@@ -3,14 +3,15 @@ set( LIB_NAME osgbDynamics )
 
 set( HEADER_PATH ${PROJECT_SOURCE_DIR}/include/${LIB_NAME} )
 set( LIB_PUBLIC_HEADERS
-    ${HEADER_PATH}/CreationRecord.h
     ${HEADER_PATH}/Export.h
+    ${HEADER_PATH}/CreationRecord.h
     ${HEADER_PATH}/GroundPlane.h
     ${HEADER_PATH}/MotionState.h
     ${HEADER_PATH}/PhysicsState.h
     ${HEADER_PATH}/PhysicsThread.h
     ${HEADER_PATH}/RigidBody.h
     ${HEADER_PATH}/RigidBodyAnimation.h
+#    ${HEADER_PATH}/SaveRestore.h
     ${HEADER_PATH}/TripleBuffer.h
 )
 
@@ -22,6 +23,7 @@ set( _osgBulletSourceFiles
     PhysicsThread.cpp
     RigidBody.cpp
     RigidBodyAnimation.cpp
+#    SaveRestore.cpp
     TripleBuffer.cpp
 )
 

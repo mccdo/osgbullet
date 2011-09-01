@@ -31,7 +31,7 @@ namespace osgbCollision {
 // Please keep in sync with top-level CMakeLists.txt OSGBULLET_VERSION variable.
 #define OSGBCOLLISION_MAJOR_VERSION 1
 #define OSGBCOLLISION_MINOR_VERSION 1
-#define OSGBCOLLISION_SUB_VERSION 81
+#define OSGBCOLLISION_SUB_VERSION 82
 
 // C preprocessor integrated version number.
 // The form is Mmmss, where:
@@ -152,5 +152,9 @@ Rigid body dynamics and constraints support.
 \subsection osgdbosgbdynamics osgdb_osgbDynamics
 
 Dot OSG file support for classes and objects in the osgbDynamics library.
+
+\subsection osgdbsgb osgdb_sgb
+
+Support for .SGB, an osgBullet file format for storing physics state.
 
 */
