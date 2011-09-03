@@ -19,10 +19,8 @@
  *************** <auto-copyright.pl END do not edit this line> ***************/
 
 #include <osgbDynamics/GroundPlane.h>
-
-#include <btBulletDynamicsCommon.h>
 #include <btBulletCollisionCommon.h>
-
+#include <btBulletDynamicsCommon.h>
 #include <osgbCollision/Utils.h>
 
 #include <osg/Geometry>
@@ -59,7 +57,8 @@ osg::Node* generateGroundPlane( const osg::Vec4& plane, btDynamicsWorld* bulletW
     osg::Vec3 p =  n * d;
 
     // TBD use new stuff in Shapes.
-    btCollisionShape* groundShape = new btStaticPlaneShape( btVector3( plane.x(), plane.y(), plane.z() ), plane.w() );
+    const btVector3 planeNormal( plane.x(), plane.y(), plane.z() );
+    btCollisionShape* groundShape = new btStaticPlaneShape( planeNormal, plane.w() );
     btRigidBody::btRigidBodyConstructionInfo rbInfo( 0., NULL, groundShape, btVector3(0,0,0) );
     btRigidBody* ground = new btRigidBody(rbInfo);
     bulletWorld->addRigidBody( ground );
@@ -98,7 +97,6 @@ osg::Node* generateGroundPlane( const osg::Vec4& plane, btDynamicsWorld* bulletW
 
     return( groundPlane.release() );
 }
-
 
 
 

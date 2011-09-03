@@ -23,24 +23,19 @@
 
 
 #include <osgbDynamics/Export.h>
-
 #include <btBulletDynamicsCommon.h>
-#include <btBulletCollisionCommon.h>
-
 #include <osg/Vec4>
 
 
 namespace osg {
     class Node;
-    class Geode;
 }
 
 namespace osgbDynamics
 {
 
 
-/**
-\brief Add a plane rigid body to the dynamics world and return an OSG subgraph to render the plane.
+/** \brief Add a plane rigid body to the dynamics world and return an OSG subgraph to render the plane.
 */
 OSGBDYNAMICS_EXPORT osg::Node* generateGroundPlane( const osg::Vec4& plane, btDynamicsWorld* bulletWorld, btRigidBody** rb=NULL );
 
