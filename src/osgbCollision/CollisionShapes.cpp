@@ -19,6 +19,7 @@
  *************** <auto-copyright.pl END do not edit this line> ***************/
 
 #include <btBulletCollisionCommon.h>
+
 #include <BulletCollision/CollisionShapes/btShapeHull.h>
 
 #include <osgbCollision/CollisionShapes.h>
@@ -184,7 +185,8 @@ btConvexHullShape* btConvexHullCollisionShapeFromOSG( osg::Node* node )
         *btvp++ = (btScalar)( s[ 1 ] );
         *btvp++ = (btScalar)( s[ 2 ] );
     }
-    btConvexHullShape* chs = new btConvexHullShape( btverts, v->size(), sizeof( btScalar ) * 3 );
+    btConvexHullShape* chs = new btConvexHullShape( btverts,
+        (int)( v->size() ), (int)( sizeof( btScalar ) * 3 ) );
     delete[] btverts;
 
     return( chs );
@@ -489,9 +491,9 @@ osg::Node* osgNodeFromBtCollisionShape( const btConvexTriangleMeshShape* btTriMe
 osg::Node* osgNodeFromBtCollisionShape( const btConvexHullShape* hull, const btTransform& trans )
 {
     btShapeHull sh( hull );
-    sh.buildHull( 0. );
+    sh.buildHull( btScalar( 0. ) );
 	int nVerts( sh.numVertices () );
-	int nIdx( sh.numIndices () );
+	int nIdx( sh.numIndices() );
     if( (nVerts <= 0) || (nIdx <= 0) )
         return( NULL );
 
