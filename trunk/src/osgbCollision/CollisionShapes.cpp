@@ -193,9 +193,10 @@ btConvexHullShape* btConvexHullCollisionShapeFromOSG( osg::Node* node )
 }
 
 btCompoundShape* btCompoundShapeFromOSGGeodes( osg::Node* node,
-    const BroadphaseNativeTypes shapeType, const osgbCollision::AXIS axis )
+    const BroadphaseNativeTypes shapeType, const osgbCollision::AXIS axis,
+    const unsigned int reductionLevel )
 {
-    ComputeShapeVisitor csv( shapeType, axis );
+    ComputeShapeVisitor csv( shapeType, axis, reductionLevel );
     node->accept( csv );
 
     btCompoundShape* cs = static_cast< btCompoundShape* >( csv.getShape() );

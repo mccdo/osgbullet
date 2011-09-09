@@ -36,7 +36,7 @@ namespace osgbDynamics
 
 CreationRecord::CreationRecord()
   : _sceneGraph( NULL ),
-    _version( 2 ),
+    _version( 3 ),
     _com( 0., 0., 0. ),
     _comSet( false ),
     _scale( osg::Vec3( 1., 1., 1. ) ),
@@ -45,15 +45,8 @@ CreationRecord::CreationRecord()
     _mass( 1.f ),
     _restitution( 0.f ),
     _friction( 1.f ),
-    _decimatorPercent( 1.f ),
-    _decimatorMaxError( FLT_MAX ),
-    _decimatorIgnoreBoundaries( true ),
-    _simplifyPercent( 1.f ),
-    _vertexAggMaxVerts( 0 ),
-    _vertexAggMinCellSize( osg::Vec3( 0., 0., 0.) ),
-    _reducerGroupThreshold( 360.f ),
-    _reducerMaxEdgeError( 360.f ),
-    _axis( osgbCollision::Z )
+    _axis( osgbCollision::Z ),
+    _reductionLevel( CreationRecord::NONE )
 {
 }
 CreationRecord::CreationRecord( const CreationRecord& rhs, osg::CopyOp copyop )
@@ -67,15 +60,8 @@ CreationRecord::CreationRecord( const CreationRecord& rhs, osg::CopyOp copyop )
     _mass( rhs._mass ),
     _restitution( rhs._restitution ),
     _friction( rhs._friction ),
-    _decimatorPercent( rhs._decimatorPercent ),
-    _decimatorMaxError( rhs._decimatorMaxError ),
-    _decimatorIgnoreBoundaries( rhs._decimatorIgnoreBoundaries ),
-    _simplifyPercent( rhs._simplifyPercent ),
-    _vertexAggMaxVerts( rhs._vertexAggMaxVerts ),
-    _vertexAggMinCellSize( rhs._vertexAggMinCellSize ),
-    _reducerGroupThreshold( rhs._reducerGroupThreshold ),
-    _reducerMaxEdgeError( rhs._reducerMaxEdgeError ),
-    _axis( rhs._axis )
+    _axis( rhs._axis ),
+    _reductionLevel( rhs._reductionLevel )
 {
 }
 
