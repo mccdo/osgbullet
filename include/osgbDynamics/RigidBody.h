@@ -75,6 +75,11 @@ setting the CreationRecord fields as needed. The fields are used as follows:
   <li> \c _axis Passed to osgbCollision::btCompoundShapeFromOSGGeodes().
     Ultimately, it is referenced only if \c _shapeType is \c CYLINDER_SHAPE_PROXYTYPE.
   </li>
+  <li> \c _reductionLevel Passed to osgbCollision::btCompoundShapeFromOSGGeodes().
+    If \c _shapeType is \c TRIANGLE_MESH_SHAPE_PROXYTYPE or CONVEX_TRIANGLEMESH_SHAPE_PROXYTYPE,
+    this value is used to configure osgWorks geometry reduction utilities to reduce triangle
+    count prior to creating the collision shape.
+  </li>
 </ul>
 
 Note that these are merely convenience routines, and your application can interface

@@ -99,9 +99,17 @@ This function collects all vertices and transforms them by any Transforms in the
 OSGBCOLLISION_EXPORT btConvexHullShape* btConvexHullCollisionShapeFromOSG( osg::Node* node );
 
 /** \brief Creates a collision shape for each Geode in the scene graph,
-and assembles them into a single btCompoundShape. */
+and assembles them into a single btCompoundShape.
+
+If \c shapeType is CYLINDER_SHAPE_PROXYTYPE, \c axis indicates the cylinder axis.
+
+\param reductionLevel If \c shapeType is TRIANGLE_MESH_SHAPE_PROXYTYPE or
+CONVEX_TRIANGLEMESH_SHAPE_PROXYTYPE, a copy of the input geometry is reduced based on
+this value, which is in the range 0 (to reduction) to 3 (aggressive reduction). See
+osgbDynamics::CreationRecord::ReductionLevel. Default is 0 (no reduction). */
 OSGBCOLLISION_EXPORT btCompoundShape* btCompoundShapeFromOSGGeodes( osg::Node* node,
-    const BroadphaseNativeTypes shapeType, const osgbCollision::AXIS axis=Y );
+    const BroadphaseNativeTypes shapeType, const osgbCollision::AXIS axis=Y,
+    const unsigned int reductionLevel = 0 );
 
 /** \brief Currently not implemented. Creates a collision shape for each Geode in the scene graph,
 and assembles them into a single btCompoundShape. */

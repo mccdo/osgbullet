@@ -71,12 +71,17 @@ public:
     /** \brief Specifies the shape to create per Geode, axis (if \c shapeType is a cylinder),
     and traversal mode. */
     ComputeShapeVisitor( const BroadphaseNativeTypes shapeType, const osgbCollision::AXIS axis=Y,
+        const unsigned int reductionLevel=0,
         osg::NodeVisitor::TraversalMode traversalMode=osg::NodeVisitor::TRAVERSE_ALL_CHILDREN );
 
 #if( OSGWORKS_OSG_VERSION >= 20800 )
     META_NodeVisitor(osgbCollision,ComputeShapeVisitor);
 #endif
 
+    /** \brief Computes overall bound of input scene graph for use in geometry reduction. */
+    void apply( osg::Group& node );
+    /** \brief Computes overall bound of input scene graph for use in geometry reduction. */
+    void apply( osg::Node& node );
     /** \brief Builds ComputeShapeVisitor::_localNodePath (a NodePath) from all Transforms, excluding AbsoluteModelTransform.
 
     This visitor must transform all geometry by Transform nodes in the scene graph before using
@@ -126,10 +131,22 @@ protected:
     */
     btCollisionShape* createShape( osg::Node& node, const osg::Matrix& m );
 
+    /** Called when _shapeType indicates a triangle mesh or convex triangle mesh.
+    Uses _reductionLevel to reduce triangle count in the input subgraph. */
+    void reduce( osg::Node& node );
+
     /** Shape to create per Geode. Set in ComputeShapeVisitor(). */
     const BroadphaseNativeTypes _shapeType;
-    /** If ComputeShapeVisitir::_shapeType is a cylinder, created shapes use this axis. Set in ComputeShapeVisitor(). */
+    /** If _shapeType is a cylinder, created shapes use this axis. Set in ComputeShapeVisitor(). */
     const osgbCollision::AXIS _axis;
+
+    /** If _shapeType is a triangle mesh or convex triangle mesh, geometry is reduced prior to creating
+    the collision shape. Range is 0 (no reduction) to 3 (aggressive reduction). */
+    const unsigned int _reductionLevel;
+    /** Computed in the first invoked apply() method to compute the overall bounding volume.
+    Used in geometry reduction if _reductionLevel is greater than zero and _shapeType indicates
+    a triangle mesh or convex triangle mesh. */
+    osg::BoundingSphere _bs;
 
     /** This is the created collision shape representing the traversed scene graph.
     Obtain it by calling getShape(). */

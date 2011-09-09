@@ -86,18 +86,17 @@ struct OSGBDYNAMICS_EXPORT CreationRecord : public osg::Object
     /** For _shapeType == CYLINDER_SHAPE_PROXYTYPE only. */
     osgbCollision::AXIS _axis;
 
-    // Reserved for future use.
-    // TBD need to incorporate new ShortEdgeOp and ReducerOp tools.
-    // Looks like Reducer is already used below...
-    float _decimatorPercent;
-    float _decimatorMaxError;
-    bool  _decimatorIgnoreBoundaries;
-    float _simplifyPercent;
-    unsigned int _vertexAggMaxVerts;
-    osg::Vec3 _vertexAggMinCellSize;
-    float _reducerGroupThreshold;
-    float _reducerMaxEdgeError;
-    // END Reserved for future use.
+    /** Corresponds to the \c _reductionLevel parameter for
+    osgbCollision::btCompoundShapeFromOSGGeodes(). */
+    typedef enum {
+        NONE = 0,
+        MINIMAL = 1,
+        INTERMEDIATE = 2,
+        AGGRESSIVE = 3
+    } ReductionLevel;
+    /** \brief Specify optional geometry reduction. Default is NONE.
+    */
+    ReductionLevel _reductionLevel;
 };
 
 

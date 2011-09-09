@@ -77,7 +77,7 @@ btRigidBody* createRigidBody( osgbDynamics::CreationRecord* cr )
 
     osg::notify( osg::DEBUG_FP ) << "createRigidBody: Creating collision shape." << std::endl;
     btCompoundShape* shape = osgbCollision::btCompoundShapeFromOSGGeodes( tempMtRoot.get(),
-        cr->_shapeType, cr->_axis );
+        cr->_shapeType, cr->_axis, static_cast< unsigned int >( cr->_reductionLevel ) );
     if( shape == NULL )
     {
         osg::notify( osg::WARN ) << "createRigidBody: btCompoundShapeFromOSGGeodes returned NULL." << std::endl;

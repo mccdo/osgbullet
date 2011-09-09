@@ -23,6 +23,9 @@
 #include <osg/Geode>
 #include <osg/Notify>
 #include <osgwTools/Transform.h>
+#include <osgwTools/ShortEdgeOp.h>
+#include <osgwTools/ReducerOp.h>
+#include <osgwTools/GeometryModifier.h>
 #include <osgbCollision/Utils.h>
 #include <osgwTools/AbsoluteModelTransform.h>
 
@@ -32,17 +35,40 @@ namespace osgbCollision
 
 
 ComputeShapeVisitor::ComputeShapeVisitor( const BroadphaseNativeTypes shapeType,
-    const osgbCollision::AXIS axis, osg::NodeVisitor::TraversalMode traversalMode )
+    const osgbCollision::AXIS axis,         const unsigned int reductionLevel,
+
+    osg::NodeVisitor::TraversalMode traversalMode )
   : osg::NodeVisitor( traversalMode ),
     _shapeType( shapeType ),
     _axis( axis ),
+    _reductionLevel( reductionLevel ),
     _shape( new btCompoundShape() )
 {
 }
 
+void ComputeShapeVisitor::apply( osg::Group& node )
+{
+    // If this is the root node, the bounding sphere will be invalid. Compute it.
+    if( !( _bs.valid() ) )
+        _bs = node.getBound();
+
+    traverse( node );
+}
+void ComputeShapeVisitor::apply( osg::Node& node )
+{
+    // If this is the root node, the bounding sphere will be invalid. Compute it.
+    if( !( _bs.valid() ) )
+        _bs = node.getBound();
+
+    traverse( node );
+}
 void ComputeShapeVisitor::apply( osg::Transform& node )
 {
-    /* Override apply(Transform&) solely to avoid processing AMT nodes. */
+    // If this is the root node, the bounding sphere will be invalid. Compute it.
+    if( !( _bs.valid() ) )
+        _bs = node.getBound();
+
+    /* Override apply(Transform&) to avoid processing AMT nodes. */
     const bool nonAMT = ( dynamic_cast< osgwTools::AbsoluteModelTransform* >( &node ) == NULL );
     if( nonAMT )
         _localNodePath.push_back( &node );
@@ -55,7 +81,9 @@ void ComputeShapeVisitor::apply( osg::Transform& node )
 
 void ComputeShapeVisitor::apply( osg::Geode& node )
 {
-    osg::notify( osg::DEBUG_INFO ) << "Geode" << std::endl;
+    // If this is the root node, the bounding sphere will be invalid. Compute it.
+    if( !( _bs.valid() ) )
+        _bs = node.getBound();
 
     osg::Matrix m = osg::computeLocalToWorld( _localNodePath );
     createAndAddShape( node, m );
@@ -86,8 +114,8 @@ btCollisionShape* ComputeShapeVisitor::createShape( osg::Node& node, const osg::
 {
     osg::notify( osg::DEBUG_INFO ) << "In createShape" << std::endl;
 
-    // Make a copy of the incoming node and its data, then
-    // transform the copy by the specified matrix.
+    // Make a copy of the incoming node and its data. The copy witll be transformed by the
+    // specified matrix, and possibly geometry reduced.
     if( node.asGeode() == NULL )
     {
         osg::notify( osg::WARN ) << "ComputeShapeVisitor encountered non-Geode." << std::endl;
@@ -127,12 +155,18 @@ btCollisionShape* ComputeShapeVisitor::createShape( osg::Node& node, const osg::
     case TRIANGLE_MESH_SHAPE_PROXYTYPE:
     {
         // Do _not_ compute center of bounding sphere for tri meshes.
+
+        // Reduce geometry.
+        reduce( *geodeCopy );
         collision = osgbCollision::btTriMeshCollisionShapeFromOSG( geodeCopy );
         break;
     }
     case CONVEX_TRIANGLEMESH_SHAPE_PROXYTYPE:
     {
         // Do _not_ compute center of bounding sphere for tri meshes.
+        
+        // Reduce geometry.
+        reduce( *geodeCopy );
         collision = osgbCollision::btConvexTriMeshCollisionShapeFromOSG( geodeCopy );
         break;
     }
@@ -160,6 +194,69 @@ btCollisionShape* ComputeShapeVisitor::createShape( osg::Node& node, const osg::
 
     return( collision );
 }
+
+void ComputeShapeVisitor::reduce( osg::Node& node )
+{
+    if( !( _bs.valid() ) )
+    {
+        osg::notify( osg::WARN ) << "ComputeShapeVisitor: Can't reduce with invalid bound." << std::endl;
+        return;
+    }
+
+    float seFeature;
+    float sePercent;
+    float grpThreshold;
+    float edgeError;
+    switch( _reductionLevel )
+    {
+    case 1:
+        seFeature = .15f;
+        sePercent = .9f;
+        grpThreshold = 8.f;
+        edgeError = 8.f;
+        break;
+    case 2:
+        seFeature = .25f;
+        sePercent = .6f;
+        grpThreshold = 17.f;
+        edgeError = 17.f;
+        break;
+    case 3:
+        seFeature = .35f;
+        sePercent = .3f;
+        grpThreshold = 28.f;
+        edgeError = 28.f;
+        break;
+    case 0:
+    default:
+        // No reduction.
+        return;
+        break;
+    }
+    seFeature *= _bs.radius() * 2.;
+
+    osg::notify( osg::DEBUG_FP ) << "ComputeShapeVisitor: Reducing..." << std::endl;
+    {
+        osgwTools::ShortEdgeOp* seOp = new osgwTools::ShortEdgeOp( sePercent, FLT_MAX, seFeature );
+        seOp->setDoTriStrip( false );
+        seOp->setMinPrimitives( 1 );
+
+        osgwTools::GeometryModifier modifier( seOp );
+        node.accept( modifier );
+        modifier.displayStatistics( osg::notify( osg::DEBUG_FP ) );
+    }
+
+    {
+        osgwTools::ReducerOp* redOp = new osgwTools::ReducerOp;
+        redOp->setGroupThreshold( grpThreshold );
+        redOp->setMaxEdgeError( edgeError );
+
+        osgwTools::GeometryModifier modifier( redOp );
+        node.accept( modifier );
+        modifier.displayStatistics( osg::notify( osg::DEBUG_FP ) );
+    }
+}
+
 
 
 // osgbCollision
