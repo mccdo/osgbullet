@@ -46,7 +46,8 @@ CreationRecord::CreationRecord()
     _restitution( 0.f ),
     _friction( 1.f ),
     _axis( osgbCollision::Z ),
-    _reductionLevel( CreationRecord::NONE )
+    _reductionLevel( CreationRecord::NONE ),
+    _overall( false )
 {
 }
 CreationRecord::CreationRecord( const CreationRecord& rhs, osg::CopyOp copyop )
@@ -61,7 +62,8 @@ CreationRecord::CreationRecord( const CreationRecord& rhs, osg::CopyOp copyop )
     _restitution( rhs._restitution ),
     _friction( rhs._friction ),
     _axis( rhs._axis ),
-    _reductionLevel( rhs._reductionLevel )
+    _reductionLevel( rhs._reductionLevel ),
+    _overall( rhs._overall )
 {
 }
 

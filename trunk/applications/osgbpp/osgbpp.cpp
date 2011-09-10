@@ -332,7 +332,7 @@ int main( int argc, char* argv[] )
     }
 
 
-    const bool overall( arguments.read( "--overall" ) );
+    const bool overall( arguments.read( "--overall" ) != 0 );
     if (overall)
         osg::notify( osg::INFO ) << "osgbpp: Overall" << std::endl;
 
@@ -377,46 +377,7 @@ int main( int argc, char* argv[] )
     cr->_axis = axis;
     cr->_reductionLevel = osgbDynamics::CreationRecord::MINIMAL;
 
-    btRigidBody* rb( NULL );
-    if( overall )
-    {
-        osg::Matrix m;
-        if( comSpecified )
-            m.setTrans( -com );
-        else
-            m.setTrans( -bs.center() );
-        osg::ref_ptr< osg::MatrixTransform > mt = new osg::MatrixTransform( m );
-        mt->addChild( model.get() );
-
-        btCollisionShape* shape( NULL );
-        switch( shapeType )
-        {
-        case BOX_SHAPE_PROXYTYPE:
-            shape = osgbCollision::btCompoundShapeFromBounds( mt.get(), BOX_SHAPE_PROXYTYPE );
-            break;
-        case SPHERE_SHAPE_PROXYTYPE:
-            shape = osgbCollision::btCompoundShapeFromBounds( mt.get(), SPHERE_SHAPE_PROXYTYPE );
-            break;
-        case CYLINDER_SHAPE_PROXYTYPE:
-            shape = osgbCollision::btCompoundShapeFromBounds( mt.get(), CYLINDER_SHAPE_PROXYTYPE, axis );            //shape = osgbCollision::btCylinderCollisionShapeFromOSG( mt.get(), axis );
-            break;
-        case TRIANGLE_MESH_SHAPE_PROXYTYPE:
-            shape = osgbCollision::btTriMeshCollisionShapeFromOSG( mt.get() );
-            break;
-        case CONVEX_TRIANGLEMESH_SHAPE_PROXYTYPE:
-            shape = osgbCollision::btConvexTriMeshCollisionShapeFromOSG( mt.get() );
-            break;
-        case CONVEX_HULL_SHAPE_PROXYTYPE:
-            shape = osgbCollision::btConvexHullCollisionShapeFromOSG( mt.get() );
-            break;
-        }
-        if( shape != NULL )
-            rb = osgbDynamics::createRigidBody( cr.get(), shape );
-    }
-    else
-    {
-        rb = osgbDynamics::createRigidBody( cr.get() );
-    }
+    btRigidBody* rb( osgbDynamics::createRigidBody( cr.get() ) );
     if( rb == NULL )
     {
         osg::notify( osg::FATAL ) << "osgbpp: NULL rigid body." << std::endl;

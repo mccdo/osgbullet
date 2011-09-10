@@ -76,8 +76,36 @@ btRigidBody* createRigidBody( osgbDynamics::CreationRecord* cr )
 
 
     osg::notify( osg::DEBUG_FP ) << "createRigidBody: Creating collision shape." << std::endl;
-    btCompoundShape* shape = osgbCollision::btCompoundShapeFromOSGGeodes( tempMtRoot.get(),
-        cr->_shapeType, cr->_axis, static_cast< unsigned int >( cr->_reductionLevel ) );
+    btCollisionShape* shape( NULL );
+    if( cr->_overall )
+    {
+        switch( cr->_shapeType )
+        {
+        case BOX_SHAPE_PROXYTYPE:
+            shape = osgbCollision::btCompoundShapeFromBounds( tempMtRoot.get(), BOX_SHAPE_PROXYTYPE );
+            break;
+        case SPHERE_SHAPE_PROXYTYPE:
+            shape = osgbCollision::btCompoundShapeFromBounds( tempMtRoot.get(), SPHERE_SHAPE_PROXYTYPE );
+            break;
+        case CYLINDER_SHAPE_PROXYTYPE:
+            shape = osgbCollision::btCompoundShapeFromBounds( tempMtRoot.get(), CYLINDER_SHAPE_PROXYTYPE, cr->_axis );
+            break;
+        case TRIANGLE_MESH_SHAPE_PROXYTYPE:
+            shape = osgbCollision::btTriMeshCollisionShapeFromOSG( tempMtRoot.get() );
+            break;
+        case CONVEX_TRIANGLEMESH_SHAPE_PROXYTYPE:
+            shape = osgbCollision::btConvexTriMeshCollisionShapeFromOSG( tempMtRoot.get() );
+            break;
+        case CONVEX_HULL_SHAPE_PROXYTYPE:
+            shape = osgbCollision::btConvexHullCollisionShapeFromOSG( tempMtRoot.get() );
+            break;
+        }
+    }
+    else
+    {
+        shape = osgbCollision::btCompoundShapeFromOSGGeodes( tempMtRoot.get(),
+            cr->_shapeType, cr->_axis, static_cast< unsigned int >( cr->_reductionLevel ) );
+    }
     if( shape == NULL )
     {
         osg::notify( osg::WARN ) << "createRigidBody: btCompoundShapeFromOSGGeodes returned NULL." << std::endl;

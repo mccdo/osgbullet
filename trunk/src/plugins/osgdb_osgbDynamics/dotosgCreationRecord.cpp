@@ -174,6 +174,12 @@ bool Creation_readLocalData( osg::Object& obj, osgDB::Input& fr )
         fr+=3;
         advance = true;
     }
+    else if( fr.matchSequence( "Overall" ) )
+    {
+        cr._overall = ( fr[1].matchString( "true" ) );
+        fr+=2;
+        advance = true;
+    }
 
     return( advance );
 }
@@ -190,6 +196,7 @@ bool Creation_writeLocalData( const osg::Object& obj, osgDB::Output& fw )
     fw.indent() << "Mass " << cr._mass << std::endl;
     fw.indent() << "Cylinder axis " << cr._axis << std::endl;
     fw.indent() << "Reduction level " << cr._reductionLevel << std::endl;
+    fw.indent() << "Overall " << std::boolalpha << cr._overall << std::endl;
 
     return( true );
 }
