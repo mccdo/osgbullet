@@ -18,7 +18,6 @@ set( LIB_PUBLIC_HEADERS
     ${HEADER_PATH}/GestureHandler.h
     ${HEADER_PATH}/HandNode.h
     ${HEADER_PATH}/HandTestEventHandler.h
-    ${HEADER_PATH}/p5support.h
 )
 
 set( _osgBulletSourceFiles
@@ -27,7 +26,6 @@ set( _osgBulletSourceFiles
     GestureHandler.cpp
     HandNode.cpp
     HandTestEventHandler.cpp
-    p5support.cpp
 )
 
 add_library( ${LIB_NAME}
