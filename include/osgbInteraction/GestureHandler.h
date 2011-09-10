@@ -41,6 +41,10 @@ namespace osgbInteraction
 class HandNode;
 
 
+/** \class GestureHandler GestureHandler.h <osgbInteraction/GestureHandler.h>
+\brief Allows data gloves to trigger interations via gesture codes.
+
+*/
 class OSGBINTERACTION_EXPORT GestureHandler : public osg::Referenced
 {
 public:

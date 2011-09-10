@@ -32,7 +32,12 @@ namespace osgbInteraction
 {
 
 
-// should this derive from osg::Referenced?
+/** \class P5Glove p5support.h <osgbInteraction/p5support.h>
+\brief Support for the P5 data glove.
+
+TBD. Should this derive from osg::Referenced?
+
+*/
 class OSGBINTERACTION_EXPORT P5Glove
 {
 public:

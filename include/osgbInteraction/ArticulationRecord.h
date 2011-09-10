@@ -31,11 +31,15 @@ namespace osgbInteraction
 {
 
 
-// handpreprocess2 stores transformation axis and pivot point
-// data in this record, and attaches it as UserData to each
-// MatrixTransform node. HandNode loads this data and store it
-// in ArticulationInfo to control how each articulation
-// transforms its subgraph.
+/** \class ArticulationRecord ArticulationRecord.h <osgbInteraction/ArticulationRecord.h>
+\brief Support for HandNode articulations.
+
+handpreprocess2 stores transformation axis and pivot point
+data in this record, and attaches it as UserData to each
+MatrixTransform node. HandNode loads this data and stores it
+in ArticulationInfo to control how each articulation
+transforms its subgraph.
+*/
 class OSGBINTERACTION_EXPORT ArticulationRecord : public osg::Object
 {
 public:

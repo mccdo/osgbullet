@@ -31,6 +31,10 @@ namespace osgbInteraction
 {
 
 
+/** \class HandTestEventHandler HandTestEventHandler.h <osgbInteraction/HandTestEventHandler.h>
+\brief Allows keyboard and mouse control of the HandNode.
+
+*/
 class OSGBINTERACTION_EXPORT HandTestEventHandler : public osgGA::GUIEventHandler
 {
 public:
