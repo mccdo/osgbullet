@@ -31,7 +31,7 @@
         #define OSGBINTERACTION_EXPORT __declspec( dllimport )
     #endif
 #else
-    #define OSGBCOLLISION_EXPORT
+    #define OSGBINTERACTION_EXPORT
 #endif
 
 
