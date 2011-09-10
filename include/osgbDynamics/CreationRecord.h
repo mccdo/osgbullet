@@ -97,6 +97,8 @@ struct OSGBDYNAMICS_EXPORT CreationRecord : public osg::Object
     /** \brief Specify optional geometry reduction. Default is NONE.
     */
     ReductionLevel _reductionLevel;
+
+    bool _overall;
 };
 
 
