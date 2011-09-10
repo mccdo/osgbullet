@@ -2650,7 +2650,7 @@ Group {
   MatrixTransform {
     name "f0k0"
     UserData {
-      osgbBulletPlus::ArticulationRecord {
+      osgbDynamics::ArticulationRecord {
         Version 2
         Axis 0 -1 0
         PivotPoint 2.6335 -0.893 0.4278
@@ -2669,7 +2669,7 @@ Group {
     MatrixTransform {
       name "f0trans"
       UserData {
-        osgbBulletPlus::ArticulationRecord {
+        osgbDynamics::ArticulationRecord {
           Version 2
           Axis 0.707107 0 0.707107
           PivotPoint 0 0 0
@@ -5496,7 +5496,7 @@ Group {
       MatrixTransform {
         name "f0k1"
         UserData {
-          osgbBulletPlus::ArticulationRecord {
+          osgbDynamics::ArticulationRecord {
             Version 2
             Axis 0 0 -1
             PivotPoint 1.1557 -4.9726 -1.3088
@@ -7253,7 +7253,7 @@ Group {
         MatrixTransform {
           name "f0k2"
           UserData {
-            osgbBulletPlus::ArticulationRecord {
+            osgbDynamics::ArticulationRecord {
               Version 2
               Axis 0 0 -1
               PivotPoint 0.8256 -2.1297 -0.3172
@@ -9893,7 +9893,7 @@ Group {
   MatrixTransform {
     name "f4trans"
     UserData {
-      osgbBulletPlus::ArticulationRecord {
+      osgbDynamics::ArticulationRecord {
         Version 2
         Axis -0.384615 0 0.923077
         PivotPoint -3.994 -7.1635 -1.0791
@@ -9912,7 +9912,7 @@ Group {
     MatrixTransform {
       name "f4k0"
       UserData {
-        osgbBulletPlus::ArticulationRecord {
+        osgbDynamics::ArticulationRecord {
           Version 2
           Axis 0.899438 -0.22486 0.374766
           PivotPoint 0 0 0
@@ -11319,7 +11319,7 @@ Group {
       MatrixTransform {
         name "f4k1"
         UserData {
-          osgbBulletPlus::ArticulationRecord {
+          osgbDynamics::ArticulationRecord {
             Version 2
             Axis 0.899438 -0.22486 0.374766
             PivotPoint -0.5127 -2.0057 -0.1025
@@ -12742,7 +12742,7 @@ Group {
         MatrixTransform {
           name "f4k2"
           UserData {
-            osgbBulletPlus::ArticulationRecord {
+            osgbDynamics::ArticulationRecord {
               Version 2
               Axis 0.899438 -0.22486 0.374766
               PivotPoint -0.3469 -2.0968 -0.5883
@@ -15433,7 +15433,7 @@ Group {
   MatrixTransform {
     name "f3trans"
     UserData {
-      osgbBulletPlus::ArticulationRecord {
+      osgbDynamics::ArticulationRecord {
         Version 2
         Axis -0.288551 0 0.957465
         PivotPoint -2.3798 -7.909 0.1728
@@ -15452,7 +15452,7 @@ Group {
     MatrixTransform {
       name "f3k0"
       UserData {
-        osgbBulletPlus::ArticulationRecord {
+        osgbDynamics::ArticulationRecord {
           Version 2
           Axis 0.949334 -0.130046 0.286101
           PivotPoint 0 0 0
@@ -16838,7 +16838,7 @@ Group {
       MatrixTransform {
         name "f3k1"
         UserData {
-          osgbBulletPlus::ArticulationRecord {
+          osgbDynamics::ArticulationRecord {
             Version 2
             Axis 0.949334 -0.130046 0.286101
             PivotPoint -0.413 -3.0119 -0.5645
@@ -18242,7 +18242,7 @@ Group {
         MatrixTransform {
           name "f3k2"
           UserData {
-            osgbBulletPlus::ArticulationRecord {
+            osgbDynamics::ArticulationRecord {
               Version 2
               Axis 0.949334 -0.130046 0.286101
               PivotPoint -0.195 -2.8131 -1.1317
@@ -20936,7 +20936,7 @@ Group {
   MatrixTransform {
     name "f2trans"
     UserData {
-      osgbBulletPlus::ArticulationRecord {
+      osgbDynamics::ArticulationRecord {
         Version 2
         Axis -0.138196 0 0.990405
         PivotPoint -0.4977 -8.6514 0.6237
@@ -20955,7 +20955,7 @@ Group {
     MatrixTransform {
       name "f2k0"
       UserData {
-        osgbBulletPlus::ArticulationRecord {
+        osgbDynamics::ArticulationRecord {
           Version 2
           Axis 0.988767 -0.0574865 0.137967
           PivotPoint 0 0 0
@@ -22357,7 +22357,7 @@ Group {
       MatrixTransform {
         name "f2k1"
         UserData {
-          osgbBulletPlus::ArticulationRecord {
+          osgbDynamics::ArticulationRecord {
             Version 2
             Axis 0.988767 -0.0574865 0.137967
             PivotPoint -0.1928 -3.7661 -0.8036
@@ -23754,7 +23754,7 @@ Group {
         MatrixTransform {
           name "f2k2"
           UserData {
-            osgbBulletPlus::ArticulationRecord {
+            osgbDynamics::ArticulationRecord {
               Version 2
               Axis 0.988767 -0.0574865 0.137967
               PivotPoint -0.1238 -2.631 -1.3582
@@ -26500,7 +26500,7 @@ Group {
   MatrixTransform {
     name "f1trans"
     UserData {
-      osgbBulletPlus::ArticulationRecord {
+      osgbDynamics::ArticulationRecord {
         Version 2
         Axis 0 0 1
         PivotPoint 1.457 -9.0416 0.9736
@@ -26519,7 +26519,7 @@ Group {
     MatrixTransform {
       name "f1k0"
       UserData {
-        osgbBulletPlus::ArticulationRecord {
+        osgbDynamics::ArticulationRecord {
           Version 2
           Axis 1 0 0
           PivotPoint 0 0 0
@@ -27953,7 +27953,7 @@ Group {
       MatrixTransform {
         name "f1k1"
         UserData {
-          osgbBulletPlus::ArticulationRecord {
+          osgbDynamics::ArticulationRecord {
             Version 2
             Axis 1 0 0
             PivotPoint 0.1152 -3.1426 -0.7329
@@ -29360,7 +29360,7 @@ Group {
         MatrixTransform {
           name "f1k2"
           UserData {
-            osgbBulletPlus::ArticulationRecord {
+            osgbDynamics::ArticulationRecord {
               Version 2
               Axis 1 0 0
               PivotPoint -0.0222 -2.5844 -1.1036

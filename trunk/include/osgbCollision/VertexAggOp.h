@@ -29,10 +29,18 @@
 #include <osg/Vec3>
 
 
-namespace osgbCollision {
+namespace osgbCollision
+{
 
+// Forward
 struct Octree;
 
+
+/** \class VertexAggOp VertexAggOp.h <osgbCollision/VertexAggOp.h>
+\brief A geometry reduction method that produces a convex hull, suitable for
+low-resolution collision shapes.
+
+*/
 class OSGBCOLLISION_EXPORT VertexAggOp : public osgwTools::GeometryOperation
 {
 public:

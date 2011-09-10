@@ -61,16 +61,15 @@ namespace osgbInteraction
 // Forward
 class FindArticulations;
 
-/*!
-   HandNode -- A Node that renders a hand model in the OSG scene
-   and maintains a Bullet rigid body and collision shape rep of
-   the hand.
+/** \class HandNode HandNode.h <osgbInteraction/HandNode.h>
+\brief A Node that renders a hand model in the OSG scene and maintains a Bullet
+rigid body and collision shape representation of the hand.
 
-   This version of HandNode has a calibration feature. call
-   setCalibrateMode( true ), then move your physical hand to match
-   the position of the virtual hand. The virtual hand will not move
-   while in calibrate mode. After your physical hand matches the
-   cirtual hand, call setCalibrateMode( false ).
+This version of HandNode has a calibration feature. call
+setCalibrateMode( true ), then move your physical hand to match
+the position of the virtual hand. The virtual hand will not move
+while in calibrate mode. After your physical hand matches the
+cirtual hand, call setCalibrateMode( false ).
 */
 class OSGBINTERACTION_EXPORT HandNode : public osg::Transform
 {

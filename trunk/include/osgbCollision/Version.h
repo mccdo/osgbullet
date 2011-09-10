@@ -149,9 +149,19 @@ versa.
 
 Rigid body dynamics and constraints support.
 
+\subsection osgbinteraction osgbInteraction
+
+Support for an articulatable hand model. Support for the P5 data glove.
+
 \subsection osgdbosgbdynamics osgdb_osgbDynamics
 
 Dot OSG file support for classes and objects in the osgbDynamics library.
+
+Note: This library currently needs to be redesigned. It provides support for,
+and depends on, all three libraries: osgbCollision, osgbDynamics, and
+osgbInteraction. This makes it impossible for an app to both use the dot OSG
+file support, and link with only osgbDynamics (it must also link with
+osgbInteraction).
 
 \subsection osgdbsgb osgdb_sgb
 
