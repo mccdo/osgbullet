@@ -43,16 +43,29 @@ include( FindBulletHelper )
 
 FIND_PACKAGE( OSGWorks REQUIRED )
 
-# add bullet & osg for entire project for include & lib paths
+
+option( OSGBULLET_P5_SUPPORT "Enable to include support for the P5 glove and build the related test code" OFF )
+if( OSGBULLET_P5_SUPPORT )
+    add_definitions( -DUSE_P5 )
+    set( OSGBULLET_P5_INCLUDE_DIR "" CACHE PATH "" )
+    set( OSGBULLET_P5_LIBRARY "" CACHE FILEPATH "" )
+else()
+    unset( OSGBULLET_P5_INCLUDE_DIR CACHE )
+    unset( OSGBULLET_P5_LIBRARY CACHE )
+endif()
+
+
 INCLUDE_DIRECTORIES( 
     ${PROJECT_SOURCE_DIR}/include
     ${OSG_INCLUDE_DIRS}
     ${OSGWORKS_INCLUDE_DIR}
     ${BULLET_INCLUDE_DIRS}
     ${BULLET_EXTRAS_INCLUDE_DIR}
+    ${OSGBULLET_P5_INCLUDE_DIR}
 )
 
-# Possible future support for collision-only (no dynamics)
+
+# Support for collision-only (no dynamics)
 if( BULLET_DYNAMICS_FOUND )
     ADD_DEFINITIONS( -DUSE_BULLET_DYNAMICS )
 endif()
@@ -94,6 +107,7 @@ endif()
 
 ADD_SUBDIRECTORY( src/osgbCollision )
 ADD_SUBDIRECTORY( src/osgbDynamics )
+ADD_SUBDIRECTORY( src/osgbInteraction )
 ADD_SUBDIRECTORY( src/plugins )
 
 
