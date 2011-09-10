@@ -15,6 +15,7 @@ set( LIB_PUBLIC_HEADERS
     ${HEADER_PATH}/RefBulletObject.h
     ${HEADER_PATH}/Utils.h
     ${HEADER_PATH}/Version.h
+    ${HEADER_PATH}/VertexAggOp.h
     ${HEADER_PATH}/Export.h
 )
 
@@ -29,6 +30,7 @@ set( _osgBulletSourceFiles
     ComputeTriMeshVisitor.cpp
     GLDebugDrawer.cpp
     Utils.cpp
+    VertexAggOp.cpp
     Version.cpp
 )
 

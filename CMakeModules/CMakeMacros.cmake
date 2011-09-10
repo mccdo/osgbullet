@@ -17,7 +17,11 @@ macro( _osgBulletPlugin TRGTNAME )
     if( BUILD_SHARED_LIBS )
         add_library( ${TRGTNAME} MODULE ${ARGN} )
 
+        # TBD. This is a shortcut. It means any app that wants to be
+        # collision-only, for example, and also use the dot OSG support,
+        # must link with all three libs. FIXME.
         link_internal( ${TRGTNAME}
+            osgbInteraction
             osgbDynamics
             osgbCollision
         )
@@ -36,6 +40,16 @@ macro( _osgBulletPlugin TRGTNAME )
     set_target_properties( ${TRGTNAME} PROPERTIES PROJECT_LABEL "Plugin ${TRGTNAME}" )
 endmacro()
 
+
+macro( _osgBulletMakeInteractionExe _exeName )
+    set( _osgBulletLibs
+        "osgbInteraction;osgbDynamics;osgbCollision"
+    )
+    set( _bulletLibs
+        "${BULLET_LIBRARIES}"
+    )
+    _osgBulletMakeExeInternal( ${_exeName} "${_osgBulletLibs}" "${_bulletLibs}" ${ARGN} )
+endmacro()
 
 macro( _osgBulletMakeDynamicsExe _exeName )
     set( _osgBulletLibs
