@@ -51,10 +51,15 @@ protected:
 };
 
 
-// Contains support for the virtual articulations (spread angle between
-// fingers, and middle/outer knuckle synchronization).
-// Also supports calibration mode, toggle right/left, and visibility.
-// See source file comment block for the handle() function.
+/** \class VirtualHandTestEventHandler HandTestEventHandler.h <osgbInteraction/HandTestEventHandler.h>
+\brief Allows keyboard and mouse control of the HandNode.
+
+Contains support for the virtual articulations (spread angle between fingers, and
+middle/outer knuckle synchronization).
+
+Also supports calibration mode, toggle right/left, and visibility. See source file
+comment block for the handle() function.
+*/
 class OSGBINTERACTION_EXPORT VirtualHandTestEventHandler : public osgGA::GUIEventHandler
 {
 public:
