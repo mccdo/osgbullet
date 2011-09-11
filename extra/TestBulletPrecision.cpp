@@ -23,6 +23,10 @@
 // This test program determins whether Bullet
 // was compiled with single or double precision.
 
+// Build this as a standalone Bullet application to determine whether
+// Bullet was built with single or double precision, then configure
+// the osgBullet CMake variable OSGBULLET_DOUBLE_PRECISION accordingly.
+
 #include <bullet/LinearMath/btScalar.h>
 
 #include <typeinfo>
