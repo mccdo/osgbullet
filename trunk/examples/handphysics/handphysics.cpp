@@ -37,12 +37,15 @@
 
 #include <osgwTools/FindNamedNode.h>
 #include <osgwTools/InsertRemove.h>
+#include <osgwTools/ReadFile.h>
 #include <osgwTools/Version.h>
 
 #include <osgbCollision/RefBulletObject.h>
+#include <osgbDynamics/GroundPlane.h>
 #include <osgbDynamics/RigidBody.h>
 #include <osgbDynamics/MotionState.h>
 #include <osgbCollision/CollisionShapes.h>
+#include <osgbCollision/GLDebugDrawer.h>
 
 #include <osgbInteraction/HandNode.h>
 #include <osgbInteraction/GestureHandler.h>
@@ -94,10 +97,6 @@
 
 
 
-//#define DO_DEBUG_DRAW
-#ifdef DO_DEBUG_DRAW
-#include <osgbCollision/GLDebugDrawer.h>
-#endif
 
 
 
@@ -118,18 +117,21 @@ public:
             {
                 // Default gesture
                 _handNode->sendGestureCode( osgbInteraction::GestureHandler::Default );
+                _handNode->setPose( osgbInteraction::HandNode::POSE_DEFAULT );
                 return( true );
             }
             else if( (ea.getKey() == 'p' ) || (ea.getKey() == 'P' ) )
             {
                 // Point gesture
                 _handNode->sendGestureCode( osgbInteraction::GestureHandler::Point );
+                _handNode->setPose( osgbInteraction::HandNode::POSE_POINT );
                 return( true );
             }
             else if( (ea.getKey() == 'f' ) || (ea.getKey() == 'F' ) )
             {
                 // Fist gesture
                 _handNode->sendGestureCode( osgbInteraction::GestureHandler::Fist );
+                _handNode->setPose( osgbInteraction::HandNode::POSE_FIST );
                 return( true );
             }
         }
@@ -174,44 +176,6 @@ btDiscreteDynamicsWorld* initPhysics( osg::Vec3 gravity = osg::Vec3( 0, 0, -1 ) 
 }
 
 
-btRigidBody* createBTBox( osg::MatrixTransform* box,
-                          osg::Vec3 center )
-{
-    btCollisionShape* collision = osgbCollision::btBoxCollisionShapeFromOSG( box );
-
-    osgbDynamics::MotionState * motion = new osgbDynamics::MotionState();
-
-    btScalar mass( 0.0 );
-    btVector3 inertia( 0, 0, 0 );
-    btRigidBody::btRigidBodyConstructionInfo rb( mass, motion, collision, inertia );
-    btRigidBody * body = new btRigidBody( rb );
-
-    motion->setTransform( box );
-    osg::Matrix groundTransform( osg::Matrix::translate( center ) );
-    motion->setParentTransform( groundTransform );
-    body->setMotionState( motion );
-
-    return( body );
-}
-
-osg::MatrixTransform* createOSGBox( osg::Vec3 size )
-{
-    osg::Box * box = new osg::Box();
-
-    box->setHalfLengths( size );
-
-    osg::ShapeDrawable * shape = new osg::ShapeDrawable( box );
-
-    osg::Geode * geode = new osg::Geode();
-    geode->addDrawable( shape );
-
-    osg::MatrixTransform * transform = new osg::MatrixTransform();
-    transform->addChild( geode );
-
-    return( transform );
-}
-
-
 /** \cond */
 // This class can read itself from a file. Long-term,
 // we might want something like this in an osgPlugin form.
@@ -239,7 +203,7 @@ public:
 
         short filterGroup( 0 );
         short filterWith( 0 );
-        bool useGroundPlane( true );
+        osg::Vec4 groundPlane( 0., 0., 1., 0. );
 
         std::string nodeName;
         bool matchAllNodes( false );
@@ -276,7 +240,7 @@ public:
             }
             else if( key == std::string( "GroundPlane:" ) )
             {
-                istr >> useGroundPlane;
+                istr >> groundPlane[ 0 ] >> groundPlane[ 1 ] >> groundPlane[ 2 ] >> groundPlane[ 3 ];
             }
             else if( key == std::string( "HandNode:" ) )
             {
@@ -346,10 +310,8 @@ public:
                 }
 
                 osgwTools::FindNamedNode fnn( nodeName );
-#if( OSGWORKS_VERSION >= 10150 )
                 // Don't include the target node in the returned paths.
                 fnn.setPathsIncludeTargetNode( false );
-#endif
                 _root->accept( fnn );
                 if( fnn._napl.empty() )
                 {
@@ -360,11 +322,6 @@ public:
                 osgwTools::FindNamedNode::NodeAndPathList::iterator it;
                 for( it = fnn._napl.begin(); it != fnn._napl.end(); it++ )
                 {
-#if( OSGWORKS_VERSION < 10150 )
-                    // Prior to v1.1.50, need to manualls pop the back of the NodePath
-                    // to remove the target node.
-                    it->second.erase( it->second.end() - 1 );
-#endif
                     btRigidBody* rb = createRigidBody(
                         it->first, it->second, cr.get() );
                     if( rb != NULL )
@@ -592,20 +549,9 @@ public:
                 osg::notify( osg::WARN ) << "ConfigReaderWriter: Unknown key: " << key << std::endl;
         }
 
-        if( useGroundPlane )
         {
-#if 0
-            osg::Vec4 groundVec( _up[0] * -1., _up[1] * -1., _up[2] * -1., 0. );
-            _root->addChild( osgbCollision::generateGroundPlane( groundVec, _dw ) );
-#else
-            float thin = .1;
-            osg::MatrixTransform* ground = 
-                createOSGBox( osg::Vec3( 10, 10, thin ) );
-            _root->addChild( ground );
-            btRigidBody* groundBody = 
-                createBTBox( ground, _up * -1. * thin );
-            _dw->addRigidBody( groundBody );
-#endif
+            osg::Node* groundNode = osgbDynamics::generateGroundPlane( groundPlane, _dw );
+            _root->addChild( groundNode );
         }
 
 
@@ -683,6 +629,8 @@ int main( int argc, char** argv )
         osg::notify( osg::FATAL ) << "Specify a config file (such as \"concave.txt\") on the command line." << std::endl;
         return 1;
     }
+    osg::ArgumentParser arguments( &argc, argv );
+    const bool debugDisplay( arguments.find( "--debug" ) > 0 );
 
     btDiscreteDynamicsWorld* bulletWorld = initPhysics();
     osg::ref_ptr< osg::Group > root = new osg::Group;
@@ -691,27 +639,36 @@ int main( int argc, char** argv )
         osgbInteraction::HandNode( bulletWorld );
     root->addChild( hn.get() );
 
-    std::string commandLineFile( argv[ 1 ] );
-    std::string fileExt = osgDB::convertToLowerCase(
-        osgDB::getFileExtension( commandLineFile ) );
-    if( fileExt == "txt" )
+    // Look for config and model files on the command line.
+    std::string configFile( "" );
+    std::string otherFiles( "" );
+    int idx;
+    for( idx=1; idx<arguments.argc(); idx++ )
+    {
+        if( arguments.isOption( arguments[ idx ] ) )
+            continue;
+
+        const std::string thisArg( arguments[ idx ] );
+        const std::string fileExt = osgDB::convertToLowerCase( osgDB::getFileExtension( thisArg ) );
+        if( fileExt == "txt" )
+            configFile = thisArg;
+        else
+            otherFiles += ( thisArg + std::string( " " ) );
+    }
+    if( !( configFile.empty() ) )
     {
         ConfigReaderWriter* crw = new ConfigReaderWriter( root.get(), bulletWorld, hn.get() );
         //osg::setNotifyLevel( osg::DEBUG_FP );
-        crw->read( commandLineFile );
+        crw->read( configFile );
         //osg::setNotifyLevel( osg::NOTICE );
     }
-    else if( fileExt == "osg" )
+    if( !( otherFiles.empty() ) )
     {
-        // Possible future support for loading .osg file
-        osg::notify( osg::FATAL ) << "Loading .osg not yet implemented." << std::endl;
-        return( 1 );
+        // Treat non-options and non-text files as other files to be loaded and rendered,
+        // but not part of the physics sim.
+        root->addChild( osgwTools::readNodeFiles( otherFiles ) );
     }
-    else
-    {
-        osg::notify( osg::FATAL ) << "No support for " << commandLineFile << std::endl;
-        return( 1 );
-    }
+
 
     //This is the default value for the island deactivation time. The smaller this
     //value is the sooner the island will be put to sleep. I believe this number is
@@ -745,17 +702,14 @@ int main( int argc, char** argv )
     viewer.addEventHandler(new osgViewer::LODScaleHandler);
     viewer.addEventHandler(new osgViewer::ScreenCaptureHandler);
 
-    double currSimTime = viewer.getFrameStamp()->getSimulationTime();
-    double prevSimTime = viewer.getFrameStamp()->getSimulationTime();
-    viewer.realize();
-    int count( 4 );
-
-#ifdef DO_DEBUG_DRAW
-    osgbCollision::GLDebugDrawer* dbgDraw = new osgbCollision::GLDebugDrawer();
-    dbgDraw->setDebugMode( ~btIDebugDraw::DBG_DrawText );
-    bulletWorld->setDebugDrawer( dbgDraw );
-    root->addChild( dbgDraw->getSceneGraph() );
-#endif
+    osgbCollision::GLDebugDrawer* dbgDraw( NULL );
+    if( debugDisplay )
+    {
+        dbgDraw = new osgbCollision::GLDebugDrawer();
+        dbgDraw->setDebugMode( ~btIDebugDraw::DBG_DrawText );
+        bulletWorld->setDebugDrawer( dbgDraw );
+        root->addChild( dbgDraw->getSceneGraph() );
+    }
 
     osg::ref_ptr< osg::Node > foo( viewer.getSceneData() );
     osgUtil::Optimizer opt;
@@ -774,30 +728,29 @@ int main( int argc, char** argv )
 	gloveZero->setMovementScale( osg::Vec3( 0.6, 0.6, 0.6 ) );
 #endif
 
-    while( /*count-- &&*/ !viewer.done() )
+    viewer.realize();
+    double currSimTime;
+    double prevSimTime = viewer.getFrameStamp()->getSimulationTime();
+
+    while( !viewer.done() )
     {
 #ifdef USE_P5
         gloveZero->updateHandState(hn.get()); // update from glove
 #endif
 
-#ifdef DO_DEBUG_DRAW
-        dbgDraw->BeginDraw();
-#endif
+        if( dbgDraw != NULL )
+            dbgDraw->BeginDraw();
 
         currSimTime = viewer.getFrameStamp()->getSimulationTime();
         bulletWorld->stepSimulation( currSimTime - prevSimTime );
-#if 0
-#ifndef BT_NO_PROFILE
-        CProfileManager::dumpAll();
-#endif
-#endif
         float dt = currSimTime - prevSimTime;
         prevSimTime = currSimTime;
 
-#ifdef DO_DEBUG_DRAW
-        bulletWorld->debugDrawWorld();
-        dbgDraw->EndDraw();
-#endif
+        if( dbgDraw != NULL )
+        {
+            bulletWorld->debugDrawWorld();
+            dbgDraw->EndDraw();
+        }
 
         viewer.frame();
     }
