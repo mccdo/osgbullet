@@ -16,7 +16,7 @@ Like !OpenSceneGraph, osgBullet uses CMake. To create project files for osgBulle
   * Hit Configure a second time (all variables must be clear, not red).
   * Hit Generate.
 
-Be sure to set OSGBULLET_USE_DOUBLE_PRECISION if Bullet was built with double precision. If you build Bullet for double precision and osgBullet for single precision, osgBullet will report link errors.
+Be sure to set OSGBULLET_USE_DOUBLE_PRECISION to match this setting in Bullet. If you build Bullet for double precision and osgBullet for single precision, or vice versa, osgBullet will report link errors.
 
 Use your project files / makefiles to build osgWorks. Build the install target to install osgWorks on your system.
 
