@@ -16,6 +16,8 @@ Like !OpenSceneGraph, osgBullet uses CMake. To create project files for osgBulle
   * Hit Configure a second time (all variables must be clear, not red).
   * Hit Generate.
 
+Be sure to set OSGBULLET_USE_DOUBLE_PRECISION if Bullet was built with double precision. If you build Bullet for double precision and osgBullet for single precision, osgBullet will report link errors.
+
 Use your project files / makefiles to build osgWorks. Build the install target to install osgWorks on your system.
 
 = Finding the OSG, Bullet, and osgWorks Dependencies=
@@ -32,9 +34,13 @@ In summary:
 
 = Finding Bullet with osgBullet's svn trunk (post-v1.1) =
 
-Our local copy of !FindBullet.cmake has bee deleted on svn trunk. To find Bullet, upgrade to CMake 2.8, which has its own !FindBullet.cmake script. This change has been discussed on the osgbullet-users Google Group:
+Our local copy of !FindBullet.cmake has been deleted on svn trunk. To find Bullet, upgrade to CMake 2.8, which has its own !FindBullet.cmake script. This change has been discussed on the osgbullet-users Google Group:
 
 http://groups.google.com/group/osgbullet-users/browse_frm/thread/f775382dac66df25
+
+= Troubleshooting Builds =
+
+osgBullet should build without error on all major platforms. If you encounter link errors, the most likely cause is a mismatch between the double precision setting in the CMake systems of osgBullet and Bullet. Please make sure both projects are configured and built consistently, either single or double precision.
 
 = Installing osgBullet = 
 
