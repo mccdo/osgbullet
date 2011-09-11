@@ -9,8 +9,8 @@ Like !OpenSceneGraph, osgBullet uses CMake. The osgBullet build system requires 
 To create project files for osgBullet, follow these general steps:
   * Run the CMake GUI or ccmake.
   * Specify a build directory, then hit Configure.
-  * Hit Configure a second time (all variables must be clear, not red).
-  * Hit Generate.
+  * Resolve any missing dependencies and again hit Configure.
+  * When all dependencies have been resolved, hit Generate.
 
 = Dependencies =
 
