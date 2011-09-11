@@ -60,16 +60,31 @@ void CollectVerticesVisitor::applyDrawable( osg::Drawable* drawable )
     const osg::Vec3Array* in = dynamic_cast< const osg::Vec3Array* >( geom->getVertexArray() );
     if( in == NULL )
     {
-        osg::notify( osg::WARN ) << "CollectVerticesVisitor: Non-Vec3 vertex array encountered." << std::endl;
+        osg::notify( osg::WARN ) << "CollectVerticesVisitor: Non-Vec3Array vertex array encountered." << std::endl;
         return;
     }
 
-    osg::Matrix m = osg::computeLocalToWorld( getNodePath() );
+    const osg::Matrix m = osg::computeLocalToWorld( getNodePath() );
+
+    unsigned int idx;
+    for( idx=0; idx < geom->getNumPrimitiveSets(); idx++ )
+    {
+        osg::PrimitiveSet* ps = geom->getPrimitiveSet( idx );
+        unsigned int jdx;
+        for( jdx=0; jdx < ps->getNumIndices(); jdx++ )
+        {
+            unsigned int index = ps->index( jdx );
+            verts_->push_back( (*in)[ index ] * m );
+        }
+    }
+
+    /*
     osg::Vec3Array::const_iterator iter;
     for( iter = in->begin(); iter != in->end(); iter++ )
     {
         verts_->push_back( *iter * m );
     }
+    */
 }
 
 
