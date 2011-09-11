@@ -29,6 +29,8 @@
 #include <osgbDynamics/CreationRecord.h>
 #include <osgbDynamics/RigidBody.h>
 #include <osgbCollision/CollisionShapes.h>
+#include <osgbDynamics/GroundPlane.h>
+#include <osgbCollision/GLDebugDrawer.h>
 #include <osgbCollision/Utils.h>
 
 #include <osgwTools/InsertRemove.h>
@@ -46,30 +48,25 @@
 #include <map>
 
 
-//#define DO_DEBUG_DRAW
-#ifdef DO_DEBUG_DRAW
-#include <osgbCollision/GLDebugDrawer.h>
-#endif
 
-
-// Filter out collisions between the door and doorframe.
+// Filter out collisions between the gate and walls.
 //
 // Bullet collision filtering tutorial:
 //   http://www.bulletphysics.com/mediawiki-1.5.8/index.php?title=Collision_Filtering
 //
 // Define filter groups
 enum CollisionTypes {
-    COL_DOOR = 0x1 << 0,
-    COL_DOORFRAME = 0x1 << 1,
+    COL_GATE = 0x1 << 0,
+    COL_WALL = 0x1 << 1,
     COL_DEFAULT = 0x1 << 2,
 };
 // Define filter masks
-unsigned int doorCollidesWith( COL_DEFAULT );
-unsigned int doorFrameCollidesWith( COL_DEFAULT );
-unsigned int defaultCollidesWith( COL_DOOR | COL_DOORFRAME | COL_DEFAULT );
+unsigned int gateCollidesWith( COL_DEFAULT );
+unsigned int wallCollidesWith( COL_DEFAULT );
+unsigned int defaultCollidesWith( COL_GATE | COL_WALL | COL_DEFAULT );
 
 
-/** \cond */
+/* \cond */
 class InteractionManipulator : public osgGA::GUIEventHandler
 {
 public:
@@ -168,8 +165,39 @@ protected:
         _world->addRigidBody( body, COL_DEFAULT, defaultCollidesWith );
     }
 };
+/* \endcond */
 
 
+//
+// BEGIN WALL FIX
+//
+
+// The input model consists of two separate walls. However, the OSG scene
+// graph for this is a single Geode with a single Geometry and a single
+// QUADS PrimitiveSet. Our app needs to make this into two separate static
+// collision shapes. One way to handle this situation would be to parse the
+// geometry data and code directly to the Bullet API.
+//
+// Howver, for this example, I have instead chosen to sacrifice a little bit
+// of rendering efficiency by fixing the scene graph, which will allow the
+// example to use osgbDynamics::createRigidBody() to automatically generate
+// the collision shapes. In order for this to work, the scene graph must contain
+// two Geodes, each with its own Geometry and PrimitiveSet. This allows the
+// osgBullet rigid body create code to simple create one rigid body for
+// each branch of the graph.
+//
+// The FindGeomOp is a GeometryOperation that returns a reference to the last
+// Geometry found, which is all we need to locate the Geometry in question in
+// this branch of the scene graph. The FixWalls function makes a copy of this
+// scene graph branch, then uses FindGeomOp to locate the Geometry, then
+// modifies the PrimitiveSet on each to only reference the vertices needed for
+// each wall segment.
+//
+// Obviously, this code is very model specific, and is not intended for
+// re-use with other models. Therefore I have wrapped it with BEGIN WALL FIX
+// and END WALL FIX.
+
+/* \cond */
 class FindGeomOp : public osgwTools::GeometryOperation
 {
 public:
@@ -185,8 +213,7 @@ public:
 
     osg::ref_ptr< osg::Geometry > _target;
 };
-/** \endcond */
-
+/* \endcond */
 
 osg::Node* fixWalls( osg::Node* wallsNode )
 {
@@ -224,62 +251,45 @@ osg::Node* fixWalls( osg::Node* wallsNode )
     return( otherWall.release() );
 }
 
+//
+// END WALL FIX
+//
 
-btRigidBody* doorFrame;
 
-void makeDoorFrame( btDiscreteDynamicsWorld* bw, InteractionManipulator* im, osg::Node* node, const osg::Matrix& m )
+
+void makeStaticObject( btDiscreteDynamicsWorld* bw, InteractionManipulator* im, osg::Node* node, const osg::Matrix& m )
 {
-    osgwTools::AbsoluteModelTransform* amt = new osgwTools::AbsoluteModelTransform( m );
-    osgwTools::insertAbove( node, amt );
-
-
     osg::ref_ptr< osgbDynamics::CreationRecord > cr = new osgbDynamics::CreationRecord;
-    cr->_sceneGraph = amt;
-    cr->_shapeType = BOX_SHAPE_PROXYTYPE;
-    cr->_parentTransform = m;
+    cr->_sceneGraph = node;
+    cr->_shapeType = CONVEX_HULL_SHAPE_PROXYTYPE;
     cr->_mass = 0.f;
     btRigidBody* rb = osgbDynamics::createRigidBody( cr.get() );
 
-    bw->addRigidBody( rb, COL_DOORFRAME, doorFrameCollidesWith );
-    rb->setActivationState( DISABLE_DEACTIVATION );
-
-    // Save RB in global, and also record its initial position in the InteractionManipulator (for reset)
-    doorFrame = rb;
+    bw->addRigidBody( rb, COL_WALL, wallCollidesWith );
 }
 
-btRigidBody* door;
-osg::Transform* makeDoor( btDiscreteDynamicsWorld* bw, InteractionManipulator* im, osg::Node* node, const osg::Matrix& m )
+btRigidBody* gate;
+osg::Transform* makeGate( btDiscreteDynamicsWorld* bw, InteractionManipulator* im, osg::Node* node, const osg::Matrix& m )
 {
-    // For COM.
-    osg::BoundingSphere doorbb = node->getBound();
-
     osgwTools::AbsoluteModelTransform* amt = new osgwTools::AbsoluteModelTransform;
     amt->setDataVariance( osg::Object::DYNAMIC );
     osgwTools::insertAbove( node, amt );
 
-    osg::Matrix invCOM = osg::Matrix::translate( -doorbb.center() );
-    osg::ref_ptr< osg::MatrixTransform > mt = new osg::MatrixTransform( invCOM );
-    mt->addChild( node );
-    btCollisionShape* shape = osgbCollision::btCompoundShapeFromBounds( mt.get(), BOX_SHAPE_PROXYTYPE );
-
     osg::ref_ptr< osgbDynamics::CreationRecord > cr = new osgbDynamics::CreationRecord;
     cr->_sceneGraph = amt;
-    cr->setCenterOfMass( doorbb.center() );
+    cr->_shapeType = CONVEX_HULL_SHAPE_PROXYTYPE;
+    cr->setCenterOfMass( node->getBound().center() );
     cr->_parentTransform = m;
     cr->_mass = 1.f;
     cr->_restitution = .5f;
-    btRigidBody* rb = osgbDynamics::createRigidBody( cr.get(), shape );
-
-    btTransform wt;
-    rb->getMotionState()->getWorldTransform( wt );
-    rb->setWorldTransform( wt );
+    btRigidBody* rb = osgbDynamics::createRigidBody( cr.get() );
 
 
-    bw->addRigidBody( rb, COL_DOOR, doorCollidesWith );
+    bw->addRigidBody( rb, COL_GATE, gateCollidesWith );
     rb->setActivationState( DISABLE_DEACTIVATION );
 
     // Save RB in global, and also record its initial position in the InteractionManipulator (for reset)
-    door = rb;
+    gate = rb;
     im->setInitialTransform( rb, m );
 
     return( amt );
@@ -319,11 +329,13 @@ osg::Node* findNamedNode( osg::Node* model, const std::string& name, osg::Matrix
 
 int main( int argc, char** argv )
 {
+    osg::ArgumentParser arguments( &argc, argv );
+    const bool debugDisplay( arguments.find( "--debug" ) > 0 );
+
     btDiscreteDynamicsWorld* bulletWorld = initPhysics();
     osg::Group* root = new osg::Group;
 
     InteractionManipulator* im = new InteractionManipulator( bulletWorld, root );
-
 
 
     osg::ref_ptr< osg::Node > rootModel = osgDB::readNodeFile( "GateWall.flt" );
@@ -335,82 +347,70 @@ int main( int argc, char** argv )
 
     root->addChild( rootModel.get() );
 
-    // As far as our code is concerned, the walls and the wall hinges are just
-    // Bullet static objects. But the model is set up in such a way that their
-    // information must be extracted separately.
-
-    // Get Node pointers and parent transforms for the walls, wall hinges, and
-    // the gate. (Node names are taken from the osgWorks osgwnames utility.)
+    // Get Node pointers and parent transforms for the wall and gate.
+    // (Node names are taken from the osgWorks osgwnames utility.)
     osg::Matrix wallXform, hingeXform, gateXform;
     osg::Node* wallsNode = findNamedNode( rootModel.get(), "Walls", wallXform );
-    osg::Node* hingesNode = findNamedNode( rootModel.get(), "WallHinges", hingeXform );
     osg::Node* gateNode = findNamedNode( rootModel.get(), "DOF_Gate", gateXform );
-    if( ( wallsNode == NULL ) || ( hingesNode == NULL ) || ( gateNode == NULL ) )
+    if( ( wallsNode == NULL ) || ( gateNode == NULL ) )
         return( 1 );
 
-    // Unfortunately, the walls come to us not just as a single Geode, but also as
+    // BEGIN WALL FIX
+    //
+    // Unfortunately, the two walls come to us as a single Geode with
     // a single Geometry and single PrimitiveSet. Break that into two Geodes, a
-    // left wall and a right wall, so we can put a box collision shape around each.
-    osg::ref_ptr< osg::Node > leftWall, rightWall;
+    // left wall and a right wall, so we can make a collision shape for each.
     osg::Node* otherWall = fixWalls( wallsNode );
     wallsNode->getParent( 0 )->addChild( otherWall );
     otherWall->setName( "otherWall" );
     osg::Matrix otherWallXform = wallXform;
-
-    // Add door
-    osg::Transform* doorAMT = makeDoor( bulletWorld, im, gateNode, gateXform );
-
-    // Add doorframe
-    makeDoorFrame( bulletWorld, im, wallsNode, wallXform );
-    makeDoorFrame( bulletWorld, im, otherWall, otherWallXform );
-    makeDoorFrame( bulletWorld, im, hingesNode, hingeXform );
+    //
+    // END WALL FIX
 
 
-    // Make ground
-    if( 1 )
+    // Make Bullet rigid bodies and collision shapes for the gate...
+    osg::Transform* doorAMT = makeGate( bulletWorld, im, gateNode, gateXform );
+    // ...and the two walls.
+    makeStaticObject( bulletWorld, im, wallsNode, wallXform );
+    makeStaticObject( bulletWorld, im, otherWall, otherWallXform );
+
+    // Add ground
+    const osg::Vec4 plane( 0., 0., 1., 0. );
+    root->addChild( osgbDynamics::generateGroundPlane( plane, bulletWorld ) );
+
+
+    // Create the hinge constraint.
     {
-        const double planeDistance( 0. );
-        osg::Geode* geode = new osg::Geode;
-        geode->addDrawable( osgwTools::makePlane( osg::Vec3( -10., -10., planeDistance ),
-            osg::Vec3( 20., 0., 0. ), osg::Vec3( 0., 20., 0. ) ) );
-        root->addChild( geode );
-        btCollisionShape* groundShape = new btStaticPlaneShape( btVector3( 0, 0, 1 ), planeDistance );
-        btRigidBody::btRigidBodyConstructionInfo rbInfo( 0., NULL, groundShape, btVector3(0,0,0) );
-        btRigidBody* ground = new btRigidBody(rbInfo);
-        bulletWorld->addRigidBody( ground );
-    }
-
-
-
-    {
-        // Pivot point and pivot axis are both in the door's object space.
-        // Note that the door is COM-adjusted, so the pivot point must also be
-        // in the door's COM-adjusted object space.
+        // Pivot point and pivot axis are both in the gate's object space.
+        // Note that the gate is COM-adjusted, so the pivot point must also be
+        // in the gate's COM-adjusted object space.
         // TBD extract this from hinge data fine.
         const btVector3 btPivot( -0.498f, -0.019f, 0.146f );
 
         btVector3 btAxisA( 0., 0., 1. );
-        btHingeConstraint* hinge = new btHingeConstraint( *door, btPivot, btAxisA );
+        btHingeConstraint* hinge = new btHingeConstraint( *gate, btPivot, btAxisA );
         hinge->setLimit( -1.5f, 1.5f );
         bulletWorld->addConstraint( hinge, true );
     }
 
 
-#ifdef DO_DEBUG_DRAW
-    osgbCollision::GLDebugDrawer* dbgDraw = new osgbCollision::GLDebugDrawer();
-    dbgDraw->setDebugMode( ~btIDebugDraw::DBG_DrawText );
-    bulletWorld->setDebugDrawer( dbgDraw );
-    root->addChild( dbgDraw->getSceneGraph() );
-#endif
+    osgbCollision::GLDebugDrawer* dbgDraw( NULL );
+    if( debugDisplay )
+    {
+        dbgDraw = new osgbCollision::GLDebugDrawer();
+        dbgDraw->setDebugMode( ~btIDebugDraw::DBG_DrawText );
+        bulletWorld->setDebugDrawer( dbgDraw );
+        root->addChild( dbgDraw->getSceneGraph() );
+    }
 
 
-    osgViewer::Viewer viewer;
+    osgViewer::Viewer viewer( arguments );
     viewer.setUpViewInWindow( 30, 30, 768, 480 );
     viewer.setSceneData( root );
     viewer.addEventHandler( im );
 
     osgGA::TrackballManipulator* tb = new osgGA::TrackballManipulator;
-    tb->setHomePosition( osg::Vec3( 0., -26., 12. ), osg::Vec3( 0., 0., 2. ), osg::Vec3( 0., 0., 1. ) ); 
+    tb->setHomePosition( osg::Vec3( 0., -8., 2. ), osg::Vec3( 0., 0., 1. ), osg::Vec3( 0., 0., 1. ) ); 
     viewer.setCameraManipulator( tb );
     viewer.getCamera()->setClearColor( osg::Vec4( .5, .5, .5, 1. ) );
 
@@ -418,18 +418,18 @@ int main( int argc, char** argv )
     double prevSimTime = 0.;
     while( !viewer.done() )
     {
-#ifdef DO_DEBUG_DRAW
-        dbgDraw->BeginDraw();
-#endif
+        if( dbgDraw != NULL )
+            dbgDraw->BeginDraw();
 
         const double currSimTime = viewer.getFrameStamp()->getSimulationTime();
         bulletWorld->stepSimulation( currSimTime - prevSimTime );
         prevSimTime = currSimTime;
 
-#ifdef DO_DEBUG_DRAW
-        bulletWorld->debugDrawWorld();
-        dbgDraw->EndDraw();
-#endif
+        if( dbgDraw != NULL )
+        {
+            bulletWorld->debugDrawWorld();
+            dbgDraw->EndDraw();
+        }
 
         viewer.frame();
 
@@ -443,4 +443,6 @@ int main( int argc, char** argv )
 /** \page hingelowlevel Simple Hinge Constraint
 
 Example description TBD.
+
+Use the --debug command line option to enable debug collision object display.
 */
