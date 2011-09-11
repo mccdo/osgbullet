@@ -9,8 +9,8 @@
 # Up: x y z      Specifies the up vector. Default is 0 0 1. (Place
 #                this command before the "Model:" command, as the
 #                model is translated by the up vector.)
-# GroundPlane: {1|0}
-#                Create a ground plane. Default is 1 (true)
+# GroundPlane: x y z d
+#                Specify the ground plane. Default is 0 0 1 0.
 # HandNode: pos att length right
 #                HandNode initial parameters. "length" is a float.
 #                "right" is {1|0}, default is 1 (right).
@@ -56,6 +56,7 @@
 #                Creates a slider constraint between two named nodes.
 
 
+GroundPlane: 0 0 1 0
 HandNode: -2 6 3 0 0 0 1 2.5 1
 Model: concavesg.osg
 
