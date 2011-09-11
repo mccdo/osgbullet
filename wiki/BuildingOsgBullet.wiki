@@ -46,6 +46,8 @@ Use your project files / makefiles to build osgWorks. Build the install target t
 
 osgBullet should build without error on all major platforms. If you encounter link errors, the most likely cause is a mismatch between the double precision setting in the CMake systems of osgBullet and Bullet. Please make sure both projects are configured and built consistently, either single or double precision.
 
+See extras/TestBulletPrecision.cpp for a standalone Bullet application that displays whether Bullet was built with single or double precision.
+
 == Installing osgBullet ==
 
 Once you have built osgBullet it is possible to install osgBullet into a directory that will contain a bin, lib, and include directory with the 'install' target for GNUMake. The location of this directory can be set via the CMake variable CMAKE_INSTALL_PREFIX. After you have installed osgBullet, be sure to point your (DY)LD_LIBRARY_PATH at the lib directory and your PATH at the bin directory. This will enable your applications to load the appropriate osgBullet libraries and plugins.
