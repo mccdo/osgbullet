@@ -22,10 +22,10 @@
 #define __OSGBINTERACTION_EXPORT_H__    1
 
 
-#if defined ( _MSC_VER ) || defined ( __CYGWIN__ ) || defined ( __MINGW32__ ) || defined ( __BCPLUSPLUS__ ) || defined ( __MWERKS__ )
-    #if defined ( OSGBULLET_STATIC )
+#if defined( _MSC_VER ) || defined( __CYGWIN__ ) || defined( __MINGW32__ ) || defined( __BCPLUSPLUS__ ) || defined( __MWERKS__ )
+    #if defined( OSGBULLET_STATIC )
         #define OSGBINTERACTION_EXPORT
-    #elif defined ( OSGBULLET_SHARED )
+    #elif defined( OSGBULLET_SHARED ) && defined( OSGBINTERACTION_LIBRARY )
         #define OSGBINTERACTION_EXPORT __declspec( dllexport )
     #else
         #define OSGBINTERACTION_EXPORT __declspec( dllimport )

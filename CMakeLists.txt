@@ -67,7 +67,7 @@ INCLUDE_DIRECTORIES(
 
 # Support for collision-only (no dynamics)
 if( BULLET_DYNAMICS_FOUND )
-    ADD_DEFINITIONS( -DUSE_BULLET_DYNAMICS )
+    add_definitions( -DUSE_BULLET_DYNAMICS )
 endif()
 
 option( BUILD_SHARED_LIBS "Set to ON to build osgBullet for dynamic linking. Use OFF for static." ON )

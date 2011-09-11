@@ -1,6 +1,6 @@
 set( LIB_NAME osgbInteraction )
 set( HEADER_PATH ${PROJECT_SOURCE_DIR}/include/${LIB_NAME} )
-
+add_definitions( -DOSGBINTERACTION_LIBRARY )
 
 if( OSGBULLET_P5_SUPPORT )
     set( P5_HEADER ${HEADER_PATH}/p5support.h )
@@ -49,6 +49,7 @@ if( BUILD_SHARED_LIBS )
         debug "${RELATIVE_LIB_PATH}osgbDynamics${CMAKE_DEBUG_POSTFIX}"
         optimized "osgbCollision"
         debug "${RELATIVE_LIB_PATH}osgbCollision${CMAKE_DEBUG_POSTFIX}"
+        ${OSGBULLET_P5_LIBRARY}
     )
 endif()
 

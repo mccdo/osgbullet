@@ -22,13 +22,13 @@
 #define __OSGBDYNAMICS_EXPORT_H__ 1
 
 
-#if defined ( _MSC_VER ) || defined ( __CYGWIN__ ) || defined ( __MINGW32__ ) || defined ( __BCPLUSPLUS__ ) || defined ( __MWERKS__ )
-    #if defined ( OSGBULLET_STATIC )
+#if defined( _MSC_VER ) || defined( __CYGWIN__ ) || defined( __MINGW32__ ) || defined( __BCPLUSPLUS__ ) || defined( __MWERKS__ )
+    #if defined( OSGBULLET_STATIC )
         #define OSGBDYNAMICS_EXPORT
-    #elif defined ( OSGBULLET_SHARED )
-        #define OSGBDYNAMICS_EXPORT    __declspec( dllexport )
+    #elif defined( OSGBULLET_SHARED ) && defined( OSGBDYNAMICS_LIBRARY )
+        #define OSGBDYNAMICS_EXPORT __declspec( dllexport )
     #else
-        #define OSGBDYNAMICS_EXPORT    __declspec( dllimport )
+        #define OSGBDYNAMICS_EXPORT __declspec( dllimport )
     #endif
 #else
     #define OSGBDYNAMICS_EXPORT

@@ -1,7 +1,8 @@
 set( LIB_NAME osgbCollision )
-
-
 set( HEADER_PATH ${PROJECT_SOURCE_DIR}/include/${LIB_NAME} )
+add_definitions( -DOSGBCOLLISION_LIBRARY )
+
+
 set( LIB_PUBLIC_HEADERS
     ${HEADER_PATH}/BoundingCone.h
     ${HEADER_PATH}/BoundingCylinder.h
