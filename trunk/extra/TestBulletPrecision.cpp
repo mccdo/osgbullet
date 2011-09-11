@@ -18,30 +18,45 @@
  *
  *************** <auto-copyright.pl END do not edit this line> ***************/
 
-// Originally contributed by Kevin Godby.
+/** \page bulletprecisiontest Bullet Precision Test
 
-// This test program determins whether Bullet
-// was compiled with single or double precision.
+This test program determins whether Bullet was compiled with single
+or double precision. The return code value is 1 for single precision
+and 2 for double precision. 0 is returned for an error.
 
-// Build this as a standalone Bullet application to determine whether
-// Bullet was built with single or double precision, then configure
-// the osgBullet CMake variable OSGBULLET_DOUBLE_PRECISION accordingly.
+Build this as a standalone Bullet application to determine whether
+Bullet was built with single or double precision, then use the output
+to configure your external application or project.
 
-#include <bullet/LinearMath/btScalar.h>
+Originally contributed by Kevin Godby. */
+
+#include <LinearMath/btScalar.h>
 
 #include <typeinfo>
 #include <iostream>
 
-int main(int argc, char **argv) {
-    if (typeid(btScalar) == typeid(double)) {
-        std::cout << "double" << std::endl;
-    } else if (typeid(btScalar) == typeid(float)) {
-        std::cout << "float" << std::endl;
-    } else {
-        std::cerr << "ERROR: Type of btScalar is [" << typeid(btScalar).name() << "]." << std::endl;
-        return 1;
+int main( int argc, char **argv )
+{
+    int returnCode( 0 );
+    std::cout << "Bullet version: " << BT_BULLET_VERSION;
+    if(typeid( btScalar ) == typeid( double ) )
+    {
+        std::cout << " (double precision)." << std::endl;
+        returnCode = 2;
+    }
+    else if( typeid( btScalar ) == typeid( float ) )
+    {
+        std::cout << " (single precision)." << std::endl;
+        returnCode = 1;
+    }
+    else
+    {
+        std::cout << std::endl;
+        std::cerr << "ERROR: Type of btScalar is [" << typeid( btScalar ).name() << "]." << std::endl;
+        returnCode = 0;
     }
 
-    return 0;
+    std::cout << "  Returning code " << returnCode << std::endl;
+    return( returnCode );
 }
 
