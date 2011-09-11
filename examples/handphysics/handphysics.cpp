@@ -204,6 +204,7 @@ public:
         short filterGroup( 0 );
         short filterWith( 0 );
         osg::Vec4 groundPlane( 0., 0., 1., 0. );
+        bool noGroundPlane( false );
 
         std::string nodeName;
         bool matchAllNodes( false );
@@ -241,6 +242,10 @@ public:
             else if( key == std::string( "GroundPlane:" ) )
             {
                 istr >> groundPlane[ 0 ] >> groundPlane[ 1 ] >> groundPlane[ 2 ] >> groundPlane[ 3 ];
+            }
+            else if( key == std::string( "NoGroundPlane:" ) )
+            {
+                noGroundPlane = true;
             }
             else if( key == std::string( "HandNode:" ) )
             {
@@ -549,6 +554,7 @@ public:
                 osg::notify( osg::WARN ) << "ConfigReaderWriter: Unknown key: " << key << std::endl;
         }
 
+        if( !noGroundPlane )
         {
             osg::Node* groundNode = osgbDynamics::generateGroundPlane( groundPlane, _dw );
             _root->addChild( groundNode );
