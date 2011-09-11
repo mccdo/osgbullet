@@ -47,6 +47,7 @@ macro( _osgBulletMakeInteractionExe _exeName )
     )
     set( _bulletLibs
         "${BULLET_LIBRARIES}"
+        "${OSGBULLET_P5_LIBRARY}"
     )
     _osgBulletMakeExeInternal( ${_exeName} "${_osgBulletLibs}" "${_bulletLibs}" ${ARGN} )
 endmacro()

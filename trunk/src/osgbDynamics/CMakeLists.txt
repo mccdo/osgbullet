@@ -1,7 +1,8 @@
 set( LIB_NAME osgbDynamics )
-
-
 set( HEADER_PATH ${PROJECT_SOURCE_DIR}/include/${LIB_NAME} )
+add_definitions( -DOSGBDYNAMICS_LIBRARY )
+
+
 set( LIB_PUBLIC_HEADERS
     ${HEADER_PATH}/Export.h
     ${HEADER_PATH}/CreationRecord.h

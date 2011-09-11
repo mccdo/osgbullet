@@ -4,6 +4,7 @@ ADD_SUBDIRECTORY( basicdemo )
 ADD_SUBDIRECTORY( centerofmass )
 ADD_SUBDIRECTORY( collision )
 ADD_SUBDIRECTORY( dice )
+ADD_SUBDIRECTORY( handphysics )
 ADD_SUBDIRECTORY( hinge )
 ADD_SUBDIRECTORY( multithreaded )
 

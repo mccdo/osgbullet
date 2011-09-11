@@ -22,10 +22,10 @@
 #define OSGBCOLLISION_EXPORT_ 1
 
 
-#if defined ( _MSC_VER ) || defined ( __CYGWIN__ ) || defined ( __MINGW32__ ) || defined ( __BCPLUSPLUS__ ) || defined ( __MWERKS__ )
-    #if defined ( OSGBULLET_STATIC )
+#if defined( _MSC_VER ) || defined( __CYGWIN__ ) || defined( __MINGW32__ ) || defined( __BCPLUSPLUS__ ) || defined( __MWERKS__ )
+    #if defined( OSGBULLET_STATIC )
         #define OSGBCOLLISION_EXPORT
-    #elif defined ( OSGBULLET_SHARED )
+    #elif defined( OSGBULLET_SHARED ) && defined( OSGBCOLLISION_LIBRARY )
         #define OSGBCOLLISION_EXPORT __declspec( dllexport )
     #else
         #define OSGBCOLLISION_EXPORT __declspec( dllimport )

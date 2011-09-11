@@ -1,0 +1,790 @@
+// Copyright (c) 2010 Skew Matrix Software LLC. All rights reserved.
+// Copyright (c) 2008 Blue Newt Software LLC and Skew Matrix Software LLC. All rights reserved.
+
+#include <osgUtil/Optimizer>
+
+#include <osgDB/ReadFile>
+#include <osgDB/FileNameUtils>
+#include <osgDB/WriteFile>
+#include <osgDB/FileUtils>
+#include <osgViewer/Viewer>
+#include <osgViewer/ViewerEventHandlers>
+#include <osgGA/StateSetManipulator>
+#include <osg/BoundingSphere>
+#include <osg/MatrixTransform>
+#include <osgGA/TrackballManipulator>
+#include <osg/ShapeDrawable>
+#include <osg/Geode>
+#include <osg/PolygonMode>
+#include <osg/PolygonOffset>
+
+#include <osgwTools/FindNamedNode.h>
+#include <osgwTools/InsertRemove.h>
+#include <osgwTools/Version.h>
+
+#include <osgbCollision/RefBulletObject.h>
+#include <osgbDynamics/RigidBody.h>
+#include <osgbDynamics/MotionState.h>
+#include <osgbCollision/CollisionShapes.h>
+
+#include <osgbInteraction/HandNode.h>
+#include <osgbInteraction/GestureHandler.h>
+#include <osgbInteraction/HandTestEventHandler.h>
+#include <osgbCollision/Utils.h>
+
+#ifdef USE_P5
+#include <osgbInteraction/p5support.h>
+#endif
+
+#include <osgwTools/AbsoluteModelTransform.h>
+
+#include <btBulletDynamicsCommon.h>
+#include <LinearMath/btQuickprof.h>
+
+#include <list>
+#include <map>
+#include <string>
+#include <sstream>
+#include <osg/io_utils>
+
+#include <iostream>
+
+
+
+//#define USE_PARALLEL_DISPATCHER
+#ifdef USE_PARALLEL_DISPATCHER
+
+#include "BulletMultiThreaded/SpuGatheringCollisionDispatcher.h"
+
+#ifdef USE_LIBSPE2
+#include "BulletMultiThreaded/SpuLibspe2Support.h"
+#elif defined (WIN32)
+#include "BulletMultiThreaded/Win32ThreadSupport.h"
+#include "BulletMultiThreaded/SpuNarrowPhaseCollisionTask/SpuGatheringCollisionTask.h"
+
+#elif defined (USE_PTHREADS)
+
+#include "BulletMultiThreaded/PosixThreadSupport.h"
+#include "BulletMultiThreaded/SpuNarrowPhaseCollisionTask/SpuGatheringCollisionTask.h"
+
+#else
+//other platforms run the parallel code sequentially (until pthread support or other parallel implementation is added)
+#include "BulletMultiThreaded/SequentialThreadSupport.h"
+#include "BulletMultiThreaded/SpuNarrowPhaseCollisionTask/SpuGatheringCollisionTask.h"
+#endif //USE_LIBSPE2
+
+#endif
+
+
+
+//#define DO_DEBUG_DRAW
+#ifdef DO_DEBUG_DRAW
+#include <osgbCollision/GLDebugDrawer.h>
+#endif
+
+
+
+
+/** \cond */
+class GestureTest : public osgGA::GUIEventHandler
+{
+public:
+    GestureTest( osgbInteraction::HandNode* handNode ) : _handNode( handNode ) {}
+
+    bool handle( const osgGA::GUIEventAdapter& ea, osgGA::GUIActionAdapter& )
+    {
+        switch( ea.getEventType() )
+        {
+        case osgGA::GUIEventAdapter::KEYUP:
+        {
+            if( (ea.getKey() == 'd' ) || (ea.getKey() == 'D' ) )
+            {
+                // Default gesture
+                _handNode->sendGestureCode( osgbInteraction::GestureHandler::Default );
+                return( true );
+            }
+            else if( (ea.getKey() == 'p' ) || (ea.getKey() == 'P' ) )
+            {
+                // Point gesture
+                _handNode->sendGestureCode( osgbInteraction::GestureHandler::Point );
+                return( true );
+            }
+            else if( (ea.getKey() == 'f' ) || (ea.getKey() == 'F' ) )
+            {
+                // Fist gesture
+                _handNode->sendGestureCode( osgbInteraction::GestureHandler::Fist );
+                return( true );
+            }
+        }
+        }
+        return( false );
+    }
+
+protected:
+    osg::ref_ptr< osgbInteraction::HandNode > _handNode;
+};
+/** \endcond */
+
+
+btDiscreteDynamicsWorld* initPhysics( osg::Vec3 gravity = osg::Vec3( 0, 0, -1 ) )
+{
+    btDefaultCollisionConfiguration * collisionConfiguration = new btDefaultCollisionConfiguration();
+
+#ifdef USE_PARALLEL_DISPATCHER
+    btThreadSupportInterface*		threadSupportCollision;
+    threadSupportCollision = new Win32ThreadSupport(Win32ThreadSupport::Win32ThreadConstructionInfo(
+								"collision",
+								processCollisionTask,
+								createCollisionLocalStoreMemory,
+								2));
+    btCollisionDispatcher * dispatcher = new SpuGatheringCollisionDispatcher(
+        threadSupportCollision, 2, collisionConfiguration );
+#else
+    btCollisionDispatcher* dispatcher = new btCollisionDispatcher( collisionConfiguration );
+#endif
+
+    btConstraintSolver * solver = new btSequentialImpulseConstraintSolver;
+
+    btVector3 worldAabbMin( -10000, -10000, -10000 );
+    btVector3 worldAabbMax( 10000, 10000, 10000 );
+    btBroadphaseInterface * inter = new btAxisSweep3( worldAabbMin, worldAabbMax, 1000 );
+
+    btDiscreteDynamicsWorld* dynamicsWorld = new btDiscreteDynamicsWorld( dispatcher, inter, solver, collisionConfiguration );
+
+    dynamicsWorld->setGravity( osgbCollision::asBtVector3( gravity * 9.8 ) );
+
+    return( dynamicsWorld );
+}
+
+
+btRigidBody* createBTBox( osg::MatrixTransform* box,
+                          osg::Vec3 center )
+{
+    btCollisionShape* collision = osgbCollision::btBoxCollisionShapeFromOSG( box );
+
+    osgbDynamics::MotionState * motion = new osgbDynamics::MotionState();
+
+    btScalar mass( 0.0 );
+    btVector3 inertia( 0, 0, 0 );
+    btRigidBody::btRigidBodyConstructionInfo rb( mass, motion, collision, inertia );
+    btRigidBody * body = new btRigidBody( rb );
+
+    motion->setTransform( box );
+    osg::Matrix groundTransform( osg::Matrix::translate( center ) );
+    motion->setParentTransform( groundTransform );
+    body->setMotionState( motion );
+
+    return( body );
+}
+
+osg::MatrixTransform* createOSGBox( osg::Vec3 size )
+{
+    osg::Box * box = new osg::Box();
+
+    box->setHalfLengths( size );
+
+    osg::ShapeDrawable * shape = new osg::ShapeDrawable( box );
+
+    osg::Geode * geode = new osg::Geode();
+    geode->addDrawable( shape );
+
+    osg::MatrixTransform * transform = new osg::MatrixTransform();
+    transform->addChild( geode );
+
+    return( transform );
+}
+
+
+/** \cond */
+// This class can read itself from a file. Long-term,
+// we might want something like this in an osgPlugin form.
+class ConfigReaderWriter : public osg::Referenced
+{
+public:
+    ConfigReaderWriter( osg::Group* root, btDiscreteDynamicsWorld* dw, osgbInteraction::HandNode* hn )
+      : _up( osg::Vec3( 0, 0, 1 ) ),
+        _root( root ),
+        _dw( dw ),
+        _hn( hn )
+    {}
+
+    bool read( const std::string& fileName )
+    {
+        std::string inFile( osgDB::findDataFile( fileName ) );
+        std::ifstream in( inFile.c_str() );
+        if( !in.good() )
+        {
+            osg::notify( osg::FATAL ) << "CondigReaderWriter::read: Can't open " << fileName << std::endl;
+            return false;
+        }
+
+        osg::ref_ptr< osgbDynamics::CreationRecord > cr = new osgbDynamics::CreationRecord;
+
+        short filterGroup( 0 );
+        short filterWith( 0 );
+        bool useGroundPlane( true );
+
+        std::string nodeName;
+        bool matchAllNodes( false );
+
+        const int bufSize( 1024 );
+        char bufCh[ bufSize ];
+        in.getline( bufCh, bufSize );
+        std::string buf( bufCh );
+        while( !in.eof() )
+        {
+            osg::notify( osg::DEBUG_INFO ) << "Data: " << buf << std::endl;
+            int spacePos( buf.find_first_of( " " ) );
+            std::string key;
+            if( spacePos != std::string::npos )
+                key = buf.substr( 0, spacePos );
+            else
+                key = buf;
+            osg::notify( osg::DEBUG_INFO ) << spacePos << " KEY " << key << std::endl;
+
+            std::istringstream istr( buf.substr( ( spacePos != std::string::npos ) ? spacePos : 0 ) );
+            in.getline( bufCh, bufSize );
+            buf = std::string( bufCh );
+            if( ( key.empty() ) ||
+                ( key == std::string( "#" ) ) )
+            {
+                osg::notify( osg::INFO ) << "  Found comment." << std::endl;
+                continue;
+            }
+
+            if( key == std::string( "Up:" ) )
+            {
+                istr >> _up;
+                _dw->setGravity( osgbCollision::asBtVector3( _up * -9.8 ) );
+            }
+            else if( key == std::string( "GroundPlane:" ) )
+            {
+                istr >> useGroundPlane;
+            }
+            else if( key == std::string( "HandNode:" ) )
+            {
+                osg::Vec3 pos;
+                osg::Quat quat;
+                float length;
+                bool right;
+                istr >> pos >> quat >> length >> right;
+                if( !_hn.valid() )
+                    osg::notify( osg::WARN ) << "  Warning: No HandNode." << std::endl;
+                else
+                {
+                    _hn->setHandLength( length );
+                    _hn->setHandedness( right ? osgbInteraction::HandNode::RIGHT : osgbInteraction::HandNode::LEFT );
+                    _hn->setPosition( pos );
+                    _hn->setAttitude( quat );
+                }
+            }
+            else if( key == std::string( "Model:" ) )
+            {
+                std::string modelName;
+                istr >> modelName;
+
+                osg::ref_ptr< osg::Node > model = osgDB::readNodeFile( modelName );
+                if( !model.valid() )
+                    osg::notify( osg::WARN ) << "  Warning: Can't find model " << modelName << std::endl;
+                else
+                {
+                    osg::ref_ptr< osg::MatrixTransform > orient = new osg::MatrixTransform(
+                        osg::Matrix::translate( _up * 7. ) );
+                    orient->addChild( model.get() );
+                    _root->addChild( orient.get() );
+                }
+            }
+            else if( key == std::string( "Node:" ) )
+            {
+                istr >> nodeName;
+            }
+            else if( key == std::string( "MatchAllNodes:" ) )
+            {
+                istr >> matchAllNodes;
+            }
+            else if( key == std::string( "Mass:" ) )
+            {
+                istr >> cr->_mass;
+            }
+            else if( key == std::string( "Shape:" ) )
+            {
+                int shape;
+                istr >> shape;
+                cr->_shapeType = (BroadphaseNativeTypes)shape;
+            }
+            else if( key == std::string( "Overall:" ) )
+            {
+                istr >> cr->_overall;
+            }
+            else if( key == std::string( "CollisionFilter:" ) )
+            {
+                istr >> std::hex >> filterGroup >> filterWith >> std::dec;
+            }
+            else if( key == std::string( "Body:" ) )
+            {
+                if( nodeName.empty() )
+                {
+                    osg::notify( osg::WARN ) << "Warning: Body: No node name specified." << std::endl;
+                    continue;
+                }
+
+                osgwTools::FindNamedNode fnn( nodeName );
+#if( OSGWORKS_VERSION >= 10150 )
+                // Don't include the target node in the returned paths.
+                fnn.setPathsIncludeTargetNode( false );
+#endif
+                _root->accept( fnn );
+                if( fnn._napl.empty() )
+                {
+                    osg::notify( osg::WARN ) << "Warning: Body: Could not find node named \"" << nodeName << "\"." << std::endl;
+                    continue;
+                }
+
+                osgwTools::FindNamedNode::NodeAndPathList::iterator it;
+                for( it = fnn._napl.begin(); it != fnn._napl.end(); it++ )
+                {
+#if( OSGWORKS_VERSION < 10150 )
+                    // Prior to v1.1.50, need to manualls pop the back of the NodePath
+                    // to remove the target node.
+                    it->second.erase( it->second.end() - 1 );
+#endif
+                    btRigidBody* rb = createRigidBody(
+                        it->first, it->second, cr.get() );
+                    if( rb != NULL )
+                    {
+                        if( (filterGroup == 0) && (filterWith == 0) )
+                            _dw->addRigidBody( rb );
+                        else
+                            _dw->addRigidBody( rb, filterGroup, filterWith );
+                    }
+                    if( !matchAllNodes )
+                        break;
+                }
+            }
+            else if( key == std::string( "AttachBody:" ) )
+            {
+                if( matchAllNodes )
+                    // TBD
+                    osg::notify( osg::WARN ) << "Warning: MmatchAllNodes is not yet implemented for AttachBody." << std::endl;
+
+                std::string loadAndAttachName;
+                istr >> loadAndAttachName;
+
+                osg::ref_ptr< osg::Node > loadedModel = osgDB::readNodeFile( loadAndAttachName );
+                if( !loadedModel.valid() )
+                {
+                    osg::notify( osg::WARN ) << "Warning: Could not load AttachBody: " << loadAndAttachName << std::endl;
+                    continue;
+                }
+
+                // Figure out where to attach it.
+                osg::Group* attachParent = _root.get();
+                osg::NodePath np;
+                if( !nodeName.empty() )
+                {
+                    osgwTools::FindNamedNode fnn( nodeName );
+                    _root->accept( fnn );
+                    if( fnn._napl.empty() )
+                    {
+                        osg::notify( osg::WARN ) << "Warning: Could not find node named \"" << nodeName << "\" for AttachBody parent." << std::endl;
+                        continue;
+                    }
+                    attachParent = fnn._napl.front().first->asGroup();
+                    if( attachParent == NULL )
+                    {
+                        osg::notify( osg::WARN ) << "Warning: Node named \"" << nodeName << "\" not a Group (in AttachBody)." << std::endl;
+                        continue;
+                    }
+                    np = fnn._napl.front().second;
+                }
+                else
+                    np.push_back( _root.get() );
+                attachParent->addChild( loadedModel.get() );
+
+                btRigidBody* rb = createRigidBody( loadedModel.get(), np, cr.get() );
+                if( rb != NULL )
+                {
+                    if( (filterGroup == 0) && (filterWith == 0) )
+                        _dw->addRigidBody( rb );
+                    else
+                        _dw->addRigidBody( rb, filterGroup, filterWith );
+                }
+            }
+            else if( key == std::string( "Hinge:" ) )
+            {
+                std::string nodeA, nodeB;
+                osg::Vec3 pivotA, pivotB;
+                osg::Vec3 axisA, axisB;
+                istr >> nodeA >> nodeB >> pivotA >> pivotB >> axisA >> axisB;
+
+                osgwTools::FindNamedNode fnnA( nodeA );
+                _root->accept( fnnA );
+                osgwTools::FindNamedNode fnnB( nodeB );
+                _root->accept( fnnB );
+
+                osgwTools::FindNamedNode::NodeAndPath& napA( fnnA._napl[ 0 ] );
+                osgwTools::AbsoluteModelTransform* amtA = dynamic_cast< osgwTools::AbsoluteModelTransform* >( napA.first->getParent( 0 ) );
+                if( amtA == NULL )
+                {
+                    osg::notify( osg::FATAL ) << "Hinge node (" << nodeA << ") parent is not AMT." << std::endl;
+                    continue;
+                }
+                osgbCollision::RefRigidBody* rbA = dynamic_cast< osgbCollision::RefRigidBody* >( amtA->getUserData() );
+                if( rbA == NULL )
+                {
+                    osg::notify( osg::FATAL ) << "AMT for " << nodeA << " has invalid user data." << std::endl;
+                    continue;
+                }
+
+                osgwTools::FindNamedNode::NodeAndPath& napB( fnnB._napl[ 0 ] );
+                osgwTools::AbsoluteModelTransform* amtB = dynamic_cast< osgwTools::AbsoluteModelTransform* >( napB.first->getParent( 0 ) );
+                if( amtB == NULL )
+                {
+                    osg::notify( osg::FATAL ) << "Hinge node (" << nodeB << ") parent is not AMT." << std::endl;
+                    continue;
+                }
+                osgbCollision::RefRigidBody* rbB = dynamic_cast< osgbCollision::RefRigidBody* >( amtB->getUserData() );
+                if( rbB == NULL )
+                {
+                    osg::notify( osg::FATAL ) << "AMT for " << nodeB << " has invalid user data." << std::endl;
+                    continue;
+                }
+
+                const btVector3 btPivotA( osgbCollision::asBtVector3( pivotA ) );
+                const btVector3 btPivotB( osgbCollision::asBtVector3( pivotB ) );
+                btVector3 btAxisA( osgbCollision::asBtVector3( axisA ) );
+                btVector3 btAxisB( osgbCollision::asBtVector3( axisB ) );
+                btHingeConstraint* hinge = new btHingeConstraint( *( rbA->get() ), *( rbB->get() ),
+                    btPivotA, btPivotB, btAxisA, btAxisB );
+                hinge->setLimit( -3.f, -.3f );
+                //hinge->setAngularOnly( true );
+                _dw->addConstraint( hinge, true );
+                //spHingeDynAB->setDbgDrawSize(btScalar(5.f));
+            }
+            else if( key == std::string( "Slider:" ) )
+            {
+                std::string nodeA, nodeB;
+                osg::Vec3 axis;
+                float low, high;
+                bool useA;
+                istr >> nodeA >> nodeB >> axis >> low >> high >> useA;
+
+                osg::Matrix axisMatrix;
+                if( axis != osg::Vec3( 1., 0., 0. ) )
+                    axisMatrix = osg::Matrix::rotate( osg::Vec3( 1., 0., 0. ), axis );
+
+                // Find Node A (usually a static object, like the cabinet framework.
+                osgwTools::FindNamedNode fnnA( nodeA );
+                _root->accept( fnnA );
+
+                // We get back a list of nodes and paths, but only use the first one.
+                osgwTools::FindNamedNode::NodeAndPath& napA( fnnA._napl[ 0 ] );
+                osgwTools::AbsoluteModelTransform* amtA = dynamic_cast< osgwTools::AbsoluteModelTransform* >( napA.first->getParent( 0 ) );
+                if( amtA == NULL )
+                {
+                    osg::notify( osg::FATAL ) << "Slider node (" << nodeA << ") parent is not AMT." << std::endl;
+                    continue;
+                }
+                osgbCollision::RefRigidBody* rbA = dynamic_cast< osgbCollision::RefRigidBody* >( amtA->getUserData() );
+                if( rbA == NULL )
+                {
+                    osg::notify( osg::FATAL ) << "AMT for " << nodeA << " has invalid user data." << std::endl;
+                    continue;
+                }
+
+                osg::ref_ptr< osg::Node > axes = osgDB::readNodeFile( "axes.osg" );
+                osg::BoundingSphere bs;
+                {
+                    // Debug -- Visualize the reference frame with the axis model at the center of mass.
+                    bs = amtA->getChild( 0 )->getBound();
+                    osg::Vec3 centerA( bs.center() );
+                    osg::MatrixTransform* mtA = new osg::MatrixTransform( osg::Matrix::translate( centerA ) );
+                    mtA->addChild( axes.get() );
+                    amtA->addChild( mtA );
+                }
+
+                // Get the world coordinate center to assist in computing the reference frame of the constraint.
+                // Body B will be constrained to (centerB - centerA).
+                bs = amtA->getBound();
+                osg::Vec3 centerA = bs.center();
+
+                // Get the 3x3 basis of body A's reference frame.
+                osg::Matrix m;
+                amtA->computeLocalToWorldMatrix( m, NULL );
+                m = m * axisMatrix;
+                btMatrix3x3 m3A( osgbCollision::asBtMatrix3x3( m ) );
+
+
+                // Find all possible body B objects.
+                // Usually something dynamic, like a drawer.
+                // We will constraint each body B to the first body A (which we found and processed above)
+                osgwTools::FindNamedNode fnnB( nodeB );
+                _root->accept( fnnB );
+
+                osgwTools::FindNamedNode::NodeAndPath& napB( fnnB._napl[ 0 ] );
+                unsigned int idx;
+                for( idx=0; idx<fnnB._napl.size(); idx++ )
+                {
+                    osgwTools::FindNamedNode::NodeAndPath& nap( fnnB._napl[ idx ] );
+                    osgwTools::AbsoluteModelTransform* amtB = dynamic_cast< osgwTools::AbsoluteModelTransform* >( nap.first->getParent( 0 ) );
+                    if( amtB == NULL )
+                    {
+                        osg::notify( osg::FATAL ) << "Slider node (" << nodeB << ") parent is not AMT." << std::endl;
+                        continue;
+                    }
+                    osgbCollision::RefRigidBody* rbB = dynamic_cast< osgbCollision::RefRigidBody* >( amtB->getUserData() );
+                    if( rbB == NULL )
+                    {
+                        osg::notify( osg::FATAL ) << "AMT for " << nodeB << " has invalid user data." << std::endl;
+                        continue;
+                    }
+
+                    {
+                        // Debug -- Visualize the reference frame with the axis model at the center of mass.
+                        bs = amtB->getChild( 0 )->getBound();
+                        osg::Vec3 centerB( bs.center() );
+                        osg::MatrixTransform* mtB = new osg::MatrixTransform( osg::Matrix::translate( centerB ) );
+                        mtB->addChild( axes.get() );
+                        amtB->addChild( mtB );
+                    }
+
+                    // Get the world coordinate center to assist in computing the reference frame of the constraint.
+                    // Body B will be constrained to offsetA = (centerB - centerA).
+                    bs = amtB->getBound();
+                    osg::Vec3 centerB = bs.center();
+                    btVector3 offsetA( osgbCollision::asBtVector3( centerB - centerA ) );
+
+                    // Get the 3x3 basis of body B's reference frame.
+                    amtB->computeLocalToWorldMatrix( m, NULL );
+                    m = m * axisMatrix;
+                    btMatrix3x3 m3B( osgbCollision::asBtMatrix3x3( m ) );
+
+                    // Finally, set up the constraint.
+                    // Set the Bullet Transforms. The constraint will align these two coordinate systems.
+                    // If _useA is true, frameB is placed in frameA between _low and _high on the specified _axis (axisMatrix).
+                    const btTransform frameInA( m3A, offsetA );
+                    const btTransform frameInB( m3B );
+                    btSliderConstraint* slider = new btSliderConstraint( *( rbA->get() ), *( rbB->get() ),
+                        frameInA, frameInB, useA );
+                    slider->setLowerLinLimit( low );
+                    slider->setUpperLinLimit( high );
+                    _dw->addConstraint( slider, true );
+                }
+            }
+            else
+                osg::notify( osg::WARN ) << "ConfigReaderWriter: Unknown key: " << key << std::endl;
+        }
+
+        if( useGroundPlane )
+        {
+#if 0
+            osg::Vec4 groundVec( _up[0] * -1., _up[1] * -1., _up[2] * -1., 0. );
+            _root->addChild( osgbCollision::generateGroundPlane( groundVec, _dw ) );
+#else
+            float thin = .1;
+            osg::MatrixTransform* ground = 
+                createOSGBox( osg::Vec3( 10, 10, thin ) );
+            _root->addChild( ground );
+            btRigidBody* groundBody = 
+                createBTBox( ground, _up * -1. * thin );
+            _dw->addRigidBody( groundBody );
+#endif
+        }
+
+
+        return true;
+    }
+    bool write( const std::string& fileName )
+    {
+        // Disabling this unused code.
+#if 0
+        std::ofstream out( fileName.c_str() );
+        if( !out.good() )
+        {
+            osg::notify( osg::FATAL ) << "CondigReaderWriter::write: Can't open " << fileName << std::endl;
+            return false;
+        }
+        out << "HandNode: " << _hn->getPosition() << " " <<
+            _hn->getAttitude() << " " <<
+            _hn->getHandLength() << " " <<
+            (_hn->getHandedness() == osgbInteraction::HandNode::RIGHT) << std::endl;
+        out << "Model: " << _model << std::endl;
+        NodeDaeMap::const_iterator itr;
+        for( itr = _nodeDaeMap.begin(); itr != _nodeDaeMap.end(); itr++ )
+        {
+            out << "Node: " << itr->first << std::endl;
+            out << "DAE: " << itr->second << std::endl;
+        }
+        return true;
+#endif
+    }
+
+    osg::Vec3 _up;
+
+protected:
+    ~ConfigReaderWriter() {}
+
+    btRigidBody* createRigidBody( osg::Node* subgraph, const osg::NodePath& np, osgbDynamics::CreationRecord* cr )
+    {
+        osg::ref_ptr< osgwTools::AbsoluteModelTransform > amt = new osgwTools::AbsoluteModelTransform;
+        amt->setDataVariance( osg::Object::DYNAMIC );
+        osgwTools::insertAbove( subgraph, amt.get() );
+        cr->_sceneGraph = amt.get();
+
+        osg::Matrix m = osg::computeLocalToWorld( np );
+        cr->_parentTransform = m;
+        cr->setCenterOfMass( subgraph->getBound().center() );
+
+        btRigidBody* rb = osgbDynamics::createRigidBody( cr );
+        if( rb == NULL )
+        {
+            osg::notify( osg::WARN ) << "Warning: createRigidBody: NULL rigid body." << std::endl;
+            return( NULL );
+        }
+        rb->setActivationState( DISABLE_DEACTIVATION );
+        amt->setUserData( new osgbCollision::RefRigidBody( rb ) );
+
+        btTransform wt;
+        rb->getMotionState()->getWorldTransform( wt );
+        rb->setWorldTransform( wt );
+
+        return( rb );
+    }
+
+
+    osg::ref_ptr< osg::Group > _root;
+    btDiscreteDynamicsWorld* _dw;
+    osg::ref_ptr< osgbInteraction::HandNode > _hn;
+};
+/** \endcond */
+
+
+int main( int argc, char** argv )
+{
+    if( argc < 2 )
+    {
+        osg::notify( osg::FATAL ) << "Specify a config file (such as \"concave.txt\") on the command line." << std::endl;
+        return 1;
+    }
+
+    btDiscreteDynamicsWorld* bulletWorld = initPhysics();
+    osg::ref_ptr< osg::Group > root = new osg::Group;
+
+    osg::ref_ptr< osgbInteraction::HandNode > hn = new
+        osgbInteraction::HandNode( bulletWorld );
+    root->addChild( hn.get() );
+
+    std::string commandLineFile( argv[ 1 ] );
+    std::string fileExt = osgDB::convertToLowerCase(
+        osgDB::getFileExtension( commandLineFile ) );
+    if( fileExt == "txt" )
+    {
+        ConfigReaderWriter* crw = new ConfigReaderWriter( root.get(), bulletWorld, hn.get() );
+        //osg::setNotifyLevel( osg::DEBUG_FP );
+        crw->read( commandLineFile );
+        //osg::setNotifyLevel( osg::NOTICE );
+    }
+    else if( fileExt == "osg" )
+    {
+        // Possible future support for loading .osg file
+        osg::notify( osg::FATAL ) << "Loading .osg not yet implemented." << std::endl;
+        return( 1 );
+    }
+    else
+    {
+        osg::notify( osg::FATAL ) << "No support for " << commandLineFile << std::endl;
+        return( 1 );
+    }
+
+    //This is the default value for the island deactivation time. The smaller this
+    //value is the sooner the island will be put to sleep. I believe this number is
+    //in seconds. It can be located in btRigidBody.cpp.
+    //btScalar	gDeactivationTime = btScalar(2.);
+    gDeactivationTime = btScalar(1.);
+
+
+    // Displays the hand origin's desired position.
+    //hn->setDebug( true );
+
+    osgViewer::Viewer viewer;
+    //viewer.setUpViewInWindow( 10, 30, 960, 600 );
+    viewer.setSceneData( root.get() );
+    viewer.addEventHandler( new osgbInteraction::VirtualHandTestEventHandler( hn.get() ) );
+
+    // Support for gestures.
+    viewer.addEventHandler( new GestureTest( hn.get() ) );
+    hn->getGestureHandlerVector().push_back( new osgbInteraction::GripRelease );
+
+    osgGA::TrackballManipulator* tb = new osgGA::TrackballManipulator;
+    viewer.setCameraManipulator( tb );
+
+    // Add osgviewer-style event handlers.
+    viewer.addEventHandler( new osgGA::StateSetManipulator(viewer.getCamera()->getOrCreateStateSet()) );
+    viewer.addEventHandler(new osgViewer::ThreadingHandler);
+    viewer.addEventHandler(new osgViewer::WindowSizeHandler);
+    viewer.addEventHandler(new osgViewer::StatsHandler);
+    //viewer.addEventHandler(new osgViewer::HelpHandler(arguments.getApplicationUsage()));
+    viewer.addEventHandler(new osgViewer::RecordCameraPathHandler);
+    viewer.addEventHandler(new osgViewer::LODScaleHandler);
+    viewer.addEventHandler(new osgViewer::ScreenCaptureHandler);
+
+    double currSimTime = viewer.getFrameStamp()->getSimulationTime();
+    double prevSimTime = viewer.getFrameStamp()->getSimulationTime();
+    viewer.realize();
+    int count( 4 );
+
+#ifdef DO_DEBUG_DRAW
+    osgbCollision::GLDebugDrawer* dbgDraw = new osgbCollision::GLDebugDrawer();
+    dbgDraw->setDebugMode( ~btIDebugDraw::DBG_DrawText );
+    bulletWorld->setDebugDrawer( dbgDraw );
+    root->addChild( dbgDraw->getSceneGraph() );
+#endif
+
+    osg::ref_ptr< osg::Node > foo( viewer.getSceneData() );
+    osgUtil::Optimizer opt;
+    opt.optimize( foo.get(),
+        osgUtil::Optimizer::DEFAULT_OPTIMIZATIONS &
+        ~osgUtil::Optimizer::REMOVE_REDUNDANT_NODES &
+        ~osgUtil::Optimizer::FLATTEN_STATIC_TRANSFORMS );
+
+#ifdef USE_P5
+    osgbInteraction::P5Glove *gloveZero = new osgbInteraction::P5Glove( true );
+	if(!gloveZero->getReady())
+	{
+		osg::notify( osg::FATAL ) << "P5 Glove failed to initialize. Exiting." << std::endl;
+        return( 1 );
+	}
+	gloveZero->setMovementScale( osg::Vec3( 0.6, 0.6, 0.6 ) );
+#endif
+
+    while( /*count-- &&*/ !viewer.done() )
+    {
+#ifdef USE_P5
+        gloveZero->updateHandState(hn.get()); // update from glove
+#endif
+
+#ifdef DO_DEBUG_DRAW
+        dbgDraw->BeginDraw();
+#endif
+
+        currSimTime = viewer.getFrameStamp()->getSimulationTime();
+        bulletWorld->stepSimulation( currSimTime - prevSimTime );
+#if 0
+#ifndef BT_NO_PROFILE
+        CProfileManager::dumpAll();
+#endif
+#endif
+        float dt = currSimTime - prevSimTime;
+        prevSimTime = currSimTime;
+
+#ifdef DO_DEBUG_DRAW
+        bulletWorld->debugDrawWorld();
+        dbgDraw->EndDraw();
+#endif
+
+        viewer.frame();
+    }
+
+    return( 0 );
+}
+
