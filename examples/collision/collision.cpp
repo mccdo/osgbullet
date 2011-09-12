@@ -152,19 +152,38 @@ int main( int argc,
     viewer.addEventHandler( mm );
     viewer.setSceneData( root.get() );
 
-
-    unsigned int lastNumManifolds( 0 );
+    bool colState = false;
     while( !viewer.done() )
     {
         collisionWorld->performDiscreteCollisionDetection();
+
+        // Detect collisions
         unsigned int numManifolds = collisionWorld->getDispatcher()->getNumManifolds();
-        if( lastNumManifolds != numManifolds )
+        if( ( numManifolds == 0 ) && (colState == true ) )
         {
-            lastNumManifolds = numManifolds;
-            if( numManifolds == 0 )
-                osg::notify( osg::ALWAYS ) << "No collision." << std::endl;
-            else
-                osg::notify( osg::ALWAYS ) << "Collision detected." << std::endl;
+            osg::notify( osg::ALWAYS ) << "No collision." << std::endl;
+            colState = false;
+        }
+        else {
+            for( unsigned int i = 0; i < numManifolds; i++ )
+            {
+                btPersistentManifold* contactManifold = collisionWorld->getDispatcher()->getManifoldByIndexInternal(i);
+                unsigned int numContacts = contactManifold->getNumContacts();
+                for( unsigned int j=0; j<numContacts; j++ )
+                {
+                    btManifoldPoint& pt = contactManifold->getContactPoint( j );
+                    if( ( pt.getDistance() <= 0.f ) && ( colState == false ) )
+                    {
+                        osg::notify( osg::ALWAYS ) << "Collision detected." << std::endl;
+                        colState = true;
+                    }
+                    else if( ( pt.getDistance() > 0.f ) && ( colState == true ) )
+                    {
+                        osg::notify( osg::ALWAYS ) << "No collision." << std::endl;
+                        colState = false;
+                    }
+                }
+            }
         }
 
         viewer.frame();
