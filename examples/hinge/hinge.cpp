@@ -34,14 +34,11 @@
 #include <osgbCollision/Utils.h>
 
 #include <osgwTools/InsertRemove.h>
-#include <osgwTools/Shapes.h>
 #include <osgwTools/FindNamedNode.h>
 #include <osgwTools/GeometryOperation.h>
 #include <osgwTools/GeometryModifier.h>
 
 #include <btBulletDynamicsCommon.h>
-#include <LinearMath/btIDebugDraw.h>
-#include <stdio.h> //printf debugging
 
 #include <osg/io_utils>
 #include <string>
@@ -268,7 +265,7 @@ void makeStaticObject( btDiscreteDynamicsWorld* bw, InteractionManipulator* im, 
     bw->addRigidBody( rb, COL_WALL, wallCollidesWith );
 }
 
-btRigidBody* gate;
+btRigidBody* gateBody;
 osg::Transform* makeGate( btDiscreteDynamicsWorld* bw, InteractionManipulator* im, osg::Node* node, const osg::Matrix& m )
 {
     osgwTools::AbsoluteModelTransform* amt = new osgwTools::AbsoluteModelTransform;
@@ -289,14 +286,13 @@ osg::Transform* makeGate( btDiscreteDynamicsWorld* bw, InteractionManipulator* i
     rb->setActivationState( DISABLE_DEACTIVATION );
 
     // Save RB in global, and also record its initial position in the InteractionManipulator (for reset)
-    gate = rb;
+    gateBody = rb;
     im->setInitialTransform( rb, m );
 
     return( amt );
 }
 
-btDiscreteDynamicsWorld*
-initPhysics()
+btDiscreteDynamicsWorld* initPhysics()
 {
     btDefaultCollisionConfiguration * collisionConfiguration = new btDefaultCollisionConfiguration();
     btCollisionDispatcher * dispatcher = new btCollisionDispatcher( collisionConfiguration );
@@ -349,7 +345,7 @@ int main( int argc, char** argv )
 
     // Get Node pointers and parent transforms for the wall and gate.
     // (Node names are taken from the osgWorks osgwnames utility.)
-    osg::Matrix wallXform, hingeXform, gateXform;
+    osg::Matrix wallXform, gateXform;
     osg::Node* wallsNode = findNamedNode( rootModel.get(), "Walls", wallXform );
     osg::Node* gateNode = findNamedNode( rootModel.get(), "DOF_Gate", gateXform );
     if( ( wallsNode == NULL ) || ( gateNode == NULL ) )
@@ -369,7 +365,7 @@ int main( int argc, char** argv )
 
 
     // Make Bullet rigid bodies and collision shapes for the gate...
-    osg::Transform* doorAMT = makeGate( bulletWorld, im, gateNode, gateXform );
+    makeGate( bulletWorld, im, gateNode, gateXform );
     // ...and the two walls.
     makeStaticObject( bulletWorld, im, wallsNode, wallXform );
     makeStaticObject( bulletWorld, im, otherWall, otherWallXform );
@@ -388,7 +384,7 @@ int main( int argc, char** argv )
         const btVector3 btPivot( -0.498f, -0.019f, 0.146f );
 
         btVector3 btAxisA( 0., 0., 1. );
-        btHingeConstraint* hinge = new btHingeConstraint( *gate, btPivot, btAxisA );
+        btHingeConstraint* hinge = new btHingeConstraint( *gateBody, btPivot, btAxisA );
         hinge->setLimit( -1.5f, 1.5f );
         bulletWorld->addConstraint( hinge, true );
     }
@@ -442,7 +438,7 @@ int main( int argc, char** argv )
 
 /** \page hingelowlevel Simple Hinge Constraint
 
-Example description TBD.
+Demonstrates coding directly to the Bullet API to create a hinge constraint.
 
 Use the --debug command line option to enable debug collision object display.
 */
