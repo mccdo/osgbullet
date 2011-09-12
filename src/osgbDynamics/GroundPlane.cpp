@@ -34,7 +34,7 @@ namespace osgbDynamics
 {
 
 
-osg::Node* generateGroundPlane( const osg::Vec4& plane, btDynamicsWorld* bulletWorld, btRigidBody** rb )
+osg::Node* generateGroundPlane( const osg::Vec4& plane, btDynamicsWorld* bulletWorld, btRigidBody** rb, const short group, const short mask )
 {
     osg::Vec3 n(plane.x(),plane.y(),plane.z());
     n.normalize();
@@ -61,7 +61,13 @@ osg::Node* generateGroundPlane( const osg::Vec4& plane, btDynamicsWorld* bulletW
     btCollisionShape* groundShape = new btStaticPlaneShape( planeNormal, plane.w() );
     btRigidBody::btRigidBodyConstructionInfo rbInfo( 0., NULL, groundShape, btVector3(0,0,0) );
     btRigidBody* ground = new btRigidBody(rbInfo);
-    bulletWorld->addRigidBody( ground );
+
+    btDiscreteDynamicsWorld* dw = dynamic_cast< btDiscreteDynamicsWorld* >( bulletWorld );
+    if( dw != NULL )
+        dw->addRigidBody( ground, group, mask );
+    else
+        bulletWorld->addRigidBody( ground );
+
     if( rb != NULL )
         *rb = ground;
 

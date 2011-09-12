@@ -37,7 +37,7 @@ namespace osgbDynamics
 
 /** \brief Add a plane rigid body to the dynamics world and return an OSG subgraph to render the plane.
 */
-OSGBDYNAMICS_EXPORT osg::Node* generateGroundPlane( const osg::Vec4& plane, btDynamicsWorld* bulletWorld, btRigidBody** rb=NULL );
+OSGBDYNAMICS_EXPORT osg::Node* generateGroundPlane( const osg::Vec4& plane, btDynamicsWorld* bulletWorld, btRigidBody** rb=NULL, short group=0, short mask=0 );
 
 
 // osgbDynamics
