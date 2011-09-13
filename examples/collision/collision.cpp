@@ -1,22 +1,22 @@
 /*************** <auto-copyright.pl BEGIN do not edit this line> **************
- *
- * osgBullet is (C) Copyright 2009-2011 by Kenneth Mark Bryden
- *
- * This library is free software; you can redistribute it and/or
- * modify it under the terms of the GNU Lesser General Public
- * License version 2.1 as published by the Free Software Foundation.
- *
- * This library is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- * Library General Public License for more details.
- *
- * You should have received a copy of the GNU Lesser General Public
- * License along with this library; if not, write to the
- * Free Software Foundation, Inc., 59 Temple Place - Suite 330,
- * Boston, MA 02111-1307, USA.
- *
- *************** <auto-copyright.pl END do not edit this line> ***************/
+*
+* osgBullet is (C) Copyright 2009-2011 by Kenneth Mark Bryden
+*
+* This library is free software; you can redistribute it and/or
+* modify it under the terms of the GNU Lesser General Public
+* License version 2.1 as published by the Free Software Foundation.
+*
+* This library is distributed in the hope that it will be useful,
+* but WITHOUT ANY WARRANTY; without even the implied warranty of
+* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+* Library General Public License for more details.
+*
+* You should have received a copy of the GNU Lesser General Public
+* License along with this library; if not, write to the
+* Free Software Foundation, Inc., 59 Temple Place - Suite 330,
+* Boston, MA 02111-1307, USA.
+*
+*************** <auto-copyright.pl END do not edit this line> ***************/
 
 #include <btBulletCollisionCommon.h>
 #include <osgbCollision/CollisionShapes.h>
@@ -137,8 +137,52 @@ osg::Node* createScene( btCollisionWorld* cw, MoveManipulator* mm, osg::Argument
     return( root.release() );
 }
 
+void detectCollision( bool& lastColState, btCollisionWorld* cw )
+{
+    unsigned int numManifolds = cw->getDispatcher()->getNumManifolds();
+    if( ( numManifolds == 0 ) && (lastColState == true ) )
+    {
+        osg::notify( osg::ALWAYS ) << "No collision." << std::endl;
+        lastColState = false;
+    }
+    else {
+        for( unsigned int i = 0; i < numManifolds; i++ )
+        {
+            btPersistentManifold* contactManifold = cw->getDispatcher()->getManifoldByIndexInternal(i);
+            unsigned int numContacts = contactManifold->getNumContacts();
+            for( unsigned int j=0; j<numContacts; j++ )
+            {
+                btManifoldPoint& pt = contactManifold->getContactPoint( j );
+                if( ( pt.getDistance() <= 0.f ) && ( lastColState == false ) )
+                {
+                    // grab these values for the contact normal arrows:
+                    osg::Vec3 pos = osgbCollision::asOsgVec3( pt.getPositionWorldOnA() ); // position of the collision on object A
+                    osg::Vec3 normal = osgbCollision::asOsgVec3( pt.m_normalWorldOnB ); // returns a unit vector
+                    float pen = pt.getDistance(); //penetration depth
+
+                    osg::Quat q;
+                    q.makeRotate( osg::Vec3( 0, 0, 1 ), normal );
+
+                    osg::notify( osg::ALWAYS ) << "Collision detected." << std::endl;
+
+                    osg::notify( osg::ALWAYS ) << "\tPosition: " << pos << std::endl;
+                    osg::notify( osg::ALWAYS ) << "\tNormal: " << normal << std::endl;
+                    osg::notify( osg::ALWAYS ) << "\tPenetration depth: " << pen << std::endl;
+                    //osg::notify( osg::ALWAYS ) << q.w() <<","<< q.x() <<","<< q.y() <<","<< q.z() << std::endl;
+                    lastColState = true;
+                }
+                else if( ( pt.getDistance() > 0.f ) && ( lastColState == true ) )
+                {
+                    osg::notify( osg::ALWAYS ) << "No collision." << std::endl;
+                    lastColState = false;
+                }
+            }
+        }
+    }
+}
+
 int main( int argc,
-          char * argv[] )
+         char * argv[] )
 {
     btCollisionWorld* collisionWorld = initCollision();
 
@@ -152,39 +196,12 @@ int main( int argc,
     viewer.addEventHandler( mm );
     viewer.setSceneData( root.get() );
 
-    bool colState = false;
+    bool lastColState = false;
     while( !viewer.done() )
     {
         collisionWorld->performDiscreteCollisionDetection();
 
-        // Detect collisions
-        unsigned int numManifolds = collisionWorld->getDispatcher()->getNumManifolds();
-        if( ( numManifolds == 0 ) && (colState == true ) )
-        {
-            osg::notify( osg::ALWAYS ) << "No collision." << std::endl;
-            colState = false;
-        }
-        else {
-            for( unsigned int i = 0; i < numManifolds; i++ )
-            {
-                btPersistentManifold* contactManifold = collisionWorld->getDispatcher()->getManifoldByIndexInternal(i);
-                unsigned int numContacts = contactManifold->getNumContacts();
-                for( unsigned int j=0; j<numContacts; j++ )
-                {
-                    btManifoldPoint& pt = contactManifold->getContactPoint( j );
-                    if( ( pt.getDistance() <= 0.f ) && ( colState == false ) )
-                    {
-                        osg::notify( osg::ALWAYS ) << "Collision detected." << std::endl;
-                        colState = true;
-                    }
-                    else if( ( pt.getDistance() > 0.f ) && ( colState == true ) )
-                    {
-                        osg::notify( osg::ALWAYS ) << "No collision." << std::endl;
-                        colState = false;
-                    }
-                }
-            }
-        }
+        detectCollision( lastColState, collisionWorld );
 
         viewer.frame();
     }
@@ -210,7 +227,13 @@ collision with the left box, the following message appears on the console:
 
 \code
 Collision detected.
+        Position: 0.5 0.5 0.5
+        Normal: -1 -0 -0
+        Penetration depth: -5.96046e-008
 \endcode
+
+The \c Position, \c normal, and \c Penetration \c depth values are taken from the
+Bullet collision information.
 
 Drag the right box away from the left box and the following message appears
 on the console:
