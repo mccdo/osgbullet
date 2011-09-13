@@ -556,7 +556,11 @@ public:
 
         if( !noGroundPlane )
         {
-            osg::Node* groundNode = osgbDynamics::generateGroundPlane( groundPlane, _dw );
+            osg::Node* groundNode;
+            if( (filterGroup == 0) && (filterWith == 0) )
+                groundNode = osgbDynamics::generateGroundPlane( groundPlane, _dw );
+            else
+                groundNode = osgbDynamics::generateGroundPlane( groundPlane, _dw, NULL, filterGroup, filterWith );
             _root->addChild( groundNode );
         }
 
@@ -725,13 +729,15 @@ int main( int argc, char** argv )
         ~osgUtil::Optimizer::FLATTEN_STATIC_TRANSFORMS );
 
 #ifdef USE_P5
-    osgbInteraction::P5Glove *gloveZero = new osgbInteraction::P5Glove( true );
-	if(!gloveZero->getReady())
-	{
-		osg::notify( osg::FATAL ) << "P5 Glove failed to initialize. Exiting." << std::endl;
-        return( 1 );
-	}
-	gloveZero->setMovementScale( osg::Vec3( 0.6, 0.6, 0.6 ) );
+    osgbInteraction::P5Glove* gloveZero = new osgbInteraction::P5Glove( true );
+	if( !gloveZero->getReady() )
+    {
+		osg::notify( osg::WARN ) << "P5 Glove failed to initialize." << std::endl;
+        delete gloveZero;
+        gloveZero = NULL;
+    }
+    if( gloveZero != NULL )
+	    gloveZero->setMovementScale( osg::Vec3( 0.6, 0.6, 0.6 ) );
 #endif
 
     viewer.realize();
@@ -741,7 +747,8 @@ int main( int argc, char** argv )
     while( !viewer.done() )
     {
 #ifdef USE_P5
-        gloveZero->updateHandState(hn.get()); // update from glove
+        if( gloveZero != NULL )
+            gloveZero->updateHandState(hn.get()); // update from glove
 #endif
 
         if( dbgDraw != NULL )
