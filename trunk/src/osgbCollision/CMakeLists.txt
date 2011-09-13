@@ -40,11 +40,22 @@ add_library( ${LIB_NAME}
     ${_osgBulletSourceFiles}
 )
 if( BUILD_SHARED_LIBS )
+    if( BULLET_COLLISION_LIBRARY_DEBUG AND BULLET_MATH_LIBRARY_DEBUG )
+        set( _localBulletLibs
+            optimized ${BULLET_COLLISION_LIBRARY} debug ${BULLET_COLLISION_LIBRARY_DEBUG}
+            optimized ${BULLET_MATH_LIBRARY} debug ${BULLET_MATH_LIBRARY_DEBUG}
+        )
+    else()
+        set( _localBulletLibs
+            ${BULLET_COLLISION_LIBRARY}
+            ${BULLET_MATH_LIBRARY}
+        )
+    endif()
+
     target_link_libraries( ${LIB_NAME}
         ${OSGWORKS_LIBRARIES}
         ${OSG_LIBRARIES}
-        ${BULLET_COLLISION_LIBRARY}
-        ${BULLET_MATH_LIBRARY}
+        ${_localBulletLibs}
     )
 endif()
 

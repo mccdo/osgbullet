@@ -66,9 +66,17 @@ macro( _osgBulletMakeCollisionExe _exeName )
     set( _osgBulletLibs
         "osgbCollision"
     )
-    set( _bulletLibs
-        "${BULLET_COLLISION_LIBRARY};${BULLET_MATH_LIBRARY}"
-    )
+    if( BULLET_COLLISION_LIBRARY_DEBUG AND BULLET_MATH_LIBRARY_DEBUG )
+        set( _bulletLibs
+            optimized ${BULLET_COLLISION_LIBRARY} debug ${BULLET_COLLISION_LIBRARY_DEBUG}
+            optimized ${BULLET_MATH_LIBRARY} debug ${BULLET_MATH_LIBRARY_DEBUG}
+        )
+    else()
+        set( _bulletLibs
+            ${BULLET_COLLISION_LIBRARY}
+            ${BULLET_MATH_LIBRARY}
+        )
+    endif()
     _osgBulletMakeExeInternal( ${_exeName} "${_osgBulletLibs}" "${_bulletLibs}" ${ARGN} )
 endmacro()
 
