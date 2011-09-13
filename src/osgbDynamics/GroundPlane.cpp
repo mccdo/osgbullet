@@ -63,7 +63,7 @@ osg::Node* generateGroundPlane( const osg::Vec4& plane, btDynamicsWorld* bulletW
     btRigidBody* ground = new btRigidBody(rbInfo);
 
     btDiscreteDynamicsWorld* dw = dynamic_cast< btDiscreteDynamicsWorld* >( bulletWorld );
-    if( dw != NULL )
+    if( ( dw != NULL ) && ( ( group != 0 ) || ( mask != 0 ) ) )
         dw->addRigidBody( ground, group, mask );
     else
         bulletWorld->addRigidBody( ground );

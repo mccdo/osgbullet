@@ -372,7 +372,8 @@ int main( int argc, char** argv )
 
     // Add ground
     const osg::Vec4 plane( 0., 0., 1., 0. );
-    root->addChild( osgbDynamics::generateGroundPlane( plane, bulletWorld ) );
+    root->addChild( osgbDynamics::generateGroundPlane( plane, bulletWorld,
+        NULL, COL_DEFAULT, defaultCollidesWith ) );
 
 
     // Create the hinge constraint.
