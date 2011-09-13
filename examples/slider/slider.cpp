@@ -132,7 +132,7 @@ protected:
 
         motion->setParentTransform( osg::Matrix::translate( _viewPos ) );
 
-        btScalar mass( 0.2 );
+        btScalar mass( 1. );
         btVector3 inertia( btVector3( 0., 0., 0. ) );
         collision->calculateLocalInertia( mass, inertia );
         btRigidBody::btRigidBodyConstructionInfo rbinfo( mass, motion, collision, inertia );
@@ -172,7 +172,7 @@ osg::Transform* makeDrawer( btDiscreteDynamicsWorld* bw, InteractionManipulator*
     cr->_shapeType = BOX_SHAPE_PROXYTYPE;
     cr->setCenterOfMass( node->getBound().center() );
     cr->_parentTransform = m;
-    cr->_mass = 1.f;
+    cr->_mass = .75f;
     cr->_restitution = .5f;
     btRigidBody* rb = osgbDynamics::createRigidBody( cr.get() );
 
@@ -247,7 +247,9 @@ int main( int argc, char** argv )
     if( ( standNode == NULL ) || ( drawerNode == NULL ) )
         return( 1 );
 
-    drawerXform *= osg::Matrix::translate( 0., -.1, 0. );
+    // Open the drawer slightly.
+    // TBD this is a hardcoded axis/distance.
+    drawerXform *= osg::Matrix::translate( 0., -.2, 0. );
 
     // Make Bullet rigid bodies and collision shapes for the drawer...
     makeDrawer( bulletWorld, im, drawerNode, drawerXform );
@@ -264,39 +266,41 @@ int main( int argc, char** argv )
     // create slider constraint between drawer and groundplane and add it to world
     // Note: Bullet slider is always along x axis. Alter this behavior with reference frames.
     {
-        // Should obtain these from model metadata or user input:
+        // Model-specific constants.
+        // TBD Should obtain these from model metadata or user input:
         const osg::Vec3 drawerAxis( 0., 1., 0. );
         const float drawerMinLimit( -1.f );
         const float drawerMaxLimit( 0.f );
 
+
         // Compute a matrix that transforms the stand's collision shape origin and x axis
         // to the drawer's origin and drawerAxis.
-
         //   1. Matrix to align the (slider constraint) x axis with the drawer axis.
         const osg::Vec3 bulletSliderAxis( 1., 0., 0. );
         const osg::Matrix axisRotate( osg::Matrix::rotate( bulletSliderAxis, drawerAxis ) );
-
+        //
         //   2. Inverse stand center of mass offset.
         osgbDynamics::MotionState* motion = dynamic_cast< osgbDynamics::MotionState* >( standBody->getMotionState() );
         const osg::Matrix invStandCOM( osg::Matrix::translate( -( motion->getCenterOfMass() ) ) );
-
+        //
         //   3. Transform from the stand's origin to the drawer's origin.
         const osg::Matrix standToDrawer( osg::Matrix::inverse( standXform ) * drawerXform );
-
+        //
         //   4. The final stand frame matrix.
         btTransform standFrame = osgbCollision::asBtTransform(
             axisRotate * invStandCOM * standToDrawer );
 
+
         // Compute a matrix that transforms the drawer's collision shape origin and x axis
         // to the drawer's origin and drawerAxis.
-
         //   1. Drawer center of mass offset.
         motion = dynamic_cast< osgbDynamics::MotionState* >( drawerBody->getMotionState() );
         const osg::Matrix invDrawerCOM( osg::Matrix::translate( -( motion->getCenterOfMass() ) ) );
-
+        //
         //   2. The final drawer frame matrix.
         btTransform drawerFrame = osgbCollision::asBtTransform(
             axisRotate * invDrawerCOM );
+
 
         btSliderConstraint* slider = new btSliderConstraint( *drawerBody, *standBody, drawerFrame, standFrame, false );
         slider->setLowerLinLimit( drawerMinLimit );
@@ -321,8 +325,7 @@ int main( int argc, char** argv )
     viewer.addEventHandler( im );
 
     osgGA::TrackballManipulator* tb = new osgGA::TrackballManipulator;
-    //tb->setHomePosition( osg::Vec3( 0., -8., 2. ), osg::Vec3( 0., 0., 1. ), osg::Vec3( 0., 0., 1. ) ); 
-    tb->setHomePosition( osg::Vec3( 0., -8., 0. ), osg::Vec3( 0., 0., 0. ), osg::Vec3( 0., 0., 1. ) ); 
+    tb->setHomePosition( osg::Vec3( 1., -7., 2. ), osg::Vec3( 0., 0., 1. ), osg::Vec3( 0., 0., 1. ) ); 
     viewer.setCameraManipulator( tb );
     viewer.getCamera()->setClearColor( osg::Vec4( .5, .5, .5, 1. ) );
 
