@@ -18,7 +18,7 @@
  *
  *************** <auto-copyright.pl END do not edit this line> ***************/
 
-#include <osgbcOLLISION/VertexAggOp.h>
+#include <osgbCollision/VertexAggOp.h>
 #include <osgbCollision/CollisionShapes.h>
 #include "BulletCollision/CollisionShapes/btShapeHull.h"
 #include <btBulletCollisionCommon.h>
