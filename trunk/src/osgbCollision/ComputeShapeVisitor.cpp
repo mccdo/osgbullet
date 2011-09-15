@@ -237,7 +237,7 @@ void ComputeShapeVisitor::reduce( osg::Node& node )
 
     osg::notify( osg::DEBUG_FP ) << "ComputeShapeVisitor: Reducing..." << std::endl;
     {
-        osgwTools::ShortEdgeOp* seOp = new osgwTools::ShortEdgeOp( sePercent, FLT_MAX, seFeature );
+        osgwTools::ShortEdgeOp* seOp = new osgwTools::ShortEdgeOp( sePercent, seFeature );
         seOp->setDoTriStrip( false );
         seOp->setMinPrimitives( 1 );
 
