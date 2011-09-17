@@ -35,9 +35,8 @@ namespace osgbCollision
 
 
 ComputeShapeVisitor::ComputeShapeVisitor( const BroadphaseNativeTypes shapeType,
-    const osgbCollision::AXIS axis,         const unsigned int reductionLevel,
-
-    osg::NodeVisitor::TraversalMode traversalMode )
+        const osgbCollision::AXIS axis, const unsigned int reductionLevel,
+        osg::NodeVisitor::TraversalMode traversalMode )
   : osg::NodeVisitor( traversalMode ),
     _shapeType( shapeType ),
     _axis( axis ),
