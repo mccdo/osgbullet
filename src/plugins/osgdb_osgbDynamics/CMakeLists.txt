@@ -1,4 +1,4 @@
-set( LIB_NAME osgdb_osgbDynamics )
+set( LIB_NAME osgdb_osgbdynamics )
 
 _osgBulletPlugin( ${LIB_NAME}
     dotosgArticulationRecord.cpp
