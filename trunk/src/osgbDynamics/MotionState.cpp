@@ -123,14 +123,54 @@ MotionState::setWorldTransformInternal( const btTransform& worldTrans )
         _amt->setMatrix( t );
 }
 
+osg::Matrix MotionState::computeOsgLocalToCOLocal() const
+{
+    // Accound for center of mass and scale.
+    const osg::Vec3 cs( _com[0]*_scale[0], _com[1]*_scale[1], _com[2]*_scale[2] );
+    const osg::Matrix csMat = osg::Matrix::translate( -cs );
+
+    const osg::Matrix invScale = osg::Matrix::scale( 1. / _scale[0], 1. / _scale[1], 1. / _scale[2] );
+
+    // Return the concatenation of these.
+    return( csMat * invScale );
+}
+osg::Matrix MotionState::computeOsgWorldToCOLocal() const
+{
+    // Convert to OSG local coords...
+    osg::Matrix l2w;
+    if( _mt.valid() )
+        l2w = _mt->getMatrix();
+    else if( _amt.valid() )
+        l2w = _amt->getMatrix();
+    osg::Matrix w2l;
+    w2l.invert( l2w );
+
+    // ...and accound for center of mass and scale.
+    osg::Matrix ol2col = computeOsgLocalToCOLocal();
+
+    // Return the concatenation of these.
+    return( w2l * ol2col );
+}
+osg::Matrix MotionState::computeOsgWorldToBulletWorld() const
+{
+    // Compute OSG world coords to collision object local coords matrix...
+    osg::Matrix ow2col = computeOsgWorldToCOLocal();
+
+    // ...and convert out to Bullet world coords.
+    btTransform bulletl2w;
+    getWorldTransform( bulletl2w );
+    osg::Matrix bl2w = osgbCollision::asOsgMatrix( bulletl2w );
+
+    // Return the concatenation of these.
+    return( ow2col * bl2w );
+}
+
 
 void
 MotionState::setTransform( osg::Transform* transform )
 {
-    //osg::MatrixTransform* mt( NULL );
-    //osgwTools::AbsoluteModelTransform* amt( NULL );
-    if( dynamic_cast< osg::MatrixTransform* >( transform ) )
-        _mt = static_cast< osg::MatrixTransform* >( transform );
+    if( transform->asMatrixTransform() != NULL )
+        _mt = transform->asMatrixTransform();
     else if( dynamic_cast< osgwTools::AbsoluteModelTransform* >( transform ) )
         _amt = static_cast< osgwTools::AbsoluteModelTransform* >( transform );
     else

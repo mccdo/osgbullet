@@ -103,6 +103,23 @@ public:
     /** \copybrief setWorldTransform */
     virtual void getWorldTransform(btTransform& worldTrans ) const;
 
+    /** \brief Get a matrix that transforms from OSG local coordinates to collision object local coordinate.
+
+    Use this function to convert a point on an OSG model into its equivalent Bullet
+    collision object location. */
+    osg::Matrix computeOsgLocalToCOLocal() const;
+    /** \brief Get a matrix that transforms from OSG world coordinates to collision object local coordinate.
+
+    Use this function to convert a point in OSG world space to its equivalent Bullet
+    collision object location. */
+    osg::Matrix computeOsgWorldToCOLocal() const;
+    /** \brief Get a matrix that transforms from OSG world coordinates to Bullet world coordinates.
+
+    This function creates a matrix that uses the center of mass and scale values to transform
+    from OSG world coordinates to Bullet world coordinates. If the center of mass is (0,0,0) and
+    the scale is (1,1,1), the returned matrix is the identity. */
+    osg::Matrix computeOsgWorldToBulletWorld() const;
+
 
     /** \brief Set and get a subgraph that corresponds to the rigid body owning this MotionState.
 
