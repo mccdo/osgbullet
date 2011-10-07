@@ -107,7 +107,7 @@ public:
 
     Use this function to convert a point in collision object local coordinate space to its
     equivalent OSG object coordinate, taking center of mass and scale into account. */
-    osg::Matrix MotionState::computeCOLocalToOsgLocal() const;
+    osg::Matrix computeCOLocalToOsgLocal() const;
     /** \brief Get a matrix that transforms from OSG local coordinates to collision object local coordinate.
 
     Use this function to convert a point on an OSG model into its equivalent Bullet
