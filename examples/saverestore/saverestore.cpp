@@ -40,7 +40,6 @@
 
 #include <osgwTools/InsertRemove.h>
 #include <osgwTools/FindNamedNode.h>
-#include <osgwTools/NodePathUtils.h>
 
 #include <btBulletDynamicsCommon.h>
 
@@ -218,7 +217,6 @@ int main( int argc, char** argv )
         np.resize( np.size() + 1);
         np[ np.size() - 1 ] = node;
 
-        const std::string npStr = osgwTools::nodePathToString( np );
         osg::ref_ptr< osgbDynamics::CreationRecord > cr;
 
         if( restoreFileName.empty() )
@@ -233,13 +231,14 @@ int main( int argc, char** argv )
             cr->_scale = xform.getScale();
             cr->_restitution = .5f;
 
-            srh->add( npStr, cr );
+            srh->add( it->first->getName(), cr );
         }
         else
         {
             // Restoring.
-            osgbDynamics::PhysicsData* pd = srh->getPhysicsData( npStr );
+            osgbDynamics::PhysicsData* pd = srh->getPhysicsData( it->first->getName() );
             cr = pd->_cr;
+            cr->_sceneGraph = amt;
         }
 
         btRigidBody* rb = osgbDynamics::createRigidBody( cr.get() );
@@ -251,7 +250,7 @@ int main( int argc, char** argv )
         if( restoreFileName.empty() )
             bulletWorld->addRigidBody( rb );
 
-        srh->add( npStr, rb );
+        srh->add( it->first->getName(), rb );
     }
 
     // Add ground
