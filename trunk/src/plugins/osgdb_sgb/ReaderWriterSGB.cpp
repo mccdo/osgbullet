@@ -121,16 +121,8 @@ ReaderWriterSGB::writeObject( const osg::Object& obj, const std::string& fileNam
         return( osgDB::ReaderWriter::WriteResult::ERROR_IN_WRITING_FILE );
 
 
-    const osgbDynamics::PhysicsState::DataMap& dm = ps->getDataMap();
-    fw << "Physics data entries " << dm.size() << std::endl;
-
-    osgbDynamics::PhysicsState::DataMap::const_iterator it;
-    for( it = dm.begin(); it != dm.end(); it++ )
-    {
-        osg::ref_ptr< osgwTools::RefID > rid = new osgwTools::RefID( it->first );
-        fw.writeObject( *rid );
-        fw.writeObject( *(it->second) );
-    }
+    fw << "Physics data entries " << ps->getNumEntries() << std::endl;
+    ps->exportEntired( fw );
 
     return( osgDB::ReaderWriter::WriteResult::FILE_SAVED );
 }

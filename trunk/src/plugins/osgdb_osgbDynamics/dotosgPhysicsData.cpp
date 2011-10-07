@@ -181,7 +181,10 @@ bool PhysicsData_writeLocalData( const osg::Object& obj, osgDB::Output& fw )
 
     fw.indent() << "Version " << pd.getVersion() << std::endl;
 
-    fw.writeObject( *(pd._cr) );
+    if( pd._cr == NULL )
+        osg::notify( osg::WARN ) << "PhysicsData_writeLocalData: Can't write NULL CreationRecord." << std::endl;
+    else
+        fw.writeObject( *( pd._cr ) );
 
     // The AMT matrix is different from the RB matrix. We need to save it
     // separately here so that we can display the OSG subgraph transformed

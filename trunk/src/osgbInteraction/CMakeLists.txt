@@ -15,17 +15,21 @@ set( LIB_PUBLIC_HEADERS
     ${P5_HEADER}
     ${HEADER_PATH}/Export.h
     ${HEADER_PATH}/ArticulationRecord.h
+    ${HEADER_PATH}/DragHandler.h
     ${HEADER_PATH}/GestureHandler.h
     ${HEADER_PATH}/HandNode.h
     ${HEADER_PATH}/HandTestEventHandler.h
+    ${HEADER_PATH}/SaveRestoreHandler.h
 )
 
 set( _osgBulletSourceFiles
     ${P5_SOURCE}
     ArticulationRecord.cpp
+    DragHandler.cpp
     GestureHandler.cpp
     HandNode.cpp
     HandTestEventHandler.cpp
+    SaveRestoreHandler.cpp
 )
 
 add_library( ${LIB_NAME}

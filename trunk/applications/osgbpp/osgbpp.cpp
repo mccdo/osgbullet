@@ -22,8 +22,7 @@
 #include <osgDB/ReadFile>
 #include <osgDB/FileNameUtils>
 #include <osgDB/FileUtils>
-#include <osgGA/TrackballManipulator>
-#include <osgGA/GUIEventHandler>
+#include <osgwTools/AbsoluteModelTransform.h>
 #include <osg/ShapeDrawable>
 #include <osg/Geode>
 
@@ -32,51 +31,20 @@
 #include <osgbCollision/GLDebugDrawer.h>
 #include <osgbCollision/Version.h>
 #include <osgbDynamics/MotionState.h>
+#include <osgbDynamics/PhysicsState.h>
 #include <osgbCollision/CollisionShapes.h>
 #include <osgbCollision/RefBulletObject.h>
 #include <osgbDynamics/RigidBody.h>
 #include <osgbCollision/Utils.h>
 
-#include <osgwTools/AbsoluteModelTransform.h>
+#include <osgbInteraction/SaveRestoreHandler.h>
+#include <osgbInteraction/DragHandler.h>
+#include <osgGA/TrackballManipulator>
 
 #include <osg/io_utils>
 #include <iostream>
 #include <sstream>
 
-
-
-/** \cond */
-class ResetHandler : public osgGA::GUIEventHandler
-{
-public:
-    ResetHandler( btRigidBody* rb )
-      : _rb( rb )
-    {}
-
-    virtual bool handle( const osgGA::GUIEventAdapter& ea, osgGA::GUIActionAdapter& aa )
-    {
-        if( ( ea.getEventType() == osgGA::GUIEventAdapter::KEYDOWN ) &&
-            ( ea.getKey() == osgGA::GUIEventAdapter::KEY_BackSpace ) )
-        {
-            osgbDynamics::MotionState* motion = static_cast< osgbDynamics::MotionState* >( _rb->getMotionState() );
-            const osg::Vec3 com = motion->getCenterOfMass();
-
-            btTransform wt; wt.setIdentity();
-            wt.setOrigin( osgbCollision::asBtVector3( com ) );
-            _rb->setWorldTransform( wt );
-
-            btVector3 zero( 0., 0., 0. );
-            _rb->setAngularVelocity( zero );
-            _rb->setLinearVelocity( zero );
-            return( true );
-        }
-        return( false );
-    }
-
-protected:
-    btRigidBody* _rb;
-};
-/** \endcond */
 
 
 btDynamicsWorld* initPhysics()
@@ -113,7 +81,7 @@ osg::Transform* createOSGBox( osg::Vec3 size )
 }
 
 osg::Node*
-createGround( float w, float h, const osg::Vec3& center )
+createGround( float w, float h, const osg::Vec3& center, btDynamicsWorld* dw )
 {
     osg::Transform* ground = createOSGBox( osg::Vec3( w, h, .05 ) );
 
@@ -130,7 +98,7 @@ createGround( float w, float h, const osg::Vec3& center )
     motion->setParentTransform( m );
     body->setWorldTransform( osgbCollision::asBtTransform( m ) );
 
-    ground->setUserData( new osgbCollision::RefRigidBody( body ) );
+    dw->addRigidBody( body );
 
     return( ground );
 }
@@ -180,7 +148,7 @@ int main( int argc, char* argv[] )
     else if( fullHelp )
         arguments.getApplicationUsage()->write( osg::notify( osg::ALWAYS ), osg::ApplicationUsage::COMMAND_LINE_OPTION );
     if( briefHelp || fullHelp )
-        osg::notify( osg::ALWAYS ) << "Use the backspace key to reset the physics simultation." << std::endl;
+        osg::notify( osg::ALWAYS ) << "Use the Delete key to reset the physics simultation." << std::endl;
 
     if( arguments.argc() <= 1 )
     {
@@ -359,14 +327,16 @@ int main( int argc, char* argv[] )
         return 1;
     }
     osg::notify( osg::INFO ) << "osgbpp: Loaded model(s)." << std::endl;
-
     osg::BoundingSphere bs = model->getBound();
 
 
-
+    //
+    // Create the rigid body.
+    // 1. Create an AnsoluteModelTransform to parent the model.
     osg::ref_ptr< osgwTools::AbsoluteModelTransform > amtRoot( new osgwTools::AbsoluteModelTransform );
     amtRoot->addChild( model.get() );
 
+    // 2. Specify rigid body parameters in a CreationRecord.
     osg::ref_ptr< osgbDynamics::CreationRecord > cr = new osgbDynamics::CreationRecord;
     cr->_sceneGraph = amtRoot.get();
     if( comSpecified )
@@ -377,6 +347,7 @@ int main( int argc, char* argv[] )
     cr->_axis = axis;
     cr->_reductionLevel = osgbDynamics::CreationRecord::MINIMAL;
 
+    // 3. Create the body.
     btRigidBody* rb( osgbDynamics::createRigidBody( cr.get() ) );
     if( rb == NULL )
     {
@@ -385,23 +356,23 @@ int main( int argc, char* argv[] )
     }
     rb->setActivationState( DISABLE_DEACTIVATION );
 
+    // This is how DragHandler knows that the user has selected a rigid body.
+    amtRoot->setUserData( new osgbCollision::RefRigidBody( rb ) );
 
 
-    viewer.setUpViewInWindow( 10, 30, 800, 600 );
-
-    osgGA::TrackballManipulator* tb = new osgGA::TrackballManipulator();
-    viewer.setCameraManipulator( tb );
-    viewer.addEventHandler( new ResetHandler( rb ) );
-
+    // Create a root for the scene graph, and add the AbsoluteModelTransform as a child.
     osg::ref_ptr<osg::Group> root = new osg::Group();
+    viewer.setSceneData( root.get() );
     root->addChild( amtRoot.get() );
 
 
+    // Create the dynamics world and add the rigid body.
     btDynamicsWorld* dynamicsWorld = initPhysics();
     dynamicsWorld->addRigidBody( rb );
 
     if( debug )
     {
+        // Enable debug drawing.
         root->addChild( dbgDraw.getSceneGraph() );
         dynamicsWorld->setDebugDrawer( &dbgDraw );
     }
@@ -410,25 +381,39 @@ int main( int argc, char* argv[] )
     float dim = bs._radius * 1.5;
     osg::Vec3 cen = bs._center;
     cen[ 2 ] -= dim;
-    osg::ref_ptr< osg::Node > ground = createGround( dim, dim, cen );
+    osg::ref_ptr< osg::Node > ground = createGround( dim, dim, cen, dynamicsWorld );
     root->addChild( ground.get() );
-    osgbCollision::RefRigidBody* body = dynamic_cast<
-        osgbCollision::RefRigidBody* >( ground->getUserData() );
-    dynamicsWorld->addRigidBody( body->get() );
 
 
-    double currSimTime;
+    // Viewer set up.
+    viewer.setUpViewInWindow( 10, 30, 800, 600 );
+    osgGA::TrackballManipulator* tb = new osgGA::TrackballManipulator();
+    viewer.setCameraManipulator( tb );
+
+    // Add an event handler to let us reset the scene.
+    osg::ref_ptr< osgbInteraction::SaveRestoreHandler > srh = new osgbInteraction::SaveRestoreHandler;
+    srh->add( dynamicsWorld );
+    srh->capture();
+    viewer.addEventHandler( srh.get() );
+
+    osgViewer::Viewer::Cameras cams;
+    viewer.getCameras( cams );
+    osg::ref_ptr< osgbInteraction::DragHandler > dh =
+        new osgbInteraction::DragHandler( dynamicsWorld, cams[ 0 ] );
+    viewer.addEventHandler( dh.get() );
+
+    // Do this now, before getting the start time, so that it doesn't
+    // negatively impact the first frame of the physics sim.
+    viewer.realize();
+
+
     double prevSimTime = viewer.getFrameStamp()->getSimulationTime();
-
-    viewer.setSceneData( root.get() );
-    viewer.realize(); // So that init time doesn't count against physics sim.
-
     while( !viewer.done())
     {
         if( debug )
             dbgDraw.BeginDraw();
 
-        currSimTime = viewer.getFrameStamp()->getSimulationTime();
+        const double currSimTime = viewer.getFrameStamp()->getSimulationTime();
         dynamicsWorld->stepSimulation( currSimTime - prevSimTime );
         prevSimTime = currSimTime;
 
@@ -458,7 +443,7 @@ Use osgbpp to create a rigid body from \c dice.osg, one of the osgBullet data fi
 C:\Projects>osgbpp dice.osg
 \endcode
 
-To see the model fall again, hit the backspace key.
+To see the model fall again, hit the Delete key.
 
 By default, osgbpp creates a Bullet box collision shape. You can visualize the
 collision shape with the --debug command line option:

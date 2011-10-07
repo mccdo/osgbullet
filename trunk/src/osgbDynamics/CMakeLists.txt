@@ -12,7 +12,6 @@ set( LIB_PUBLIC_HEADERS
     ${HEADER_PATH}/PhysicsThread.h
     ${HEADER_PATH}/RigidBody.h
     ${HEADER_PATH}/RigidBodyAnimation.h
-#    ${HEADER_PATH}/SaveRestore.h
     ${HEADER_PATH}/TripleBuffer.h
 )
 
@@ -24,7 +23,6 @@ set( _osgBulletSourceFiles
     PhysicsThread.cpp
     RigidBody.cpp
     RigidBodyAnimation.cpp
-#    SaveRestore.cpp
     TripleBuffer.cpp
 )
 
