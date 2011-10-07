@@ -19,7 +19,7 @@
  *************** <auto-copyright.pl END do not edit this line> ***************/
 
 #ifndef __OSGBINTERACTION_HAND_NODE_H__
-#define __OSGBINTERACTION_HAND_NODE_H__
+#define __OSGBINTERACTION_HAND_NODE_H__ 1
 
 
 #include <osgbInteraction/Export.h>

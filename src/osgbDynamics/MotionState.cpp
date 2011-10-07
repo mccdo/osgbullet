@@ -112,10 +112,8 @@ MotionState::setWorldTransformInternal( const btTransform& worldTrans )
 {
     // Compute the transformation of the OSG visual representation.
     const osg::Matrix dt = osgbCollision::asOsgMatrix( worldTrans );
-    const osg::Vec3 cs( _com[0]*_scale[0], _com[1]*_scale[1], _com[2]*_scale[2] );
-    const osg::Matrix negCS = osg::Matrix::translate( -cs );
-    const osg::Matrix scale = osg::Matrix::scale( _scale );
-    const osg::Matrix t = scale * negCS * dt;
+    const osg::Matrix col2ol = computeCOLocalToOsgLocal();
+    const osg::Matrix t = col2ol * dt;
 
     if( _mt.valid() )
         _mt->setMatrix( t );
@@ -123,6 +121,17 @@ MotionState::setWorldTransformInternal( const btTransform& worldTrans )
         _amt->setMatrix( t );
 }
 
+osg::Matrix MotionState::computeCOLocalToOsgLocal() const
+{
+    // Accound for center of mass and scale.
+    const osg::Vec3 cs( _com[0]*_scale[0], _com[1]*_scale[1], _com[2]*_scale[2] );
+    const osg::Matrix csMat = osg::Matrix::translate( -cs );
+
+    const osg::Matrix scale = osg::Matrix::scale( _scale );
+
+    // Return the concatenation of these.
+    return( scale * csMat );
+}
 osg::Matrix MotionState::computeOsgLocalToCOLocal() const
 {
     // Accound for center of mass and scale.

@@ -1,3 +1,3 @@
-_osgBulletMakeDynamicsExe( osgbpp
+_osgBulletMakeInteractionExe( osgbpp
     osgbpp.cpp
 )
