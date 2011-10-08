@@ -219,6 +219,7 @@ int main( int argc, char** argv )
 
         osg::ref_ptr< osgbDynamics::CreationRecord > cr;
 
+        osgbDynamics::PhysicsData* pd;
         if( restoreFileName.empty() )
         {
             // Not restoring.
@@ -236,7 +237,7 @@ int main( int argc, char** argv )
         else
         {
             // Restoring.
-            osgbDynamics::PhysicsData* pd = srh->getPhysicsData( it->first->getName() );
+            pd = srh->getPhysicsData( it->first->getName() );
             cr = pd->_cr;
             cr->_sceneGraph = amt;
         }
@@ -244,11 +245,17 @@ int main( int argc, char** argv )
         btRigidBody* rb = osgbDynamics::createRigidBody( cr.get() );
         rb->setActivationState( DISABLE_DEACTIVATION );
 
+        if( !( restoreFileName.empty() ) )
+        {
+            rb->setWorldTransform( osgbCollision::asBtTransform( pd->_bodyWorldTransform ) );
+            rb->setLinearVelocity( osgbCollision::asBtVector3( pd->_linearVelocity ) );
+            rb->setAngularVelocity( osgbCollision::asBtVector3( pd->_angularVelocity ) );
+        }
+
         // Required for DragHandler default behavior.
         amt->setUserData( new osgbCollision::RefRigidBody( rb ) );
 
-        if( restoreFileName.empty() )
-            bulletWorld->addRigidBody( rb );
+        bulletWorld->addRigidBody( rb );
 
         srh->add( it->first->getName(), rb );
     }
