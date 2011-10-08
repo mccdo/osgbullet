@@ -49,102 +49,6 @@
 
 
 
-//#define CREATE_SCENE
-#ifdef CREATE_SCENE
-
-#include <osg/MatrixTransform>
-#include <osg/ProxyNode>
-#include <osgDB/WriteFile>
-
-void createScene()
-{
-    osg::Group* root = new osg::Group;
-    root->getOrCreateStateSet()->setMode( GL_NORMALIZE, osg::StateAttribute::ON );
-
-    osg::MatrixTransform* mt;
-    osg::MatrixTransform* mt2;
-    osg::MatrixTransform* mt3;
-    osg::ProxyNode* pn;
-    osg::Matrix m;
-
-    m = osg::Matrix::translate( -12., 18., 6. );
-    mt = new osg::MatrixTransform( m );
-    root->addChild( mt );
-    pn = new osg::ProxyNode();
-    pn->setFileName( 0, "dumptruck.osg" );
-    pn->setName( "dumptruck-body" );
-    mt->addChild( pn );
-
-    m = osg::Matrix::translate( 8., 5., 3.5 );
-    mt = new osg::MatrixTransform( m );
-    root->addChild( mt );
-    m = osg::Matrix::scale( 3., 3., 3. );
-    mt2 = new osg::MatrixTransform( m );
-    mt->addChild( mt2 );
-    pn = new osg::ProxyNode();
-    pn->setFileName( 0, "tetra.osg" );
-    pn->setName( "tetra-body" );
-    mt2->addChild( pn );
-
-    m = osg::Matrix::translate( 2., -6., 5. );
-    mt = new osg::MatrixTransform( m );
-    root->addChild( mt );
-    m = osg::Matrix::scale( 4., 4., 4. );
-    mt2 = new osg::MatrixTransform( m );
-    mt->addChild( mt2 );
-    m = osg::Matrix::rotate( -.4, 0., 0., 1. );
-    mt3 = new osg::MatrixTransform( m );
-    mt2->addChild( mt3 );
-    pn = new osg::ProxyNode();
-    pn->setFileName( 0, "dice.osg" );
-    pn->setName( "dice-body" );
-    mt3->addChild( pn );
-
-    m = osg::Matrix::translate( -20., 8., 5. );
-    mt = new osg::MatrixTransform( m );
-    root->addChild( mt );
-    m = osg::Matrix::rotate( 2.75, 0., 0., 1. );
-    mt2 = new osg::MatrixTransform( m );
-    mt->addChild( mt2 );
-    pn = new osg::ProxyNode();
-    pn->setFileName( 0, "cow.osg" );
-    pn->setName( "cow-body" );
-    mt2->addChild( pn );
-
-    osgDB::writeNodeFile( *root, "saverestore-scene.osg" );
-}
-
-int main()
-{
-    createScene();
-    return( 0 );
-}
-
-#else
-
-btRigidBody* makeBody( osg::Node* node, const osg::Matrix& m )
-{
-    osgwTools::AbsoluteModelTransform* amt = new osgwTools::AbsoluteModelTransform;
-    amt->setDataVariance( osg::Object::DYNAMIC );
-    osgwTools::insertAbove( node, amt );
-
-    osg::ref_ptr< osgbDynamics::CreationRecord > cr = new osgbDynamics::CreationRecord;
-    cr->_sceneGraph = amt;
-    cr->_shapeType = CONVEX_HULL_SHAPE_PROXYTYPE;
-    cr->setCenterOfMass( node->getBound().center() );
-    cr->_parentTransform = m;
-    cr->_mass = 1.f;
-    cr->_scale = m.getScale();
-    cr->_restitution = .5f;
-    btRigidBody* rb = osgbDynamics::createRigidBody( cr.get() );
-    rb->setActivationState( DISABLE_DEACTIVATION );
-
-    // Required for DragHandler default behavior.
-    amt->setUserData( new osgbCollision::RefRigidBody( rb ) );
-
-    return( rb );
-}
-
 btDiscreteDynamicsWorld* initPhysics()
 {
     btDefaultCollisionConfiguration * collisionConfiguration = new btDefaultCollisionConfiguration();
@@ -204,10 +108,13 @@ int main( int argc, char** argv )
     osgwTools::FindNamedNode::NodeAndPathList::const_iterator it;
     for( it = fnn._napl.begin(); it != fnn._napl.end(); it++ )
     {
+        // Get the root node of the subgraph that we will make into a rigid body.
+        // Also, get its NodePath and local to world transform.
         osg::Node* node = it->first;
         osg::NodePath np = it->second;
         osg::Matrix xform = osg::computeLocalToWorld( np );
 
+        // Rigid bodies need to be rooted at an AbsoluteModelTransform.
         osgwTools::AbsoluteModelTransform* amt = new osgwTools::AbsoluteModelTransform;
         amt->setDataVariance( osg::Object::DYNAMIC );
         osgwTools::insertAbove( node, amt );
@@ -218,11 +125,10 @@ int main( int argc, char** argv )
         np[ np.size() - 1 ] = node;
 
         osg::ref_ptr< osgbDynamics::CreationRecord > cr;
-
         osgbDynamics::PhysicsData* pd;
         if( restoreFileName.empty() )
         {
-            // Not restoring.
+            // Not restoring. Configure the CreationRecord.
             cr = new osgbDynamics::CreationRecord;
             cr->_sceneGraph = amt;
             cr->_shapeType = CONVEX_HULL_SHAPE_PROXYTYPE;
@@ -237,8 +143,11 @@ int main( int argc, char** argv )
         else
         {
             // Restoring.
+            // Get the CreationRecord from the SaveRestoreHandler, which
+            // contains our restored PhysicsData for this node.
             pd = srh->getPhysicsData( it->first->getName() );
             cr = pd->_cr;
+            // _sceneGraph is a live address and can't be saved/restored, so set it manually.
             cr->_sceneGraph = amt;
         }
 
@@ -247,6 +156,7 @@ int main( int argc, char** argv )
 
         if( !( restoreFileName.empty() ) )
         {
+            // Now that the rigid body has been created, set its saved transform and linear / angular velocities.
             rb->setWorldTransform( osgbCollision::asBtTransform( pd->_bodyWorldTransform ) );
             rb->setLinearVelocity( osgbCollision::asBtVector3( pd->_linearVelocity ) );
             rb->setAngularVelocity( osgbCollision::asBtVector3( pd->_angularVelocity ) );
@@ -315,8 +225,6 @@ int main( int argc, char** argv )
 
     return( 0 );
 }
-
-#endif
 
 
 /** \page saverestore Save and Restore Example

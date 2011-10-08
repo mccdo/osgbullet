@@ -80,23 +80,18 @@ bool DragHandler::handle( const osgGA::GUIEventAdapter& ea, osgGA::GUIActionAdap
         _scene->getViewMatrixAsLookAt( look, at, up );
 
 
+        // Intersect ray with plane.
         // TBD. Stolen from osgWorks' MxCore::intersectPlaneRay(), which really should be in some math library somewhere.
         osg::Vec3d planeNormal = osg::Vec3d( _dragPlane[ 0 ], _dragPlane[ 1 ], _dragPlane[ 2 ] );
-
-        osg::notify( osg::DEBUG_FP ) << "look " << look << std::endl;
-        osg::notify( osg::DEBUG_FP ) << "farPointWC " << farPointWC << std::endl;
         const osg::Vec3d vDir = osg::Vec3( farPointWC[ 0 ], farPointWC[ 1 ], farPointWC[ 2 ] ) - look;
         const double dotVd = vDir * planeNormal;
-        osg::notify( osg::DEBUG_FP ) << "  dotVd " << dotVd << std::endl;
         if( dotVd == 0. )
         {
             osg::notify( osg::WARN ) << "DragHandler: No plane intersection." << std::endl;
             return( false );
         }
         double length = -( planeNormal * look + _dragPlane[ 3 ] ) / dotVd;
-        osg::notify( osg::DEBUG_FP ) << "  length " << length << std::endl;
         osg::Vec3 pointOnPlane = look + ( vDir * length );
-        osg::notify( osg::DEBUG_FP ) << "    intersection point " << pointOnPlane << std::endl;
 
         osg::Matrix ow2bw;
         if( _constrainedMotionState != NULL )
