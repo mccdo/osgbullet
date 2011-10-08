@@ -138,10 +138,7 @@ osg::Matrix MotionState::computeOsgLocalToCOLocal() const
     const osg::Vec3 cs( _com[0]*_scale[0], _com[1]*_scale[1], _com[2]*_scale[2] );
     const osg::Matrix csMat = osg::Matrix::translate( -cs );
 
-    const osg::Matrix invScale = osg::Matrix::scale( 1. / _scale[0], 1. / _scale[1], 1. / _scale[2] );
-
-    // Return the concatenation of these.
-    return( csMat * invScale );
+    return( csMat );
 }
 osg::Matrix MotionState::computeOsgWorldToCOLocal() const
 {
