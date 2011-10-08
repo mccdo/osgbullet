@@ -6,7 +6,7 @@
 
 *Release date: Expected late 2011
 
-*Status:* In progress.
+*Status:* Release candidate available.
 
 This non-backwards compatible release will remove all portions of osgBullet that depend on the Bullet !ColladaConverter library.
 
