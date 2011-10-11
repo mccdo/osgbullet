@@ -24,13 +24,18 @@
 #include <osg/MatrixTransform>
 #include <osg/ShapeDrawable>
 #include <osg/Geode>
+#include <osgUtil/Optimizer>
 
 #include <osgbDynamics/MotionState.h>
 #include <osgbCollision/CollisionShapes.h>
+#include <osgbCollision/RefBulletObject.h>
 #include <osgbDynamics/RigidBody.h>
 #include <osgbDynamics/GroundPlane.h>
 #include <osgbCollision/GLDebugDrawer.h>
 #include <osgbCollision/Utils.h>
+#include <osgbInteraction/DragHandler.h>
+#include <osgbInteraction/LaunchHandler.h>
+#include <osgbInteraction/SaveRestoreHandler.h>
 
 #include <osgwTools/InsertRemove.h>
 #include <osgwTools/FindNamedNode.h>
@@ -163,7 +168,7 @@ protected:
 
 
 btRigidBody* standBody;
-void makeStaticObject( btDiscreteDynamicsWorld* bw, InteractionManipulator* im, osg::Node* node, const osg::Matrix& m )
+void makeStaticObject( btDiscreteDynamicsWorld* bw, osg::Node* node, const osg::Matrix& m )
 {
     osg::ref_ptr< osgbDynamics::CreationRecord > cr = new osgbDynamics::CreationRecord;
     cr->_sceneGraph = node;
@@ -179,7 +184,7 @@ void makeStaticObject( btDiscreteDynamicsWorld* bw, InteractionManipulator* im, 
 }
 
 btRigidBody* drawerBody;
-osg::Transform* makeDrawer( btDiscreteDynamicsWorld* bw, InteractionManipulator* im, osg::Node* node, const osg::Matrix& m )
+osg::Transform* makeDrawer( btDiscreteDynamicsWorld* bw, osgbInteraction::SaveRestoreHandler* srh, osg::Node* node, const osg::Matrix& m )
 {
     osgwTools::AbsoluteModelTransform* amt = new osgwTools::AbsoluteModelTransform;
     amt->setDataVariance( osg::Object::DYNAMIC );
@@ -198,9 +203,10 @@ osg::Transform* makeDrawer( btDiscreteDynamicsWorld* bw, InteractionManipulator*
     bw->addRigidBody( rb, COL_DRAWER, drawerCollidesWith );
     rb->setActivationState( DISABLE_DEACTIVATION );
 
-    // Save RB in global, and also record its initial position in the InteractionManipulator (for reset)
+    // Save RB in global, as AMT UserData (for DragHandler), and in SaveRestoreHandler.
     drawerBody = rb;
-    im->setInitialTransform( rb, m );
+    amt->setUserData( new osgbCollision::RefRigidBody( rb ) );
+    srh->add( "gate", rb );
 
     return( amt );
 }
@@ -245,7 +251,8 @@ int main( int argc, char** argv )
     btDiscreteDynamicsWorld* bulletWorld = initPhysics();
     osg::Group* root = new osg::Group;
 
-    InteractionManipulator* im = new InteractionManipulator( bulletWorld, root );
+    osg::Group* launchHandlerAttachPoint = new osg::Group;
+    root->addChild( launchHandlerAttachPoint );
 
 
     osg::ref_ptr< osg::Node > rootModel = osgDB::readNodeFile( "NightStand.flt" );
@@ -269,10 +276,13 @@ int main( int argc, char** argv )
     // TBD this is a hardcoded axis/distance.
     drawerXform *= osg::Matrix::translate( 0., -.2, 0. );
 
+    osg::ref_ptr< osgbInteraction::SaveRestoreHandler > srh = new
+        osgbInteraction::SaveRestoreHandler;
+
     // Make Bullet rigid bodies and collision shapes for the drawer...
-    makeDrawer( bulletWorld, im, drawerNode, drawerXform );
+    makeDrawer( bulletWorld, srh, drawerNode, drawerXform );
     // ...and the stand.
-    makeStaticObject( bulletWorld, im, standNode, standXform );
+    makeStaticObject( bulletWorld, standNode, standXform );
 
 
     // Add ground
@@ -340,12 +350,38 @@ int main( int argc, char** argv )
     osgViewer::Viewer viewer( arguments );
     viewer.setUpViewInWindow( 30, 30, 768, 480 );
     viewer.setSceneData( root );
-    viewer.addEventHandler( im );
 
     osgGA::TrackballManipulator* tb = new osgGA::TrackballManipulator;
     tb->setHomePosition( osg::Vec3( 1., -7., 2. ), osg::Vec3( 0., 0., 1. ), osg::Vec3( 0., 0., 1. ) ); 
     viewer.setCameraManipulator( tb );
     viewer.getCamera()->setClearColor( osg::Vec4( .5, .5, .5, 1. ) );
+
+    // Create the launch handler.
+    osgbInteraction::LaunchHandler* lh = new osgbInteraction::LaunchHandler(
+        bulletWorld, launchHandlerAttachPoint, viewer.getCamera() );
+    {
+        // Use a custom launch model: A scaled-down teapot.
+        osg::ref_ptr< osg::MatrixTransform > mt = new osg::MatrixTransform(
+            osg::Matrix::scale( 0.2, 0.2, 0.2 ) );
+        mt->addChild( osgDB::readNodeFile( "teapot.osg" ) );
+        osgUtil::Optimizer opt;
+        opt.optimize( mt.get(), osgUtil::Optimizer::FLATTEN_STATIC_TRANSFORMS );
+        mt->getOrCreateStateSet()->setMode( GL_NORMALIZE, osg::StateAttribute::ON );
+
+        lh->setLaunchModel( mt.get() );
+        lh->setInitialVelocity( 20. );
+
+        // Also add the proper collision masks
+        lh->setCollisionFlags( COL_DEFAULT, defaultCollidesWith );
+
+        viewer.addEventHandler( lh );
+    }
+
+    srh->setLaunchHandler( lh );
+    srh->capture();
+    viewer.addEventHandler( srh );
+    viewer.addEventHandler( new osgbInteraction::DragHandler(
+        bulletWorld, viewer.getCamera() ) );
 
     viewer.realize();
     double prevSimTime = 0.;
@@ -365,8 +401,6 @@ int main( int argc, char** argv )
         }
 
         viewer.frame();
-
-        im->updateView( viewer.getCamera() );
     }
 
     return( 0 );
