@@ -184,8 +184,8 @@ bool DragHandler::pick( float wx, float wy )
     if( _constrainedMotionState != NULL )
         ow2ocl = _constrainedMotionState->computeOsgWorldToCOLocal();
     osg::Vec3d pickPointBulletOCLocal = pickPointWC * ow2ocl;
-    osg::notify( osg::ALWAYS ) << "pickPointWC: " << pickPointWC << std::endl;
-    osg::notify( osg::ALWAYS ) << "pickPointBulletOCLocal: " << pickPointBulletOCLocal << std::endl;
+    osg::notify( osg::DEBUG_FP ) << "pickPointWC: " << pickPointWC << std::endl;
+    osg::notify( osg::DEBUG_FP ) << "pickPointBulletOCLocal: " << pickPointBulletOCLocal << std::endl;
 
     // We now have the intersetionPoint and a pointer to the btRigidBody.
     // Make a Bullet point-to-point constraint, so we can drag it around.
