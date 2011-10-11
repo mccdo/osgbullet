@@ -27,10 +27,15 @@
 #include <osgbDynamics/MotionState.h>
 #include <osgbDynamics/GroundPlane.h>
 #include <osgbCollision/CollisionShapes.h>
+#include <osgbCollision/RefBulletObject.h>
 #include <osgbCollision/Utils.h>
+#include <osgbInteraction/DragHandler.h>
+#include <osgbInteraction/LaunchHandler.h>
+#include <osgbInteraction/SaveRestoreHandler.h>
 
 #include <osgwTools/FindNamedNode.h>
 #include <osgwTools/InsertRemove.h>
+#include <osgwTools/Shapes.h>
 
 #include <btBulletDynamicsCommon.h>
 
@@ -70,109 +75,10 @@ struct MyCallback : public osgbDynamics::MotionStateCallback
         osg::notify( osg::ALWAYS ) << "Callback has been called " << ++_count << " times. Current x: " << worldTrans.getOrigin()[0] << std::endl;
     }
 };
-
-class InteractionManipulator : public osgGA::GUIEventHandler
-{
-public:
-    InteractionManipulator( btDynamicsWorld* world, osg::Group* sg )
-      : _world( world ),
-        _sg( sg )
-    {}
-
-    void setInitialTransform( btRigidBody* rb, osg::Matrix m )
-    {
-        _posMap[ rb ] = m;
-    }
-
-    void updateView( osg::Camera* camera )
-    {
-        osg::Vec3 center, up;
-        camera->getViewMatrixAsLookAt( _viewPos, center, up );
-        _viewDir = center - _viewPos;
-    }
-
-    bool handle( const osgGA::GUIEventAdapter& ea, osgGA::GUIActionAdapter& )
-    {
-        switch( ea.getEventType() )
-        {
-            case osgGA::GUIEventAdapter::KEYUP:
-            {
-                if (ea.getKey()==osgGA::GUIEventAdapter::KEY_BackSpace)
-                {
-                    reset();
-                    return true;
-                }
-                if (ea.getKey()==osgGA::GUIEventAdapter::KEY_Return)
-                {
-                    fire();
-                    return true;
-                }
-
-                return false;
-            }
-
-            default:
-            break;
-        }
-        return false;
-    }
-
-protected:
-    btDynamicsWorld* _world;
-    osg::ref_ptr< osg::Group > _sg;
-
-    osg::Vec3 _viewPos, _viewDir;
-
-    typedef std::map< btRigidBody*, osg::Matrix > PosMap;
-    PosMap _posMap;
-
-    typedef std::list< osg::ref_ptr< osg::Node > > NodeList;
-    NodeList _nodeList;
-
-    void reset()
-    {
-        PosMap::iterator it;
-        for( it=_posMap.begin(); it!=_posMap.end(); it++ )
-        {
-            btRigidBody* rb = it->first;
-            btTransform t = osgbCollision::asBtTransform( it->second );
-            rb->setWorldTransform( t );
-            rb->setAngularVelocity( btVector3( 3., 5., 0. ) );
-            rb->setActivationState( DISABLE_DEACTIVATION );
-        }
-    }
-
-    void fire()
-    {
-        osg::Sphere* sp = new osg::Sphere( osg::Vec3( 0., 0., 0. ), .5 );
-        osg::ShapeDrawable* shape = new osg::ShapeDrawable( sp );
-        osg::Geode* geode = new osg::Geode();
-        geode->addDrawable( shape );
-        osg::ref_ptr< osgwTools::AbsoluteModelTransform > amt = new osgwTools::AbsoluteModelTransform;
-        amt->addChild( geode );
-        _sg->addChild( amt.get() );
-
-        btSphereShape* collision = new btSphereShape( .5 );
-
-        osgbDynamics::MotionState* motion = new osgbDynamics::MotionState;
-        motion->setTransform( amt.get() );
-
-        motion->setParentTransform( osg::Matrix::translate( _viewPos ) );
-
-        btScalar mass( 1. );
-        btVector3 inertia( btVector3( 0., 0., 0. ) );//osgbCollision::asBtVector3( _viewDir ) );
-        collision->calculateLocalInertia( mass, inertia );
-        btRigidBody::btRigidBodyConstructionInfo rbinfo( mass, motion, collision, inertia );
-        btRigidBody* body = new btRigidBody( rbinfo );
-        body->setLinearVelocity( osgbCollision::asBtVector3( _viewDir * 50. ) );
-        _world->addRigidBody( body );
-    }
-};
 /* \endcond */
 
-void
-enablePhysics( osg::Node* root, const std::string& nodeName, btDynamicsWorld* bw,
-              InteractionManipulator& im )
+void enablePhysics( osg::Node* root, const std::string& nodeName, btDynamicsWorld* bw,
+              osgbInteraction::SaveRestoreHandler* srh )
 {
     osgwTools::FindNamedNode fnn( nodeName );
     root->accept( fnn );
@@ -204,16 +110,21 @@ enablePhysics( osg::Node* root, const std::string& nodeName, btDynamicsWorld* bw
     rb->setAngularVelocity( btVector3( 3., 5., 0. ) );
     bw->addRigidBody( rb );
 
-    im.setInitialTransform( rb, parentTrans );
+    // Add rigid body as user data for DragHandler.
+    model->setUserData( new osgbCollision::RefRigidBody( rb ) );
+    srh->add( "box", rb );
 }
 
-int main( int argc,
-          char * argv[] )
+int main( int argc, char** argv )
 {
     osg::ref_ptr< osg::Group > root = new osg::Group();
     btDynamicsWorld* bw = initPhysics();
 
-    InteractionManipulator* im = new InteractionManipulator( bw, root.get() );
+    osg::ref_ptr< osgbInteraction::SaveRestoreHandler > srh = new
+        osgbInteraction::SaveRestoreHandler;
+
+    osg::Group* launchHandlerAttachPoint = new osg::Group;
+    root->addChild( launchHandlerAttachPoint );
 
     root->addChild( osgbDynamics::generateGroundPlane( osg::Vec4( 0.f, 0.f, 1.f, -10.f ), bw ) );
 
@@ -230,13 +141,12 @@ int main( int argc,
 
 	block->setName( "block" );
     mt->addChild( block );
-    enablePhysics( root.get(), "block", bw, *im );
+    enablePhysics( root.get(), "block", bw, srh.get() );
 
 
 
     osgViewer::Viewer viewer;
     viewer.setUpViewInWindow( 10, 30, 800, 600 );
-    viewer.addEventHandler( im );
     osgGA::TrackballManipulator * tb = new osgGA::TrackballManipulator();
     tb->setHomePosition( osg::Vec3( 10, -55, 13 ),
                         osg::Vec3( 0, 0, -4 ),
@@ -244,10 +154,29 @@ int main( int argc,
     viewer.setCameraManipulator( tb );
     viewer.setSceneData( root.get() );
 
-    double currSimTime;
-    double prevSimTime = viewer.getFrameStamp()->getSimulationTime();
+    // Create the launch handler.
+    osgbInteraction::LaunchHandler* lh = new osgbInteraction::LaunchHandler(
+        bw, launchHandlerAttachPoint, viewer.getCamera() );
+    {
+        // Use a custom launch model: Sphere with radius 0.5 (instead of default 1.0).
+        osg::Geode* geode = new osg::Geode;
+        const double radius( .5 );
+        geode->addDrawable( osgwTools::makeGeodesicSphere( radius ) );
+        lh->setLaunchModel( geode, new btSphereShape( radius ) );
+        lh->setInitialVelocity( 50. );
+
+        viewer.addEventHandler( lh );
+    }
+
+    srh->setLaunchHandler( lh );
+    srh->capture();
+    viewer.addEventHandler( srh );
+    viewer.addEventHandler( new osgbInteraction::DragHandler( bw, viewer.getCamera() ) );
 
     viewer.realize();
+
+    double currSimTime;
+    double prevSimTime = viewer.getFrameStamp()->getSimulationTime();
 
     while( !viewer.done() )
     {
@@ -255,8 +184,6 @@ int main( int argc,
         bw->stepSimulation( currSimTime - prevSimTime );
         prevSimTime = currSimTime;
         viewer.frame();
-
-        im->updateView( viewer.getCamera() );
     }
 
     return( 0 );
