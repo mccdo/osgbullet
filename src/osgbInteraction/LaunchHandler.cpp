@@ -103,6 +103,7 @@ bool LaunchHandler::handle( const osgGA::GUIEventAdapter& ea, osgGA::GUIActionAd
     cr->_parentTransform = parentTrans;
     btRigidBody* rb = osgbDynamics::createRigidBody( cr.get(), _launchCollisionShape );
     rb->setLinearVelocity( osgbCollision::asBtVector3( launchDir * _initialVelocity ) );
+    rb->setAngularVelocity( btVector3( .2, .3, 1.5 ) );
 
     amt->setUserData( new osgbCollision::RefRigidBody( rb ) );
     if( (_group != 0) || (_mask != 0) )
