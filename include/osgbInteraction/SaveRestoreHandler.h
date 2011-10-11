@@ -32,6 +32,10 @@ namespace osgbInteraction
 {
 
 
+// Forward:
+class LaunchHandler;
+
+
 /** \class SaveRestoreHandler SaveRestoreHandler.h <osgbInteraction\SaveRestoreHandler.h>
 \brief An event handler to support physics save and restore.
 
@@ -107,11 +111,20 @@ public:
     */
     void restore( const std::string& fileName=std::string( "" ) );
 
+    /** \brief Specify a LaunchHandler to reset during the reset() call.
+
+    By default, no LaunchHandler is specified. Specify one with this function
+    call, and reset() will call LaunchHandler::reset() to erase all launched
+    models. */
+    void setLaunchHandler( osgbInteraction::LaunchHandler* lh ) { _lh = lh; }
+
 protected:
     virtual ~SaveRestoreHandler();
 
     osg::ref_ptr< osgbDynamics::PhysicsState > _state;
     std::string _fileName;
+
+    osgbInteraction::LaunchHandler* _lh;
 };
 
 

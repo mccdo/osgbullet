@@ -24,6 +24,7 @@
 #include <osgDB/FileNameUtils>
 #include <osgGA/GUIEventHandler>
 #include <osgbDynamics/PhysicsState.h>
+#include <osgbInteraction/LaunchHandler.h>
 
 #include <btBulletDynamicsCommon.h>
 
@@ -36,7 +37,8 @@ namespace osgbInteraction
 
 SaveRestoreHandler::SaveRestoreHandler()
   : _state( new osgbDynamics::PhysicsState ),
-    _fileName( "osgbullet-save.sgb" )
+    _fileName( "osgbullet-save.sgb" ),
+    _lh( NULL )
 {
 }
 SaveRestoreHandler::~SaveRestoreHandler()
@@ -117,6 +119,9 @@ void SaveRestoreHandler::capture()
 void SaveRestoreHandler::reset()
 {
     _state->restoreState();
+
+    if( _lh != NULL )
+        _lh->reset();
 }
 
 void SaveRestoreHandler::setSaveRestoreFileName( const std::string& fileName )
