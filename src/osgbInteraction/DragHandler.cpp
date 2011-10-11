@@ -58,8 +58,12 @@ bool DragHandler::handle( const osgGA::GUIEventAdapter& ea, osgGA::GUIActionAdap
         if( !ctrl )
             return( false );
 
-        const bool result = pick( ea.getXnormalized(), ea.getYnormalized() );
-        return( result );
+        const bool picked = pick( ea.getXnormalized(), ea.getYnormalized() );
+
+        if( picked )
+            _constraint->getRigidBodyA().activate( true );
+
+        return( picked );
     }
     else if( ea.getEventType() == osgGA::GUIEventAdapter::DRAG )
     {
@@ -92,12 +96,13 @@ bool DragHandler::handle( const osgGA::GUIEventAdapter& ea, osgGA::GUIActionAdap
         }
         double length = -( planeNormal * look + _dragPlane[ 3 ] ) / dotVd;
         osg::Vec3 pointOnPlane = look + ( vDir * length );
+        osg::notify( osg::DEBUG_FP ) << "  OSG point " << pointOnPlane << std::endl;
 
         osg::Matrix ow2bw;
         if( _constrainedMotionState != NULL )
             ow2bw = _constrainedMotionState->computeOsgWorldToBulletWorld();
         osg::Vec3d bulletPoint = pointOnPlane * ow2bw;
-        osg::notify( osg::DEBUG_FP ) << "    bulletPoint " << bulletPoint << std::endl;
+        osg::notify( osg::DEBUG_FP ) << "    bullet point " << bulletPoint << std::endl;
 
         _constraint->setPivotB( osgbCollision::asBtVector3( bulletPoint ) );
 
@@ -175,15 +180,17 @@ bool DragHandler::pick( float wx, float wy )
 
     // Save the MotionState for this rigid body. We'll use it during the DRAG events.
     _constrainedMotionState = dynamic_cast< osgbDynamics::MotionState* >( rb->getMotionState() );
-    osg::Matrix ow2bw;
+    osg::Matrix ow2ocl;
     if( _constrainedMotionState != NULL )
-        ow2bw = _constrainedMotionState->computeOsgWorldToCOLocal();
-    osg::Vec3d pickPointBulletWorld = pickPointWC * ow2bw;
+        ow2ocl = _constrainedMotionState->computeOsgWorldToCOLocal();
+    osg::Vec3d pickPointBulletOCLocal = pickPointWC * ow2ocl;
+    osg::notify( osg::ALWAYS ) << "pickPointWC: " << pickPointWC << std::endl;
+    osg::notify( osg::ALWAYS ) << "pickPointBulletOCLocal: " << pickPointBulletOCLocal << std::endl;
 
     // We now have the intersetionPoint and a pointer to the btRigidBody.
     // Make a Bullet point-to-point constraint, so we can drag it around.
     _constraint = new btPoint2PointConstraint( *rb,
-        osgbCollision::asBtVector3( pickPointBulletWorld ) );
+        osgbCollision::asBtVector3( pickPointBulletOCLocal ) );
     _dw->addConstraint( _constraint );
     
 

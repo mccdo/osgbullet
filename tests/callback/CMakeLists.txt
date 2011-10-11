@@ -1,3 +1,3 @@
-_osgBulletMakeDynamicsExe( callback
+_osgBulletMakeInteractionExe( callback
     callback.cpp
 )
