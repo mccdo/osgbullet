@@ -34,6 +34,10 @@ namespace osg {
     class Camera;
 }
 
+namespace osgbDynamics {
+    class PhysicsThread;
+}
+
 
 namespace osgbInteraction
 {
@@ -60,6 +64,8 @@ public:
     */
     virtual bool handle( const osgGA::GUIEventAdapter& ea, osgGA::GUIActionAdapter& aa );
 
+    void setThreadedPhysicsSupport( osgbDynamics::PhysicsThread* pt );
+
 protected:
     ~DragHandler();
 
@@ -75,6 +81,8 @@ protected:
     btPoint2PointConstraint* _constraint;
     osgbDynamics::MotionState* _constrainedMotionState;
     osg::Vec4 _dragPlane;
+
+    osgbDynamics::PhysicsThread* _pt;
 };
 
 

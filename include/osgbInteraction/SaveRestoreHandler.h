@@ -28,6 +28,12 @@
 #include <btBulletDynamicsCommon.h>
 
 
+// Forward
+namespace osgbDynamics {
+    class PhysicsThread;
+}
+
+
 namespace osgbInteraction
 {
 
@@ -56,6 +62,8 @@ public:
     \li ctrl-r Restore state from disk file.
     */
     virtual bool handle( const osgGA::GUIEventAdapter& ea, osgGA::GUIActionAdapter& aa );
+
+    void setThreadedPhysicsSupport( osgbDynamics::PhysicsThread* pt );
 
     /** \brief Add a rigid body for save / restore management.
 
@@ -125,6 +133,8 @@ protected:
     std::string _fileName;
 
     osgbInteraction::LaunchHandler* _lh;
+
+    osgbDynamics::PhysicsThread* _pt;
 };
 
 

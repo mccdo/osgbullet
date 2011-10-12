@@ -1,3 +1,3 @@
-_osgBulletMakeDynamicsExe( multithreaded
+_osgBulletMakeInteractionExe( multithreaded
     multithreaded.cpp
 )

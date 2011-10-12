@@ -24,6 +24,7 @@
 #include <osgDB/FileNameUtils>
 #include <osgGA/GUIEventHandler>
 #include <osgbDynamics/PhysicsState.h>
+#include <osgbDynamics/PhysicsThread.h>
 #include <osgbInteraction/LaunchHandler.h>
 
 #include <btBulletDynamicsCommon.h>
@@ -38,7 +39,8 @@ namespace osgbInteraction
 SaveRestoreHandler::SaveRestoreHandler()
   : _state( new osgbDynamics::PhysicsState ),
     _fileName( "osgbullet-save.sgb" ),
-    _lh( NULL )
+    _lh( NULL ),
+    _pt( NULL )
 {
 }
 SaveRestoreHandler::~SaveRestoreHandler()
@@ -53,12 +55,20 @@ bool SaveRestoreHandler::handle( const osgGA::GUIEventAdapter& ea, osgGA::GUIAct
 
     if( ea.getKey() == osgGA::GUIEventAdapter::KEY_Insert )
     {
+        if( _pt != NULL )
+            _pt->pause( true );
         capture();
+        if( _pt != NULL )
+            _pt->pause( false );
         return( true );
     }
     else if( ea.getKey() == osgGA::GUIEventAdapter::KEY_Delete )
     {
+        if( _pt != NULL )
+            _pt->pause( true );
         reset();
+        if( _pt != NULL )
+            _pt->pause( false );
         return( true );
     }
     else if( ea.getKey() == osgGA::GUIEventAdapter::KEY_F1 )
@@ -68,7 +78,11 @@ bool SaveRestoreHandler::handle( const osgGA::GUIEventAdapter& ea, osgGA::GUIAct
     }
     else if( ea.getKey() == osgGA::GUIEventAdapter::KEY_F2 )
     {
+        if( _pt != NULL )
+            _pt->pause( true );
         capture();
+        if( _pt != NULL )
+            _pt->pause( false );
         save();
         return( true );
     }
@@ -78,6 +92,11 @@ bool SaveRestoreHandler::handle( const osgGA::GUIEventAdapter& ea, osgGA::GUIAct
         return( true );
     }
     return( false );
+}
+
+void SaveRestoreHandler::setThreadedPhysicsSupport( osgbDynamics::PhysicsThread* pt )
+{
+    _pt = pt;
 }
 
 void SaveRestoreHandler::add( const std::string& id, btRigidBody* rb )

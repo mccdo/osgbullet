@@ -25,6 +25,8 @@
 #include <osgbCollision/RefBulletObject.h>
 #include <osgwTools/AbsoluteModelTransform.h>
 #include <osgbCollision/Utils.h>
+#include <osgbDynamics/PhysicsThread.h>
+#include <osgbDynamics/TripleBuffer.h>
 #include <osg/Group>
 #include <osg/Camera>
 #include <osg/Geode>
@@ -42,7 +44,10 @@ LaunchHandler::LaunchHandler( btDynamicsWorld* dw, osg::Group* attachPoint, osg:
     _launchCollisionShape( NULL ),
     _initialVelocity( 10. ),
     _group( 0 ),
-    _mask( 0 )
+    _mask( 0 ),
+    _pt( NULL ),
+    _tb( NULL ),
+    _msl( NULL )
 {
     // Make the default launch model: Sphere with radius 1.0.
     osg::Geode* geode = new osg::Geode;
@@ -50,19 +55,40 @@ LaunchHandler::LaunchHandler( btDynamicsWorld* dw, osg::Group* attachPoint, osg:
     geode->addDrawable( osgwTools::makeGeodesicSphere( radius ) );
     _launchModel = geode;
     _launchCollisionShape = new btSphereShape( radius );
+    _ownsCollisionShape = true;
 }
 
 LaunchHandler::~LaunchHandler()
 {
+    reset();
+    if( ( _launchCollisionShape != NULL ) && _ownsCollisionShape )
+        delete _launchCollisionShape;
+}
+
+void LaunchHandler::setThreadedPhysicsSupport( osgbDynamics::PhysicsThread* pt, osgbDynamics::TripleBuffer* tb, osgbDynamics::MotionStateList* msl )
+{
+    _pt = pt;
+    _tb = tb;
+    _msl = msl;
 }
 
 void LaunchHandler::setLaunchModel( osg::Node* model, btCollisionShape* shape )
 {
     _launchModel = model;
+
+    if( ( _launchCollisionShape != NULL ) && _ownsCollisionShape )
+        delete _launchCollisionShape;
+
     if( shape != NULL )
+    {
         _launchCollisionShape = shape;
+        _ownsCollisionShape = false;
+    }
     else
+    {
         _launchCollisionShape = osgbCollision::btConvexHullCollisionShapeFromOSG( model );
+        _ownsCollisionShape = true;
+    }
 }
 
 bool LaunchHandler::handle( const osgGA::GUIEventAdapter& ea, osgGA::GUIActionAdapter& )
@@ -105,17 +131,32 @@ bool LaunchHandler::handle( const osgGA::GUIEventAdapter& ea, osgGA::GUIActionAd
     rb->setLinearVelocity( osgbCollision::asBtVector3( launchDir * _initialVelocity ) );
     rb->setAngularVelocity( btVector3( .2, .3, 1.5 ) );
 
+    osgbDynamics::MotionState* motion = static_cast< osgbDynamics::MotionState* >( rb->getMotionState() );
+    if( _tb != NULL )
+        motion->registerTripleBuffer( _tb );
+    if( _msl != NULL )
+        _msl->insert( motion );
+
+    if( _pt != NULL )
+        _pt->pause( true );
+
     amt->setUserData( new osgbCollision::RefRigidBody( rb ) );
     if( (_group != 0) || (_mask != 0) )
         _dw->addRigidBody( rb, _group, _mask );
     else
         _dw->addRigidBody( rb );
 
+    if( _pt != NULL )
+        _pt->pause( false );
+
     return( true );
 }
 
 void LaunchHandler::reset()
 {
+    if( _pt != NULL )
+        _pt->pause( true );
+
     NodeList::iterator it;
     for( it=_nodeList.begin(); it != _nodeList.end(); it++ )
     {
@@ -129,11 +170,24 @@ void LaunchHandler::reset()
 
         btRigidBody* rb = rrb->get();
         if( rb->getMotionState() )
-            delete rb->getMotionState();
+        {
+            osgbDynamics::MotionState* motion = static_cast< osgbDynamics::MotionState* >( rb->getMotionState() );
+            if( _msl != NULL )
+            {
+                osgbDynamics::MotionStateList::iterator it = _msl->find( motion );
+                if( it != _msl->end() )
+                    _msl->erase( it );
+            }
+            delete motion;
+        }
         _dw->removeRigidBody( rb );
         delete rb;
         _attachPoint->removeChild( node.get() );
     }
+
+    if( _pt != NULL )
+        _pt->pause( false );
+
     _nodeList.clear();
 }
 
