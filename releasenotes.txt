@@ -1,0 +1,43 @@
+osgBullet v2.00.00 Release Notes
+
+v2.00.00 is not backwards-compatible with osgBullet v1.xx. osgBullet-based
+applications and projects will need to port their code to the new version.
+Changes from v1.01.00 to v2.00.00 include the following:
+
+* The osgbBullet library has been replaced with two libraries: osgbCollision and
+osgbDynamics. Your project will need to link with the new libraries. The
+v2.00.00 contains an analogous change in the namespaces and header file
+directory structure.
+
+  * By linking with osgbCollision, your osgBullet application can use Bullet for
+  collision detection without a dependency on libBulletDynamics. The new
+  collision example program demonstrates this usage.
+
+* The OSGToCollada class has been replaced by new rigid body creation
+convenience routines. See the osgbDynamics/RigidBody.h header file. Nearly all
+of the examples and tests use the new interface.
+
+A new library, osgbInteraction, has been added to allow user interaction with
+the physics simulation. The library contains the following classes:
+
+  * The HandNode class features a fully articulated hand model that can be
+  driven by a data glove or keyboard. Support for the P5 data glove is provided.
+
+  * The DragHandler allows the user to drag rigid bodies using the mouse.
+
+  * The LaunchHandler allows the user to fire objects into the scene.
+
+  * The SaveRestoreHandler allows the user to capture the physics simulation at
+  a particular point in time, then restore back to the capture point.
+
+* New examples demonstrate hinge and slider constraints.
+
+* The MotionState class now exposes routines to convert between Bullet collision
+object and OSG coordinates while correctly accounting for differences due to
+center of mass and scaling.
+
+* A new example, saverestore, demonstrates saving current physics state and
+restoring from file.
+
+* Many classes are now documented using Doxygen.
+
