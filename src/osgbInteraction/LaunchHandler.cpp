@@ -112,8 +112,10 @@ bool LaunchHandler::handle( const osgGA::GUIEventAdapter& ea, osgGA::GUIActionAd
     osg::Vec4 clip( ea.getXnormalized() * zFar, ea.getYnormalized() * zFar, zFar, zFar );
     osg::Vec4 wc = clip * proj * view;
 
-    osg::Matrix parentTrans = osg::Matrix::translate( look );
-    osg::Vec3 launchDir = osg::Vec3( wc[0], wc[1], wc[2] ) - look;
+    const osg::Vec3 launchPos = look + ( up * ( _launchModel->getBound()._radius * 2. ) );
+
+    osg::Matrix parentTrans = osg::Matrix::translate( launchPos );
+    osg::Vec3 launchDir = osg::Vec3( wc[0], wc[1], wc[2] ) - launchPos;
     launchDir.normalize();
 
     osg::ref_ptr< osgwTools::AbsoluteModelTransform > amt = new osgwTools::AbsoluteModelTransform;
