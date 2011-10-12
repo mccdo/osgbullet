@@ -22,6 +22,7 @@
 #include <osgbCollision/RefBulletObject.h>
 #include <osgbCollision/Utils.h>
 #include <osgbDynamics/MotionState.h>
+#include <osgbDynamics/PhysicsThread.h>
 
 #include <osgGA/GUIEventHandler>
 #include <osg/Camera>
@@ -42,7 +43,8 @@ DragHandler::DragHandler( btDynamicsWorld* dw, osg::Camera* scene )
   : _dw( dw ),
     _scene( scene ),
     _constraint( NULL ),
-    _constrainedMotionState( NULL )
+    _constrainedMotionState( NULL ),
+    _pt( NULL )
 {
 }
 DragHandler::~DragHandler()
@@ -98,6 +100,9 @@ bool DragHandler::handle( const osgGA::GUIEventAdapter& ea, osgGA::GUIActionAdap
         osg::Vec3 pointOnPlane = look + ( vDir * length );
         osg::notify( osg::DEBUG_FP ) << "  OSG point " << pointOnPlane << std::endl;
 
+        if( _pt != NULL )
+            _pt->pause( true );
+
         osg::Matrix ow2bw;
         if( _constrainedMotionState != NULL )
             ow2bw = _constrainedMotionState->computeOsgWorldToBulletWorld();
@@ -106,6 +111,9 @@ bool DragHandler::handle( const osgGA::GUIEventAdapter& ea, osgGA::GUIActionAdap
 
         _constraint->setPivotB( osgbCollision::asBtVector3( bulletPoint ) );
 
+        if( _pt != NULL )
+            _pt->pause( false );
+
         return( true );
     }
     else if( ea.getEventType() == osgGA::GUIEventAdapter::RELEASE )
@@ -113,7 +121,14 @@ bool DragHandler::handle( const osgGA::GUIEventAdapter& ea, osgGA::GUIActionAdap
         if( _constraint == NULL )
             return( false );
 
+        if( _pt != NULL )
+            _pt->pause( true );
+
         _dw->removeConstraint( _constraint );
+
+        if( _pt != NULL )
+            _pt->pause( false );
+
         delete _constraint;
         _constraint = NULL;
         _constrainedMotionState = NULL;
@@ -121,6 +136,11 @@ bool DragHandler::handle( const osgGA::GUIEventAdapter& ea, osgGA::GUIActionAdap
     }
 
     return( false );
+}
+
+void DragHandler::setThreadedPhysicsSupport( osgbDynamics::PhysicsThread* pt )
+{
+    _pt = pt;
 }
 
 bool DragHandler::pick( float wx, float wy )
@@ -191,8 +211,12 @@ bool DragHandler::pick( float wx, float wy )
     // Make a Bullet point-to-point constraint, so we can drag it around.
     _constraint = new btPoint2PointConstraint( *rb,
         osgbCollision::asBtVector3( pickPointBulletOCLocal ) );
+    if( _pt != NULL )
+        _pt->pause( true );
     _dw->addConstraint( _constraint );
-    
+    if( _pt != NULL )
+        _pt->pause( false );
+
 
     // Also make a drag plane.
     osg::Vec3d look, at, up;

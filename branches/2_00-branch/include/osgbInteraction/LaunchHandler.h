@@ -23,6 +23,7 @@
 
 
 #include <osgbInteraction/Export.h>
+#include <osgbDynamics/MotionState.h>
 #include <osgGA/GUIEventHandler>
 #include <btBulletDynamicsCommon.h>
 #include <osg/ref_ptr>
@@ -33,6 +34,11 @@ namespace osg {
     class Node;
     class Group;
     class Camera;
+}
+
+namespace osgbDynamics {
+    class PhysicsThread;
+    class TripleBuffer;
 }
 
 
@@ -50,6 +56,10 @@ class OSGBINTERACTION_EXPORT LaunchHandler : public osgGA::GUIEventHandler
 public:
     LaunchHandler( btDynamicsWorld* dw, osg::Group* attachPoint, osg::Camera* camera=NULL );
 
+    bool handle( const osgGA::GUIEventAdapter& ea, osgGA::GUIActionAdapter& );
+
+    void setThreadedPhysicsSupport( osgbDynamics::PhysicsThread* pt, osgbDynamics::TripleBuffer* tb, osgbDynamics::MotionStateList* msl );
+
     void setLaunchModel( osg::Node* model, btCollisionShape* shape=NULL );
 
     /** \brief Access the initial launch velocity.
@@ -61,8 +71,6 @@ public:
     void setCollisionFlags( short group, short mask ) { _group = group; _mask = mask; }
 
     void setCamera( osg::Camera* camera ) { _camera = camera; }
-
-    bool handle( const osgGA::GUIEventAdapter& ea, osgGA::GUIActionAdapter& );
 
     /** \brief Remove all launched models from the scene graph and physics simultation.
     */
@@ -77,11 +85,16 @@ protected:
 
     osg::ref_ptr< osg::Node > _launchModel;
     btCollisionShape* _launchCollisionShape;
+    bool _ownsCollisionShape;
     double _initialVelocity;
     short _group, _mask;
 
     typedef std::list< osg::ref_ptr< osg::Node > > NodeList;
     NodeList _nodeList;
+
+    osgbDynamics::PhysicsThread* _pt;
+    osgbDynamics::TripleBuffer* _tb;
+    osgbDynamics::MotionStateList* _msl;
 };
 
 

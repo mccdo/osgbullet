@@ -29,6 +29,7 @@
 #include <osgbDynamics/Export.h>
 
 #include <vector>
+#include <set>
 
 
 namespace osgbDynamics
@@ -237,7 +238,7 @@ private:
 \brief Container class for multiple MotionState objects.
 
 */
-typedef std::vector< osgbDynamics::MotionState* > MotionStateList;
+typedef std::set< osgbDynamics::MotionState* > MotionStateList;
 
 /** \relates osgbDynamics::TripleBuffer
 \brief Class for updating a list of MotionState objects from a TripleBuffer.
