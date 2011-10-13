@@ -114,7 +114,7 @@ void SaveRestoreHandler::add( btDynamicsWorld* dw )
     int idx;
     for( idx=0; idx < dw->getNumCollisionObjects(); idx++ )
     {
-        btRigidBody* rb = dynamic_cast< btRigidBody* >( coa[ idx ] );
+        btRigidBody* rb = static_cast< btRigidBody* >( coa[ idx ] );
         if( rb != NULL )
         {
             std::ostringstream ostr;
