@@ -57,7 +57,8 @@ bool DragHandler::handle( const osgGA::GUIEventAdapter& ea, osgGA::GUIActionAdap
 
     if( ea.getEventType() == osgGA::GUIEventAdapter::PUSH )
     {
-        if( !ctrl )
+        if( !ctrl ||
+            ( ( ea.getButtonMask() & osgGA::GUIEventAdapter::LEFT_MOUSE_BUTTON ) == 0 ) )
             return( false );
 
         const bool picked = pick( ea.getXnormalized(), ea.getYnormalized() );
@@ -69,7 +70,8 @@ bool DragHandler::handle( const osgGA::GUIEventAdapter& ea, osgGA::GUIActionAdap
     }
     else if( ea.getEventType() == osgGA::GUIEventAdapter::DRAG )
     {
-        if( ( !ctrl ) || ( _constraint == NULL ) )
+        if( ( !ctrl ) || ( _constraint == NULL ) ||
+            ( ( ea.getButtonMask() & osgGA::GUIEventAdapter::LEFT_MOUSE_BUTTON ) == 0 ) )
             return( false );
 
         osg::Vec4d farPointNDC = osg::Vec4d( ea.getXnormalized(), ea.getYnormalized(), 1., 1. );

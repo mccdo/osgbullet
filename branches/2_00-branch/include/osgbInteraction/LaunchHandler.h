@@ -49,17 +49,63 @@ namespace osgbInteraction
 /** \class LaunchHandler LaunchHandler.h <osgbInteraction\LaunchHandler.h>
 \brief An event handler to support throwing objects into a dynamics simulation.
 
-TBD full descrip.
-*/
+This class allows users to launch btRigidBody objects into the scene using
+shift-leftmouse.
+
+By default, the launched object is a sphere with radius 1.0 at a velocity of 10.0
+units/sec. However, the application can specify an arbitrary model to launch, and
+also change the initial velocity.
+
+LaunchHandler uses multiparenting so that only one incarnation of the launch model
+is present in the scene graph, regardless of how many objects the user has launched.
+LaunchHandler also shares the same btCollisionShape between all launched objects.
+
+LaunchHandler is compatible with SaveRestoreHandler, so that hitting the Delete key
+to trigger a SaveRestoreHandler::reset() will remove all launched rigid bodies. */
 class OSGBINTERACTION_EXPORT LaunchHandler : public osgGA::GUIEventHandler
 {
 public:
+    /** \brief Constructor.
+    \param dw LaunchHandler adds launched rigid bodies to this dynamics world.
+    \param attachPoint LaunchHandler adds instances of the launch model to this node
+    in the scene graph.
+    \param camera LaunchHandler uses this Camera to compute the launch direction
+    vector from the mouse position.
+    */
     LaunchHandler( btDynamicsWorld* dw, osg::Group* attachPoint, osg::Camera* camera=NULL );
 
+    /** \brief Handle events.
+
+    Controls:
+    \li shift-leftmouse Computes a launch vector from the mouse click position,
+    creates a new btRigidBody for the launch model, adds an instance of the
+    launch model to the scene attach point, specified the initial velocity of
+    the btRigidBody, and adds the rigid body to the dynamics world.
+    */
     bool handle( const osgGA::GUIEventAdapter& ea, osgGA::GUIActionAdapter& );
 
+    /** \brief Support for running the Bullet physics simultation in a separate thread.
+
+    Call this function to specify osgBullet threaded physics objects.
+    \param pt LaunchHandler pauses and unpauses this thread before adding or removing rigid
+    bodies from the dynamics world.
+    \param tb The launched btRigidBody's MotionState registers this TripleBuffer for thread-safe
+    transform modification in the scene graph.
+    \param msl The launched btRigidBody's MotionState is added to this list of MotionState objects
+    for processung during scene graph update.
+    */
     void setThreadedPhysicsSupport( osgbDynamics::PhysicsThread* pt, osgbDynamics::TripleBuffer* tb, osgbDynamics::MotionStateList* msl );
 
+    /** \brief Specify a non-default launch model.
+
+    The default launch model is a sphere with radius 1. Use this routine to specify a non-default
+    launch model.
+    \param shape Specify a collision shape for the model. If \c shape is NULL (the default),
+    this function creates a convex hull collision shape from \c model, using it's bounding
+    sphere for center of mass, and default scaling of 1.0 in all axes.
+    
+    Future work: Calling this function with a NULL \c model should cause the default launch
+    model to be recreated and used for subsequent launches. */
     void setLaunchModel( osg::Node* model, btCollisionShape* shape=NULL );
 
     /** \brief Access the initial launch velocity.
@@ -68,8 +114,16 @@ public:
     void setInitialVelocity( double velocity ) { _initialVelocity = velocity; }
     double getInitialVelocity() const { return( _initialVelocity ); }
 
+    /** \brief Specify collision flags for Bullet's addRigidBody() call.
+
+    By default, there are no collision flags, and LaunchHandler uses the simple form
+    of addRigidBody(btRigidBody*) when adding a launched object. Call this function
+    to specify collision flags, which will cause LaunchHandler to use the extended
+    form of addRigidBody(btRigidBody*,short,short). */
     void setCollisionFlags( short group, short mask ) { _group = group; _mask = mask; }
 
+    /** \brief Specify the camera used to compute the launch direction vector, if not
+    specified in the constructor. */
     void setCamera( osg::Camera* camera ) { _camera = camera; }
 
     /** \brief Remove all launched models from the scene graph and physics simultation.
