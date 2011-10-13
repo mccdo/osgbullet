@@ -57,12 +57,15 @@ public:
     Controls:
     \li Insert Capture the current physics state.
     \li Delete Reset the last captured physics state.
-    \li ctrl-s Save last captured state to disk.
-    \li ctrl-a Capture and save current physics state to disk.
-    \li ctrl-r Restore state from disk file.
+    \li F1 Save last captured state to disk.
+    \li F2 Capture and save current physics state to disk.
     */
     virtual bool handle( const osgGA::GUIEventAdapter& ea, osgGA::GUIActionAdapter& aa );
 
+    /** \brief Support for running the Bullet physics simultation in a separate thread.
+
+    Call this function to specify the osgbDynamics::PhysicsThread. SaveRestoreHandler pauses
+    and unpauses the thread during accesses to the dynamics world. */
     void setThreadedPhysicsSupport( osgbDynamics::PhysicsThread* pt );
 
     /** \brief Add a rigid body for save / restore management.
@@ -74,8 +77,14 @@ public:
     \param rb Rigid body to manage. */
     void add( const std::string& id, btRigidBody* rb );
 
-    /**
-    */
+    /** \brief Add a CreationRecord for saving to disk.
+
+    To support later restore from disk, use this function to associate a CreationRecord
+    with a particular ID. For an example of how to use this information to restore from disk,
+    see the saverestore example.
+    \param id A unique string identifier, used for associating rigid bodies with
+    scene graph locations during a restore from disk.
+    \param cr CreationRecord rigid body creation information. */
     void add( const std::string& id, osgbDynamics::CreationRecord* cr );
 
     /** \brief Add all rigid bodies to save / restore management.
@@ -111,12 +120,14 @@ public:
     void setSaveRestoreFileName( const std::string& fileName );
     std::string getSaveRestoreFileName() const;
 
-    /** \brief
+    /** \brief Save to disk.
     */
     void save( const std::string& fileName=std::string( "" ) );
 
-    /** \brief
-    */
+    /** \brief Restore from disk. Not currently implemented.
+
+    Do not use this function. See saverestore for an example of restoreing
+    from disk. */
     void restore( const std::string& fileName=std::string( "" ) );
 
     /** \brief Specify a LaunchHandler to reset during the reset() call.

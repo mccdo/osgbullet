@@ -86,11 +86,6 @@ bool SaveRestoreHandler::handle( const osgGA::GUIEventAdapter& ea, osgGA::GUIAct
         save();
         return( true );
     }
-    else if( ea.getKey() == osgGA::GUIEventAdapter::KEY_F3 )
-    {
-        restore();
-        return( true );
-    }
     return( false );
 }
 
@@ -170,6 +165,9 @@ void SaveRestoreHandler::save( const std::string& fileName )
 
 void SaveRestoreHandler::restore( const std::string& fileName )
 {
+    osg::notify( osg::WARN ) << "SaveRestoreHandler::restore() not currently implemented." << std::endl;
+    return;
+
     std::string fName( fileName );
     if( fName.empty() )
         fName = _fileName;

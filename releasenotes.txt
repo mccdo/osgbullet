@@ -1,12 +1,17 @@
 osgBullet v2.00.00 Release Notes
 
+osgBullet v2.00.00 is compatible with:
+* OpenSceneGraph v2.8.0 - v3.0.1
+* Bullet v2.76 - v2.79
+* osgWorks v2.00.00 (now in release candidate)
+
 v2.00.00 is not backwards-compatible with osgBullet v1.xx. osgBullet-based
 applications and projects will need to port their code to the new version.
 Changes from v1.01.00 to v2.00.00 include the following:
 
 * The osgbBullet library has been replaced with two libraries: osgbCollision and
 osgbDynamics. Your project will need to link with the new libraries. The
-v2.00.00 contains an analogous change in the namespaces and header file
+v2.00.00 release contains an analogous change in the namespaces and header file
 directory structure.
 
   * By linking with osgbCollision, your osgBullet application can use Bullet for
@@ -17,7 +22,7 @@ directory structure.
 convenience routines. See the osgbDynamics/RigidBody.h header file. Nearly all
 of the examples and tests use the new interface.
 
-A new library, osgbInteraction, has been added to allow user interaction with
+* A new library, osgbInteraction, has been added to allow user interaction with
 the physics simulation. The library contains the following classes:
 
   * The HandNode class features a fully articulated hand model that can be
