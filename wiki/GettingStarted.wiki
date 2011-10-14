@@ -2,23 +2,6 @@
 
 <wiki:toc />
 
-= Using colladaread =
+= Using osgbpp =
 
-The *colladaread* example loads a scene graph, then allows you to interactively load a COLLADA file containing a rigid body for that model.
-
-COLLADA file names are the same as the input scene graph file name, but with a number inserted. For example, if the input scene graph file is `tetra.osg`, then *colladaread* expects to file `tetra0.dae, tetra1.dae,` etc.
-
-To create several .dae files for the sample data, do the following:
-{{{
-  cd data
-  ../scripts/mkdae.sh (or ..\scripts\mkdae.bat)
-}}}
-
-This script runs the *osgbpp* application, which creates a rigid body from an OSG scene graph, then writes the body as a COLLADA file. The script should create files like `cow0.dae` and `cow1.dae.`
-
-Then you can try:
-{{{
-  colladaread tetra.osg
-}}}
-
-You should see your model floating about a ground plane. Now hit a numeric key to load the corresponding .dae file. For example, hit the 0 key to load `tetra0.dae.` The model should fall to the ground.
+The *osgbpp* application is the Bullet physics previewer. It loads a model, creates a collision shape and rigid body, then drops it onto a surface.
