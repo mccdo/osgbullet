@@ -202,10 +202,10 @@ bool DragHandler::pick( float wx, float wy )
 
     // Save the MotionState for this rigid body. We'll use it during the DRAG events.
     _constrainedMotionState = dynamic_cast< osgbDynamics::MotionState* >( rb->getMotionState() );
-    osg::Matrix ow2ocl;
+    osg::Matrix ow2col;
     if( _constrainedMotionState != NULL )
-        ow2ocl = _constrainedMotionState->computeOsgWorldToCOLocal();
-    osg::Vec3d pickPointBulletOCLocal = pickPointWC * ow2ocl;
+        ow2col = _constrainedMotionState->computeOsgWorldToCOLocal();
+    osg::Vec3d pickPointBulletOCLocal = pickPointWC * ow2col;
     osg::notify( osg::DEBUG_FP ) << "pickPointWC: " << pickPointWC << std::endl;
     osg::notify( osg::DEBUG_FP ) << "pickPointBulletOCLocal: " << pickPointBulletOCLocal << std::endl;
 
