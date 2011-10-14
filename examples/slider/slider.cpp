@@ -311,4 +311,11 @@ int main( int argc, char** argv )
 Demonstrates coding directly to the Bullet API to create a slider constraint.
 
 Use the --debug command line option to enable debug collision object display.
+
+\section slidercontrols UI Controls
+
+\li Delete: Reset the physics simulation to its initial state.
+\li ctrl-leftmouse: Select and drag an object.
+\li shift-leftmouse: Launches a sphere into the scene.
+
 */

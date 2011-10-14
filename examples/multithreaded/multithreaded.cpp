@@ -272,3 +272,16 @@ int main( int argc, char** argv )
 
     return( 0 );
 }
+
+
+
+/** \page multithreaded The multithreaded Example
+This examples demonstrates running the Bullet physics simultation in a separate thread.
+
+\section multithreadedcontrols UI Controls
+
+\li Delete: Reset the physics simulation to its initial state.
+\li ctrl-leftmouse: Select and drag an object.
+\li shift-leftmouse: Launches a sphere into the scene.
+
+*/
