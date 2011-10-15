@@ -202,8 +202,8 @@ void launchMaterial( osg::Node* root )
     osg::StateSet* rootState = root->getOrCreateStateSet();
 
     osg::Material* mat = new osg::Material;
-    mat->setAmbient( osg::Material::FRONT, osg::Vec4( .2, .2, .2, 1. ) );
-    mat->setDiffuse( osg::Material::FRONT, osg::Vec4( .4, .4, .4, 1. ) );
+    mat->setAmbient( osg::Material::FRONT, osg::Vec4( .2, .2, .3, 1. ) );
+    mat->setDiffuse( osg::Material::FRONT, osg::Vec4( .4, .4, .5, 1. ) );
     mat->setSpecular( osg::Material::FRONT, osg::Vec4( .4, .4, .4, 1. ) );
     mat->setShininess( osg::Material::FRONT, 30.f );
     rootState->setAttribute( mat, osg::StateAttribute::ON | osg::StateAttribute::OVERRIDE );
