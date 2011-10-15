@@ -138,7 +138,7 @@ int main( int argc, char** argv )
             cr->_scale = xform.getScale();
             cr->_restitution = .5f;
 
-            srh->add( it->first->getName(), cr );
+            srh->add( it->first->getName(), cr.get() );
         }
         else
         {
@@ -187,7 +187,7 @@ int main( int argc, char** argv )
 
     osgViewer::Viewer viewer( arguments );
     viewer.setUpViewInWindow( 30, 30, 768, 480 );
-    viewer.setSceneData( root );
+    viewer.setSceneData( root.get() );
 
     osgGA::TrackballManipulator* tb = new osgGA::TrackballManipulator;
     //tb->setHomePosition( osg::Vec3( 0., -8., 2. ), osg::Vec3( 0., 0., 1. ), osg::Vec3( 0., 0., 1. ) ); 
