@@ -274,7 +274,7 @@ int main( int argc, char** argv )
         osgbInteraction::SaveRestoreHandler;
 
     // Make Bullet rigid bodies and collision shapes for the gate...
-    makeGate( bulletWorld, srh, gateNode, gateXform );
+    makeGate( bulletWorld, srh.get(), gateNode, gateXform );
     // ...and the two walls.
     makeStaticObject( bulletWorld, wallsNode, wallXform );
     makeStaticObject( bulletWorld, otherWall, otherWallXform );
@@ -339,7 +339,7 @@ int main( int argc, char** argv )
 
     srh->setLaunchHandler( lh );
     srh->capture();
-    viewer.addEventHandler( srh );
+    viewer.addEventHandler( srh.get() );
     viewer.addEventHandler( new osgbInteraction::DragHandler(
         bulletWorld, viewer.getCamera() ) );
 

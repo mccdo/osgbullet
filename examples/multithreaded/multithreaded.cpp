@@ -197,7 +197,7 @@ int main( int argc, char** argv )
             for( x=xStart, xIdx=0; xIdx<xCount; x+=2.25, xIdx++ )
             {
                 osg::Vec3 pos( x, y, z );
-                root->addChild( makeModel( fileName, index++, bulletWorld, pos, srh ) );
+                root->addChild( makeModel( fileName, index++, bulletWorld, pos, srh.get() ) );
             }
         }
         xStart += 1.25;
@@ -208,7 +208,7 @@ int main( int argc, char** argv )
     }
 
     // Add a cow
-    root->addChild( makeCow( bulletWorld, osg::Vec3( -11., 6., 4. ), srh ) );
+    root->addChild( makeCow( bulletWorld, osg::Vec3( -11., 6., 4. ), srh.get() ) );
 
     // Make ground.
     {
@@ -244,7 +244,7 @@ int main( int argc, char** argv )
 
     srh->setLaunchHandler( lh );
     srh->capture();
-    viewer.addEventHandler( srh );
+    viewer.addEventHandler( srh.get() );
     osgbInteraction::DragHandler* dh = new osgbInteraction::DragHandler(
         bulletWorld, viewer.getCamera() );
     viewer.addEventHandler( dh );
