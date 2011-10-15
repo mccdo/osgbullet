@@ -19,12 +19,20 @@
  *************** <auto-copyright.pl END do not edit this line> ***************/
 
 #include <osgDB/ReadFile>
+#include <osgDB/FileUtils>
 #include <osgViewer/Viewer>
 #include <osgGA/TrackballManipulator>
 #include <osg/MatrixTransform>
 #include <osg/ShapeDrawable>
 #include <osg/Geode>
 #include <osgUtil/Optimizer>
+
+#include <osg/Light>
+#include <osg/LightSource>
+#include <osg/Material>
+#include <osg/LightModel>
+#include <osgShadow/ShadowedScene>
+#include <osgShadow/StandardShadowMap>
 
 #include <osgbDynamics/MotionState.h>
 #include <osgbCollision/CollisionShapes.h>
@@ -142,6 +150,68 @@ osg::Node* findNamedNode( osg::Node* model, const std::string& name, osg::Matrix
     return( fnn._napl[ 0 ].first );
 }
 
+void simpleLighting( osg::Group* root )
+{
+    osg::StateSet* rootState = root->getOrCreateStateSet();
+    rootState->setMode( GL_LIGHT0, osg::StateAttribute::ON );
+
+    osg::LightSource* ls = new osg::LightSource();
+    ls->setReferenceFrame( osg::LightSource::RELATIVE_RF );
+    root->addChild( ls );
+
+    osg::Light* light = new osg::Light;
+    light->setLightNum( 0 );
+    light->setAmbient( osg::Vec4( 1., 1., 1., 1. ) );
+    light->setDiffuse( osg::Vec4( 1., 1., 1., 1. ) );
+    light->setSpecular( osg::Vec4( 1., 1., 1., 1. ) );
+    light->setPosition( osg::Vec4( -.5, .25, 2., 1. ) );
+    ls->setLight( light );
+
+    osg::LightModel* lm = new osg::LightModel;
+    lm->setAmbientIntensity( osg::Vec4( 0., 0., 0., 1. ) );
+    lm->setColorControl( osg::LightModel::SEPARATE_SPECULAR_COLOR );
+    rootState->setAttribute( lm, osg::StateAttribute::ON );
+}
+
+void nightstandMaterial( osg::Node* root )
+{
+    osg::StateSet* rootState = root->getOrCreateStateSet();
+
+    osg::Material* mat = new osg::Material;
+    mat->setAmbient( osg::Material::FRONT, osg::Vec4( .1, .1, .1, 1. ) );
+    mat->setDiffuse( osg::Material::FRONT, osg::Vec4( 1., 1., 1., 1. ) );
+    mat->setSpecular( osg::Material::FRONT, osg::Vec4( 0.6, 0.6, 0.5, 1. ) );
+    mat->setShininess( osg::Material::FRONT, 16.f );
+    rootState->setAttribute( mat, osg::StateAttribute::ON | osg::StateAttribute::OVERRIDE );
+}
+
+void groundMaterial( osg::Node* root )
+{
+    osg::StateSet* rootState = root->getOrCreateStateSet();
+
+    osg::Material* mat = new osg::Material;
+    mat->setAmbient( osg::Material::FRONT, osg::Vec4( .1, .1, .1, 1. ) );
+    mat->setDiffuse( osg::Material::FRONT, osg::Vec4( .75, .75, .75, 1. ) );
+    mat->setSpecular( osg::Material::FRONT, osg::Vec4( 0., 0., 0., 1. ) );
+    rootState->setAttribute( mat, osg::StateAttribute::ON | osg::StateAttribute::OVERRIDE );
+}
+
+void launchMaterial( osg::Node* root )
+{
+    osg::StateSet* rootState = root->getOrCreateStateSet();
+
+    osg::Material* mat = new osg::Material;
+    mat->setAmbient( osg::Material::FRONT, osg::Vec4( .2, .2, .2, 1. ) );
+    mat->setDiffuse( osg::Material::FRONT, osg::Vec4( .4, .4, .4, 1. ) );
+    mat->setSpecular( osg::Material::FRONT, osg::Vec4( .4, .4, .4, 1. ) );
+    mat->setShininess( osg::Material::FRONT, 30.f );
+    rootState->setAttribute( mat, osg::StateAttribute::ON | osg::StateAttribute::OVERRIDE );
+}
+
+#define SHADOW_CASTER 0x1
+#define SHADOW_RECEIVER 0x2
+#define SHADOW_BOTH (SHADOW_CASTER|SHADOW_RECEIVER)
+
 int main( int argc, char** argv )
 {
     osg::ArgumentParser arguments( &argc, argv );
@@ -150,8 +220,12 @@ int main( int argc, char** argv )
     btDiscreteDynamicsWorld* bulletWorld = initPhysics();
     osg::Group* root = new osg::Group;
 
+    simpleLighting( root );
+
     osg::Group* launchHandlerAttachPoint = new osg::Group;
+    launchHandlerAttachPoint->setNodeMask( SHADOW_BOTH );
     root->addChild( launchHandlerAttachPoint );
+    launchMaterial( launchHandlerAttachPoint );
 
 
     osg::ref_ptr< osg::Node > rootModel = osgDB::readNodeFile( "NightStand.flt" );
@@ -160,6 +234,8 @@ int main( int argc, char** argv )
         osg::notify( osg::FATAL ) << "hinge: Can't load data file \"NightStand.flt\"." << std::endl;
         return( 1 );
     }
+    rootModel->setNodeMask( SHADOW_BOTH );
+    nightstandMaterial( rootModel.get() );
 
     root->addChild( rootModel.get() );
 
@@ -179,15 +255,18 @@ int main( int argc, char** argv )
         osgbInteraction::SaveRestoreHandler;
 
     // Make Bullet rigid bodies and collision shapes for the drawer...
-    makeDrawer( bulletWorld, srh, drawerNode, drawerXform );
+    makeDrawer( bulletWorld, srh.get(), drawerNode, drawerXform );
     // ...and the stand.
     makeStaticObject( bulletWorld, standNode, standXform );
 
 
     // Add ground
     const osg::Vec4 plane( 0., 0., 1., 0. );
-    root->addChild( osgbDynamics::generateGroundPlane( plane,
-        bulletWorld, NULL, COL_DEFAULT, defaultCollidesWith ) );
+    osg::Node* groundRoot = osgbDynamics::generateGroundPlane( plane,
+        bulletWorld, NULL, COL_DEFAULT, defaultCollidesWith );
+    groundRoot->setNodeMask( SHADOW_RECEIVER );
+    groundMaterial( groundRoot );
+    root->addChild( groundRoot );
     
 
     // create slider constraint between drawer and groundplane and add it to world
@@ -242,13 +321,33 @@ int main( int argc, char** argv )
         dbgDraw = new osgbCollision::GLDebugDrawer();
         dbgDraw->setDebugMode( ~btIDebugDraw::DBG_DrawText );
         bulletWorld->setDebugDrawer( dbgDraw );
-        root->addChild( dbgDraw->getSceneGraph() );
+        osg::Node* dbgRoot = dbgDraw->getSceneGraph();
+        dbgRoot->setNodeMask( ~SHADOW_BOTH );
+        root->addChild( dbgRoot );
+    }
+
+
+    osgShadow::ShadowedScene* sceneRoot = new osgShadow::ShadowedScene;
+    sceneRoot->setCastsShadowTraversalMask( SHADOW_CASTER );
+    sceneRoot->setReceivesShadowTraversalMask( SHADOW_RECEIVER );
+    sceneRoot->addChild( root );
+    {
+        osgShadow::StandardShadowMap* sTex = new osgShadow::StandardShadowMap;
+
+        // Workaround the fact that OSG StandardShadowMap fragment shader
+        // doesn't add in the specular color.
+        osg::Shader* shader = new osg::Shader( osg::Shader::FRAGMENT );
+        shader->setName( "ShadowMap-Main.fs" );
+        shader->loadShaderSourceFromFile( osgDB::findDataFile( shader->getName() ) );
+        sTex->setMainFragmentShader( shader );
+
+        sceneRoot->setShadowTechnique( sTex );
     }
 
 
     osgViewer::Viewer viewer( arguments );
     viewer.setUpViewInWindow( 30, 30, 768, 480 );
-    viewer.setSceneData( root );
+    viewer.setSceneData( sceneRoot );
 
     osgGA::TrackballManipulator* tb = new osgGA::TrackballManipulator;
     tb->setHomePosition( osg::Vec3( 1., -7., 2. ), osg::Vec3( 0., 0., 1. ), osg::Vec3( 0., 0., 1. ) ); 
@@ -268,7 +367,7 @@ int main( int argc, char** argv )
         mt->getOrCreateStateSet()->setMode( GL_NORMALIZE, osg::StateAttribute::ON );
 
         lh->setLaunchModel( mt.get() );
-        lh->setInitialVelocity( 20. );
+        lh->setInitialVelocity( 10. );
 
         // Also add the proper collision masks
         lh->setCollisionFlags( COL_DEFAULT, defaultCollidesWith );
@@ -278,7 +377,7 @@ int main( int argc, char** argv )
 
     srh->setLaunchHandler( lh );
     srh->capture();
-    viewer.addEventHandler( srh );
+    viewer.addEventHandler( srh.get() );
     viewer.addEventHandler( new osgbInteraction::DragHandler(
         bulletWorld, viewer.getCamera() ) );
 
