@@ -170,7 +170,7 @@ int main( int argc, char** argv )
 
     srh->setLaunchHandler( lh );
     srh->capture();
-    viewer.addEventHandler( srh );
+    viewer.addEventHandler( srh.get() );
     viewer.addEventHandler( new osgbInteraction::DragHandler( bw, viewer.getCamera() ) );
 
     viewer.realize();
