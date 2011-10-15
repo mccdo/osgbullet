@@ -691,7 +691,7 @@ int main( int argc, char** argv )
     //hn->setDebug( true );
 
     osgViewer::Viewer viewer;
-    //viewer.setUpViewInWindow( 10, 30, 960, 600 );
+    viewer.setUpViewInWindow( 30, 30, 768, 480 );
     viewer.setSceneData( root.get() );
     viewer.addEventHandler( new osgbInteraction::VirtualHandTestEventHandler( hn.get() ) );
 
