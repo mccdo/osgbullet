@@ -26,6 +26,7 @@
 #include <osg/ShapeDrawable>
 #include <osg/Geode>
 #include <osgUtil/Optimizer>
+#include <osg/ComputeBoundsVisitor>
 
 #include <osg/Light>
 #include <osg/LightSource>
@@ -164,7 +165,7 @@ void simpleLighting( osg::Group* root )
     light->setAmbient( osg::Vec4( 1., 1., 1., 1. ) );
     light->setDiffuse( osg::Vec4( 1., 1., 1., 1. ) );
     light->setSpecular( osg::Vec4( 1., 1., 1., 1. ) );
-    light->setPosition( osg::Vec4( -.5, .25, 2., 1. ) );
+    light->setPosition( osg::Vec4( -.5, -.4, 2., 1. ) );
     ls->setLight( light );
 
     osg::LightModel* lm = new osg::LightModel;
@@ -247,10 +248,6 @@ int main( int argc, char** argv )
     if( ( standNode == NULL ) || ( drawerNode == NULL ) )
         return( 1 );
 
-    // Open the drawer slightly.
-    // TBD this is a hardcoded axis/distance.
-    drawerXform *= osg::Matrix::translate( 0., -.2, 0. );
-
     osg::ref_ptr< osgbInteraction::SaveRestoreHandler > srh = new
         osgbInteraction::SaveRestoreHandler;
 
@@ -271,13 +268,18 @@ int main( int argc, char** argv )
 
     // create slider constraint between drawer and groundplane and add it to world
     // Note: Bullet slider is always along x axis. Alter this behavior with reference frames.
+    btSliderConstraint* slider;
+    float drawerMinLimit;
     {
         // Model-specific constants.
         // TBD Should obtain these from model metadata or user input:
         const osg::Vec3 drawerAxis( 0., 1., 0. );
-        const float drawerMinLimit( -1.f );
         const float drawerMaxLimit( 0.f );
 
+        osg::ComputeBoundsVisitor cbv;
+        drawerNode->accept( cbv );
+        const osg::BoundingBox& bb = cbv.getBoundingBox();
+        drawerMinLimit = -( bb.yMax() - bb.yMin() );
 
         // Compute a matrix that transforms the stand's collision shape origin and x axis
         // to the drawer's origin and drawerAxis.
@@ -308,7 +310,7 @@ int main( int argc, char** argv )
             axisRotate * invDrawerCOM );
 
 
-        btSliderConstraint* slider = new btSliderConstraint( *drawerBody, *standBody, drawerFrame, standFrame, false );
+        slider = new btSliderConstraint( *drawerBody, *standBody, drawerFrame, standFrame, false );
         slider->setLowerLinLimit( drawerMinLimit );
 	    slider->setUpperLinLimit( drawerMaxLimit );
         bulletWorld->addConstraint( slider, true );
@@ -350,7 +352,7 @@ int main( int argc, char** argv )
     viewer.setSceneData( sceneRoot );
 
     osgGA::TrackballManipulator* tb = new osgGA::TrackballManipulator;
-    tb->setHomePosition( osg::Vec3( 1., -7., 2. ), osg::Vec3( 0., 0., 1. ), osg::Vec3( 0., 0., 1. ) ); 
+    tb->setHomePosition( osg::Vec3( .8, -5., 1.6 ), osg::Vec3( 0., 0., .5 ), osg::Vec3( 0., 0., 1. ) ); 
     viewer.setCameraManipulator( tb );
     viewer.getCamera()->setClearColor( osg::Vec4( .5, .5, .5, 1. ) );
 
@@ -399,6 +401,15 @@ int main( int argc, char** argv )
         }
 
         viewer.frame();
+
+        /* TBD future work: break the constraint when the drawer is pulled out.
+        if( ( slider != NULL ) && ( slider->getLinearPos() <= ( drawerMinLimit * .95 ) ) )
+        {
+            bulletWorld->removeConstraint( slider );
+            delete slider;
+            slider = NULL;
+        }
+        */
     }
 
     return( 0 );
