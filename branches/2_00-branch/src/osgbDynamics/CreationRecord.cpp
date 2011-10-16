@@ -37,6 +37,8 @@ namespace osgbDynamics
 CreationRecord::CreationRecord()
   : _sceneGraph( NULL ),
     _version( 3 ),
+    _margin( 0.f ),
+    _marginSet( false ),
     _com( 0., 0., 0. ),
     _comSet( false ),
     _scale( osg::Vec3( 1., 1., 1. ) ),
@@ -53,6 +55,8 @@ CreationRecord::CreationRecord()
 CreationRecord::CreationRecord( const CreationRecord& rhs, osg::CopyOp copyop )
   : _sceneGraph( rhs._sceneGraph ),
     _version( rhs._version ),
+    _margin( rhs._margin ),
+    _marginSet( rhs._marginSet ),
     _com( rhs._com ),
     _comSet( rhs._comSet ),
     _scale( rhs._scale ),
@@ -65,6 +69,12 @@ CreationRecord::CreationRecord( const CreationRecord& rhs, osg::CopyOp copyop )
     _reductionLevel( rhs._reductionLevel ),
     _overall( rhs._overall )
 {
+}
+
+void CreationRecord::setMargin( const float margin )
+{
+    _margin = margin;
+    _marginSet = true;
 }
 
 void CreationRecord::setCenterOfMass( const osg::Vec3& com )
