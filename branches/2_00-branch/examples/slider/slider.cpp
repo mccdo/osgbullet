@@ -270,6 +270,7 @@ int main( int argc, char** argv )
     // Note: Bullet slider is always along x axis. Alter this behavior with reference frames.
     btSliderConstraint* slider;
     float drawerMinLimit;
+    btVector3 startPos;
     {
         // Model-specific constants.
         // TBD Should obtain these from model metadata or user input:
@@ -314,6 +315,9 @@ int main( int argc, char** argv )
         slider->setLowerLinLimit( drawerMinLimit );
 	    slider->setUpperLinLimit( drawerMaxLimit );
         bulletWorld->addConstraint( slider, true );
+
+        btTransform m = drawerBody->getWorldTransform();
+        startPos = m.getOrigin();
     }
 
 
@@ -402,14 +406,17 @@ int main( int argc, char** argv )
 
         viewer.frame();
 
-        /* TBD future work: break the constraint when the drawer is pulled out.
-        if( ( slider != NULL ) && ( slider->getLinearPos() <= ( drawerMinLimit * .95 ) ) )
+        if( slider != NULL )
         {
-            bulletWorld->removeConstraint( slider );
-            delete slider;
-            slider = NULL;
+            btTransform m = drawerBody->getWorldTransform();
+            btVector3 v = m.getOrigin();
+            if( ( v[ 1 ] - startPos[ 1 ] ) < drawerMinLimit )
+            {
+                bulletWorld->removeConstraint( slider );
+                delete slider;
+                slider = NULL;
+            }
         }
-        */
     }
 
     return( 0 );
