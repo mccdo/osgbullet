@@ -86,7 +86,9 @@ void LaunchHandler::setLaunchModel( osg::Node* model, btCollisionShape* shape )
     }
     else
     {
-        _launchCollisionShape = osgbCollision::btConvexHullCollisionShapeFromOSG( model );
+        btConvexHullShape* ch = osgbCollision::btConvexHullCollisionShapeFromOSG( model );
+        ch->setMargin( 0.0 );
+        _launchCollisionShape = ch;
         _ownsCollisionShape = true;
     }
 }

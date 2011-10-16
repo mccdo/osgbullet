@@ -79,7 +79,7 @@ public:
     Controls:
     \li shift-leftmouse Computes a launch vector from the mouse click position,
     creates a new btRigidBody for the launch model, adds an instance of the
-    launch model to the scene attach point, specified the initial velocity of
+    launch model to the scene attach point, specifies the initial velocity of
     the btRigidBody, and adds the rigid body to the dynamics world.
     */
     bool handle( const osgGA::GUIEventAdapter& ea, osgGA::GUIActionAdapter& );
@@ -101,7 +101,7 @@ public:
     The default launch model is a sphere with radius 1. Use this routine to specify a non-default
     launch model.
     \param shape Specify a collision shape for the model. If \c shape is NULL (the default),
-    this function creates a convex hull collision shape from \c model, using it's bounding
+    this function creates a convex hull collision shape from \c model, using its bounding
     sphere for center of mass, and default scaling of 1.0 in all axes.
     
     Future work: Calling this function with a NULL \c model should cause the default launch

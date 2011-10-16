@@ -406,15 +406,16 @@ int main( int argc, char** argv )
 
         viewer.frame();
 
-        if( slider != NULL )
+        if( slider->isEnabled() )
         {
             btTransform m = drawerBody->getWorldTransform();
             btVector3 v = m.getOrigin();
             if( ( v[ 1 ] - startPos[ 1 ] ) < drawerMinLimit )
             {
+                slider->setEnabled( false );
                 bulletWorld->removeConstraint( slider );
-                delete slider;
-                slider = NULL;
+                drawerBody->getBroadphaseProxy()->m_collisionFilterGroup = COL_DEFAULT;
+                drawerBody->getBroadphaseProxy()->m_collisionFilterMask = defaultCollidesWith;
             }
         }
     }
