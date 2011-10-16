@@ -48,6 +48,7 @@
 
 #include <osgwTools/InsertRemove.h>
 #include <osgwTools/FindNamedNode.h>
+#include <osgwTools/Version.h>
 
 #include <btBulletDynamicsCommon.h>
 
@@ -342,10 +343,22 @@ int main( int argc, char** argv )
 
         // Workaround the fact that OSG StandardShadowMap fragment shader
         // doesn't add in the specular color.
+#if( OSGWORKS_OSG_VERSION < 20912 )
+        // Prior to Feb 23 2011 (2.9.12 release), StandardShadowMap used vertex
+        // shaders that employed a varying to convey ambient color.
+        std::string shaderName( "ShadowMap-Main.fs" );
+#else
+        // From 2.9.12 onward, StandardShadowMap uses only a fragment shader,
+        // so ambient color is conveyed in the FFP built-in varying.
+        std::string shaderName( "ShadowMap-Main-3x.fs" );
+#endif
         osg::Shader* shader = new osg::Shader( osg::Shader::FRAGMENT );
-        shader->setName( "ShadowMap-Main.fs" );
-        shader->loadShaderSourceFromFile( osgDB::findDataFile( shader->getName() ) );
-        sTex->setMainFragmentShader( shader );
+        shader->setName( shaderName );
+        shader->loadShaderSourceFromFile( osgDB::findDataFile( shaderName ) );
+        if( shader->getShaderSource().empty() )
+            osg::notify( osg::WARN ) << "Warning: Unable to load shader file: \"" << shaderName << "\"." << std::endl;
+        else
+            sTex->setMainFragmentShader( shader );
 
         sceneRoot->setShadowTechnique( sTex );
     }
@@ -410,7 +423,7 @@ int main( int argc, char** argv )
         {
             btTransform m = drawerBody->getWorldTransform();
             btVector3 v = m.getOrigin();
-            if( ( v[ 1 ] - startPos[ 1 ] ) < drawerMinLimit )
+            if( ( v[ 1 ] - startPos[ 1 ] ) < ( drawerMinLimit * 1.02 ) )
             {
                 slider->setEnabled( false );
                 bulletWorld->removeConstraint( slider );
