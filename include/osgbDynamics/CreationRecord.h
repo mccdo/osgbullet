@@ -75,6 +75,14 @@ struct OSGBDYNAMICS_EXPORT CreationRecord : public osg::Object
     osg::Vec3 _com;
     bool _comSet;
 
+    /** Specify the collision shape margin for convex hull and convex tri mesh
+    collision shapes.
+    
+    Note: Margin is currently used only if _overall is true. */
+    void setMargin( const float margin );
+    float _margin;
+    bool _marginSet;
+
     osg::Vec3 _scale;
     osg::Matrix _parentTransform;
 

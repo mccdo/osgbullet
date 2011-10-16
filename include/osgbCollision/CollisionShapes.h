@@ -18,8 +18,8 @@
  *
  *************** <auto-copyright.pl END do not edit this line> ***************/
 
-#ifndef __OSGCOLLISION_COLLISIONSHAPES_H__
-#define __OSGCOLLISION_COLLISIONSHAPES_H__ 1
+#ifndef __OSGBCOLLISION_COLLISION_SHAPES_H__
+#define __OSGBCOLLISION_COLLISION_SHAPES_H__ 1
 
 
 #include <osgbCollision/Export.h>
@@ -27,6 +27,7 @@
 
 #include <btBulletCollisionCommon.h>
 
+// Forward
 namespace osg {
     class Node;
     class Geometry;
@@ -172,5 +173,5 @@ OSGBCOLLISION_EXPORT osg::Geometry* osgGeometryFromBtCollisionShape( const btCyl
 }
 
 
-// __OSGCOLLISION_COLLISIONSHAPES_H__
+// __OSGBCOLLISION_COLLISION_SHAPES_H__
 #endif

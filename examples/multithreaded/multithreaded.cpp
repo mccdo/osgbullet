@@ -30,9 +30,15 @@
 #include <osgbDynamics/MotionState.h>
 #include <osgbDynamics/GroundPlane.h>
 #include <osgbCollision/CollisionShapes.h>
+#include <osgbCollision/RefBulletObject.h>
 #include <osgbCollision/Utils.h>
 #include <osgbDynamics/TripleBuffer.h>
 #include <osgbDynamics/PhysicsThread.h>
+#include <osgbInteraction/DragHandler.h>
+#include <osgbInteraction/LaunchHandler.h>
+#include <osgbInteraction/SaveRestoreHandler.h>
+
+#include <osgwTools/Shapes.h>
 
 #include <btBulletDynamicsCommon.h>
 
@@ -64,130 +70,10 @@ btDiscreteDynamicsWorld* initPhysics()
 }
 
 
-/* \cond */
-class InteractionManipulator : public osgGA::GUIEventHandler
-{
-public:
-    InteractionManipulator( btDiscreteDynamicsWorld* world, osg::Group* sg, osgbDynamics::PhysicsThread* pt=NULL )
-      : _world( world ),
-        _sg( sg ),
-        _pt( pt )
-    {}
-
-    void setInitialTransform( btRigidBody* rb, osg::Matrix m )
-    {
-        _posMap[ rb ] = m;
-    }
-
-    void updateView( osg::Camera* camera )
-    {
-        osg::Vec3 center, up;
-        camera->getViewMatrixAsLookAt( _viewPos, center, up );
-        _viewDir = center - _viewPos;
-    }
-
-    bool handle( const osgGA::GUIEventAdapter& ea, osgGA::GUIActionAdapter& )
-    {
-        switch( ea.getEventType() )
-        {
-            case osgGA::GUIEventAdapter::KEYUP:
-            {
-                if (ea.getKey()==osgGA::GUIEventAdapter::KEY_BackSpace)
-                {
-                    reset();
-                    return true;
-                }
-                if (ea.getKey()==osgGA::GUIEventAdapter::KEY_Return)
-                {
-                    fire();
-                    return true;
-                }
-
-                return false;
-            }
-
-            default:
-            break;
-        }
-        return false;
-    }
-
-protected:
-    btDiscreteDynamicsWorld* _world;
-    osg::ref_ptr< osg::Group > _sg;
-    osgbDynamics::PhysicsThread* _pt;
-
-    osg::Vec3 _viewPos, _viewDir;
-
-    typedef std::map< btRigidBody*, osg::Matrix > PosMap;
-    PosMap _posMap;
-
-    typedef std::list< osg::ref_ptr< osg::Node > > NodeList;
-    NodeList _nodeList;
-
-    void reset()
-    {
-        PosMap::iterator it;
-        for( it=_posMap.begin(); it!=_posMap.end(); it++ )
-        {
-            btRigidBody* rb = it->first;
-            osgbDynamics::MotionState* motion = static_cast< osgbDynamics::MotionState* >( rb->getMotionState() );
-
-            btTransform t = osgbCollision::asBtTransform( it->second );
-            motion->setWorldTransform( t );
-            rb->setWorldTransform( t );
-
-            btVector3 zero( 0., 0., 0. );
-            rb->setAngularVelocity( zero );
-            rb->setLinearVelocity( zero );
-        }
-    }
-
-    void fire()
-    {
-        osg::Sphere* sp = new osg::Sphere( osg::Vec3( 0., 0., 0. ), .5 );
-        osg::ShapeDrawable* shape = new osg::ShapeDrawable( sp );
-        osg::Geode* geode = new osg::Geode();
-        geode->addDrawable( shape );
-        osg::ref_ptr< osgwTools::AbsoluteModelTransform > amt = new osgwTools::AbsoluteModelTransform;
-        amt->addChild( geode );
-        _sg->addChild( amt.get() );
-
-        btSphereShape* collision = new btSphereShape( .5 );
-
-        // Block physics
-        if( _pt != NULL )
-            // Blocks until thread is paused.
-            _pt->pause( true );
-
-        osgbDynamics::MotionState* motion = new osgbDynamics::MotionState;
-        motion->setTransform( amt.get() );
-        motion->setParentTransform( osg::Matrix::translate( _viewPos ) );
-
-        btScalar mass( 0.2 );
-        btVector3 inertia( btVector3( 0., 0., 0. ) );//osgbCollision::asBtVector3( _viewDir ) );
-        collision->calculateLocalInertia( mass, inertia );
-        btRigidBody::btRigidBodyConstructionInfo rbinfo( mass, motion, collision, inertia );
-        btRigidBody* body = new btRigidBody( rbinfo );
-        body->setLinearVelocity( osgbCollision::asBtVector3( _viewDir * 50. ) );
-        _world->addRigidBody( body );
-
-        // Set up for multithreading and triple buffering.
-        motion->registerTripleBuffer( &tBuf );
-        msl.push_back( motion );
-
-        // Unblock physics
-        if( _pt != NULL )
-            _pt->pause( false );
-    }
-};
-/* \endcond */
-
-
 osg::ref_ptr< osg::Node > modelNode( NULL );
 
 osg::Transform*
-makeModel( const std::string& fileName, btDynamicsWorld* bw, osg::Vec3 pos, InteractionManipulator* im )
+makeModel( const std::string& fileName, const int index, btDynamicsWorld* bw, osg::Vec3 pos, osgbInteraction::SaveRestoreHandler* srh )
 {
     osg::Matrix m( osg::Matrix::translate( pos ) );
     osg::ref_ptr< osgwTools::AbsoluteModelTransform > amt = new osgwTools::AbsoluteModelTransform;
@@ -219,16 +105,20 @@ makeModel( const std::string& fileName, btDynamicsWorld* bw, osg::Vec3 pos, Inte
     // Set up for multithreading and triple buffering.
     osgbDynamics::MotionState* motion = static_cast< osgbDynamics::MotionState* >( rb->getMotionState() );
     motion->registerTripleBuffer( &tBuf );
-    msl.push_back( motion );
+    msl.insert( motion );
 
-    im->setInitialTransform( rb, m );
+    std::ostringstream ostr;
+    ostr << fileName << index;
+    srh->add( ostr.str(), rb );
+
+    amt->setUserData( new osgbCollision::RefRigidBody( rb ) );
     bw->addRigidBody( rb );
 
     return( amt.release() );
 }
 
 osg::MatrixTransform*
-makeCow( btDynamicsWorld* bw, osg::Vec3 pos, InteractionManipulator* im )
+makeCow( btDynamicsWorld* bw, osg::Vec3 pos, osgbInteraction::SaveRestoreHandler* srh )
 {
     osg::Matrix m( osg::Matrix::rotate( 1.5, osg::Vec3( 0., 0., 1. ) ) *
         osg::Matrix::translate( pos ) );
@@ -257,20 +147,20 @@ makeCow( btDynamicsWorld* bw, osg::Vec3 pos, InteractionManipulator* im )
 
     // Set up for multithreading and triple buffering.
     motion->registerTripleBuffer( &tBuf );
-    msl.push_back( motion );
+    msl.insert( motion );
 
     btRigidBody* body = new btRigidBody( rb );
     body->setActivationState( DISABLE_DEACTIVATION );
-    im->setInitialTransform( body, m );
     bw->addRigidBody( body );
+
+    srh->add( "cow", body );
+    amt->setUserData( new osgbCollision::RefRigidBody( body ) );
 
     return( root );
 }
 
 
-int
-main( int argc,
-      char ** argv )
+int main( int argc, char** argv )
 {
     // Increase triple buffer size to hold lots of transform data.
     tBuf.resize( 16384 );
@@ -279,7 +169,11 @@ main( int argc,
     osgbDynamics::PhysicsThread pt( bulletWorld, &tBuf );
     osg::Group* root = new osg::Group;
 
-    InteractionManipulator* im = new InteractionManipulator( bulletWorld, root, &pt );
+    osg::Group* launchHandlerAttachPoint = new osg::Group;
+    root->addChild( launchHandlerAttachPoint );
+
+    osg::ref_ptr< osgbInteraction::SaveRestoreHandler > srh = new
+        osgbInteraction::SaveRestoreHandler;
 
     std::string fileName( "dice.osg" );
     if( argc > 1 )
@@ -293,6 +187,7 @@ main( int argc,
     float yStart( -3. );
     const float zInc( 2.5 );
     float z( 1.75 );
+    int index( 0 );
     while( xCount && yCount )
     {
         float x, y;
@@ -302,7 +197,7 @@ main( int argc,
             for( x=xStart, xIdx=0; xIdx<xCount; x+=2.25, xIdx++ )
             {
                 osg::Vec3 pos( x, y, z );
-                root->addChild( makeModel( fileName, bulletWorld, pos, im ) );
+                root->addChild( makeModel( fileName, index++, bulletWorld, pos, srh.get() ) );
             }
         }
         xStart += 1.25;
@@ -313,7 +208,7 @@ main( int argc,
     }
 
     // Add a cow
-    root->addChild( makeCow( bulletWorld, osg::Vec3( -11., 6., 4. ), im ) );
+    root->addChild( makeCow( bulletWorld, osg::Vec3( -11., 6., 4. ), srh.get() ) );
 
     // Make ground.
     {
@@ -326,13 +221,38 @@ main( int argc,
     osgViewer::Viewer viewer;
     viewer.setUpViewInWindow( 10, 30, 800, 600 );
     viewer.setSceneData( root );
-    viewer.addEventHandler( im );
 
     osgGA::TrackballManipulator* tb = new osgGA::TrackballManipulator;
     tb->setHomePosition( osg::Vec3( 0., -26., 12. ), osg::Vec3( 0., 0., 2. ), osg::Vec3( 0., 0., 1. ) ); 
     viewer.setCameraManipulator( tb );
 
     viewer.addEventHandler( new osgViewer::StatsHandler );
+
+    // Create the launch handler.
+    osgbInteraction::LaunchHandler* lh = new osgbInteraction::LaunchHandler(
+        bulletWorld, launchHandlerAttachPoint, viewer.getCamera() );
+    {
+        // Use a custom launch model: Sphere with radius 0.5 (instead of default 1.0).
+        osg::Geode* geode = new osg::Geode;
+        const double radius( .5 );
+        geode->addDrawable( osgwTools::makeGeodesicSphere( radius ) );
+        lh->setLaunchModel( geode, new btSphereShape( radius ) );
+        lh->setInitialVelocity( 50. );
+
+        viewer.addEventHandler( lh );
+    }
+
+    srh->setLaunchHandler( lh );
+    srh->capture();
+    viewer.addEventHandler( srh.get() );
+    osgbInteraction::DragHandler* dh = new osgbInteraction::DragHandler(
+        bulletWorld, viewer.getCamera() );
+    viewer.addEventHandler( dh );
+
+    lh->setThreadedPhysicsSupport( &pt, &tBuf, &msl );
+    srh->setThreadedPhysicsSupport( &pt );
+    dh->setThreadedPhysicsSupport( &pt );
+
 
     viewer.realize();
     pt.setProcessorAffinity( 0 );
@@ -345,8 +265,6 @@ main( int argc,
         TripleBufferMotionStateUpdate( msl, &tBuf );
 
         viewer.frame();
-
-        im->updateView( viewer.getCamera() );
     }
 
     pt.stopPhysics();
@@ -354,3 +272,16 @@ main( int argc,
 
     return( 0 );
 }
+
+
+
+/** \page multithreaded The multithreaded Example
+This examples demonstrates running the Bullet physics simultation in a separate thread.
+
+\section multithreadedcontrols UI Controls
+
+\li Delete: Reset the physics simulation to its initial state.
+\li ctrl-leftmouse: Select and drag an object.
+\li shift-leftmouse: Launches a sphere into the scene.
+
+*/

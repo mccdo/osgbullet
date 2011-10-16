@@ -1,3 +1,3 @@
-_osgBulletMakeDynamicsExe( slider
+_osgBulletMakeInteractionExe( slider
     slider.cpp
 )

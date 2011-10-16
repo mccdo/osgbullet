@@ -3,7 +3,7 @@ cmake_minimum_required( VERSION 2.8 )
 project( osgBullet )
 
 # Please keep in sync with Version.h
-set( OSGBULLET_VERSION 1.09.01 )
+set( OSGBULLET_VERSION 1.09.03 )
 
 
 set( CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/CMakeModules;${CMAKE_MODULE_PATH}" )

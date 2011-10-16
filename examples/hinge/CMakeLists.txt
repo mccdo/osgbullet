@@ -1,3 +1,3 @@
-_osgBulletMakeDynamicsExe( hinge
+_osgBulletMakeInteractionExe( hinge
     hinge.cpp
 )

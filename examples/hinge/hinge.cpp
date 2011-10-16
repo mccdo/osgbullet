@@ -29,14 +29,19 @@
 #include <osgbDynamics/CreationRecord.h>
 #include <osgbDynamics/RigidBody.h>
 #include <osgbCollision/CollisionShapes.h>
+#include <osgbCollision/RefBulletObject.h>
 #include <osgbDynamics/GroundPlane.h>
 #include <osgbCollision/GLDebugDrawer.h>
 #include <osgbCollision/Utils.h>
+#include <osgbInteraction/DragHandler.h>
+#include <osgbInteraction/LaunchHandler.h>
+#include <osgbInteraction/SaveRestoreHandler.h>
 
 #include <osgwTools/InsertRemove.h>
 #include <osgwTools/FindNamedNode.h>
 #include <osgwTools/GeometryOperation.h>
 #include <osgwTools/GeometryModifier.h>
+#include <osgwTools/Shapes.h>
 
 #include <btBulletDynamicsCommon.h>
 
@@ -62,107 +67,6 @@ unsigned int gateCollidesWith( COL_DEFAULT );
 unsigned int wallCollidesWith( COL_DEFAULT );
 unsigned int defaultCollidesWith( COL_GATE | COL_WALL | COL_DEFAULT );
 
-
-/* \cond */
-class InteractionManipulator : public osgGA::GUIEventHandler
-{
-public:
-    InteractionManipulator( btDiscreteDynamicsWorld* world, osg::Group* sg )
-      : _world( world ),
-        _sg( sg )
-    {}
-
-    void setInitialTransform( btRigidBody* rb, osg::Matrix m )
-    {
-        _posMap[ rb ] = m;
-    }
-
-    void updateView( osg::Camera* camera )
-    {
-        osg::Vec3 center, up;
-        camera->getViewMatrixAsLookAt( _viewPos, center, up );
-        _viewDir = center - _viewPos;
-    }
-
-    bool handle( const osgGA::GUIEventAdapter& ea, osgGA::GUIActionAdapter& )
-    {
-        switch( ea.getEventType() )
-        {
-            case osgGA::GUIEventAdapter::KEYUP:
-            {
-                if (ea.getKey()==osgGA::GUIEventAdapter::KEY_BackSpace)
-                {
-                    reset();
-                    return true;
-                }
-                if (ea.getKey()==osgGA::GUIEventAdapter::KEY_Return)
-                {
-                    fire();
-                    return true;
-                }
-
-                return false;
-            }
-
-            default:
-            break;
-        }
-        return false;
-    }
-
-protected:
-    btDiscreteDynamicsWorld* _world;
-    osg::ref_ptr< osg::Group > _sg;
-
-    osg::Vec3 _viewPos, _viewDir;
-
-    typedef std::map< btRigidBody*, osg::Matrix > PosMap;
-    PosMap _posMap;
-
-    typedef std::list< osg::ref_ptr< osg::Node > > NodeList;
-    NodeList _nodeList;
-
-    void reset()
-    {
-        PosMap::iterator it;
-        for( it=_posMap.begin(); it!=_posMap.end(); it++ )
-        {
-            btRigidBody* rb = it->first;
-            btTransform t = osgbCollision::asBtTransform( it->second );
-            rb->setWorldTransform( t );
-        }
-    }
-
-    void fire()
-    {
-        float radius( .2 );
-        const btVector3 velocity = osgbCollision::asBtVector3( _viewDir * 100. * radius );
-
-        osg::Sphere* sp = new osg::Sphere( osg::Vec3( 0., 0., 0. ), radius );
-        osg::ShapeDrawable* shape = new osg::ShapeDrawable( sp );
-        osg::Geode* geode = new osg::Geode();
-        geode->addDrawable( shape );
-        osg::ref_ptr< osgwTools::AbsoluteModelTransform > amt = new osgwTools::AbsoluteModelTransform;
-        amt->addChild( geode );
-        _sg->addChild( amt.get() );
-
-        btSphereShape* collision = new btSphereShape( radius );
-
-        osgbDynamics::MotionState* motion = new osgbDynamics::MotionState;
-        motion->setTransform( amt.get() );
-
-        motion->setParentTransform( osg::Matrix::translate( _viewPos ) );
-
-        btScalar mass( 0.2 );
-        btVector3 inertia( btVector3( 0., 0., 0. ) );
-        collision->calculateLocalInertia( mass, inertia );
-        btRigidBody::btRigidBodyConstructionInfo rbinfo( mass, motion, collision, inertia );
-        btRigidBody* body = new btRigidBody( rbinfo );
-        body->setLinearVelocity( velocity );
-        _world->addRigidBody( body, COL_DEFAULT, defaultCollidesWith );
-    }
-};
-/* \endcond */
 
 
 //
@@ -254,7 +158,7 @@ osg::Node* fixWalls( osg::Node* wallsNode )
 
 
 
-void makeStaticObject( btDiscreteDynamicsWorld* bw, InteractionManipulator* im, osg::Node* node, const osg::Matrix& m )
+void makeStaticObject( btDiscreteDynamicsWorld* bw, osg::Node* node, const osg::Matrix& m )
 {
     osg::ref_ptr< osgbDynamics::CreationRecord > cr = new osgbDynamics::CreationRecord;
     cr->_sceneGraph = node;
@@ -266,7 +170,7 @@ void makeStaticObject( btDiscreteDynamicsWorld* bw, InteractionManipulator* im, 
 }
 
 btRigidBody* gateBody;
-osg::Transform* makeGate( btDiscreteDynamicsWorld* bw, InteractionManipulator* im, osg::Node* node, const osg::Matrix& m )
+osg::Transform* makeGate( btDiscreteDynamicsWorld* bw, osgbInteraction::SaveRestoreHandler* srh, osg::Node* node, const osg::Matrix& m )
 {
     osgwTools::AbsoluteModelTransform* amt = new osgwTools::AbsoluteModelTransform;
     amt->setDataVariance( osg::Object::DYNAMIC );
@@ -285,9 +189,10 @@ osg::Transform* makeGate( btDiscreteDynamicsWorld* bw, InteractionManipulator* i
     bw->addRigidBody( rb, COL_GATE, gateCollidesWith );
     rb->setActivationState( DISABLE_DEACTIVATION );
 
-    // Save RB in global, and also record its initial position in the InteractionManipulator (for reset)
+    // Save RB in global, as AMT UserData (for DragHandler), and in SaveRestoreHandler.
     gateBody = rb;
-    im->setInitialTransform( rb, m );
+    amt->setUserData( new osgbCollision::RefRigidBody( rb ) );
+    srh->add( "gate", rb );
 
     return( amt );
 }
@@ -331,7 +236,8 @@ int main( int argc, char** argv )
     btDiscreteDynamicsWorld* bulletWorld = initPhysics();
     osg::Group* root = new osg::Group;
 
-    InteractionManipulator* im = new InteractionManipulator( bulletWorld, root );
+    osg::Group* launchHandlerAttachPoint = new osg::Group;
+    root->addChild( launchHandlerAttachPoint );
 
 
     osg::ref_ptr< osg::Node > rootModel = osgDB::readNodeFile( "GateWall.flt" );
@@ -364,11 +270,14 @@ int main( int argc, char** argv )
     // END WALL FIX
 
 
+    osg::ref_ptr< osgbInteraction::SaveRestoreHandler > srh = new
+        osgbInteraction::SaveRestoreHandler;
+
     // Make Bullet rigid bodies and collision shapes for the gate...
-    makeGate( bulletWorld, im, gateNode, gateXform );
+    makeGate( bulletWorld, srh.get(), gateNode, gateXform );
     // ...and the two walls.
-    makeStaticObject( bulletWorld, im, wallsNode, wallXform );
-    makeStaticObject( bulletWorld, im, otherWall, otherWallXform );
+    makeStaticObject( bulletWorld, wallsNode, wallXform );
+    makeStaticObject( bulletWorld, otherWall, otherWallXform );
 
     // Add ground
     const osg::Vec4 plane( 0., 0., 1., 0. );
@@ -404,14 +313,37 @@ int main( int argc, char** argv )
     osgViewer::Viewer viewer( arguments );
     viewer.setUpViewInWindow( 30, 30, 768, 480 );
     viewer.setSceneData( root );
-    viewer.addEventHandler( im );
 
     osgGA::TrackballManipulator* tb = new osgGA::TrackballManipulator;
     tb->setHomePosition( osg::Vec3( 0., -8., 2. ), osg::Vec3( 0., 0., 1. ), osg::Vec3( 0., 0., 1. ) ); 
     viewer.setCameraManipulator( tb );
     viewer.getCamera()->setClearColor( osg::Vec4( .5, .5, .5, 1. ) );
-
     viewer.realize();
+
+    // Create the launch handler.
+    osgbInteraction::LaunchHandler* lh = new osgbInteraction::LaunchHandler(
+        bulletWorld, launchHandlerAttachPoint, viewer.getCamera() );
+    {
+        // Use a custom launch model: Sphere with radius 0.2 (instead of default 1.0).
+        osg::Geode* geode = new osg::Geode;
+        const double radius( .2 );
+        geode->addDrawable( osgwTools::makeGeodesicSphere( radius ) );
+        lh->setLaunchModel( geode, new btSphereShape( radius ) );
+        lh->setInitialVelocity( 20. );
+
+        // Also add the proper collision masks
+        lh->setCollisionFlags( COL_DEFAULT, defaultCollidesWith );
+
+        viewer.addEventHandler( lh );
+    }
+
+    srh->setLaunchHandler( lh );
+    srh->capture();
+    viewer.addEventHandler( srh.get() );
+    viewer.addEventHandler( new osgbInteraction::DragHandler(
+        bulletWorld, viewer.getCamera() ) );
+
+
     double prevSimTime = 0.;
     while( !viewer.done() )
     {
@@ -429,8 +361,6 @@ int main( int argc, char** argv )
         }
 
         viewer.frame();
-
-        im->updateView( viewer.getCamera() );
     }
 
     return( 0 );
@@ -442,4 +372,11 @@ int main( int argc, char** argv )
 Demonstrates coding directly to the Bullet API to create a hinge constraint.
 
 Use the --debug command line option to enable debug collision object display.
+
+\section hingecontrols UI Controls
+
+\li Delete: Reset the physics simulation to its initial state.
+\li ctrl-leftmouse: Select and drag an object.
+\li shift-leftmouse: Launches a sphere into the scene.
+
 */

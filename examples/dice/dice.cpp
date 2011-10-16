@@ -283,3 +283,9 @@ main( int argc,
 
     return( 0 );
 }
+
+
+/** \page diceexample The Mandatory Dice Example
+No physics-based project would be complete without a dice example. Use the
+left mouse button to chake the dice shaker.
+*/

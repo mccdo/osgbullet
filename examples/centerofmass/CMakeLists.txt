@@ -1,3 +1,3 @@
-_osgBulletMakeDynamicsExe( centerofmass
+_osgBulletMakeInteractionExe( centerofmass
     centerofmass.cpp
 )

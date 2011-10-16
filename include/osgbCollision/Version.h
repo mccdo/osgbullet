@@ -31,7 +31,7 @@ namespace osgbCollision {
 // Please keep in sync with top-level CMakeLists.txt OSGBULLET_VERSION variable.
 #define OSGBCOLLISION_MAJOR_VERSION 1
 #define OSGBCOLLISION_MINOR_VERSION 9
-#define OSGBCOLLISION_SUB_VERSION 1
+#define OSGBCOLLISION_SUB_VERSION 3
 
 // C preprocessor integrated version number.
 // The form is Mmmss, where:
@@ -120,10 +120,10 @@ that wrap collision shape and \ref osgbDynamics::MotionState "MotionState" creat
 
 Other features include the following.
 
-\li An implementation of \c btMotionState for synchronizing the transformation
-of an OSG subgraph with a Bullet collision object.
 \li Support for running physics and rendering in separate threads.
 \li Supports using Bullet for both rigid body dynamics as well as collision detection only.
+\li A set of osgGA-based GUIEventHandlers for interacting with the physics simulation, including
+the osgbInteraction::HandNode class to support data glove usage.
 \li Routines for creating Bullet collision shapes from OSG geometry.
 \li An OSG-based implementation of \c \c btIDebugDraw.
 \li OSG reference counting for Bullet objects.
@@ -133,9 +133,14 @@ of an OSG subgraph with a Bullet collision object.
 \section appsexamples Applications and Examples
 
 \li The \ref osgbpp "osgbpp" application allows you to preview a physics simultation on a model.
-\li The \ref collision "collision" example demonstrates using osgBullet and Bullet for collision detection only.
 \li The \ref examplecom "centerofmass" example demonstrates application-specified center of mass.
-
+\li The \ref collision "collision" example demonstrates using osgBullet and Bullet for collision detection only.
+\li The \ref diceexample "dice" example, just for fun.
+\li The \ref handphysicsexample "hand physics" example demonstrates using the \c HandNode to interact with the scene.
+\li The \ref hingelowlevel "hinge" example demonstrates creating a hinge constraint.
+\li The \ref multithreaded "multithreaded" example demonstrates running Bullet in a separate thread.
+\li The \ref saverestoreexample "saverestore" example demonstrates saving/restoring a physics simultation to/from disk.
+\li The \ref sliderlowlevel "slider" example demonstrates creating a slider constraint.
 
 \section libraries Libraries
 
@@ -151,7 +156,10 @@ Rigid body dynamics and constraints support.
 
 \subsection osgbinteraction osgbInteraction
 
-Support for an articulatable hand model. Support for the P5 data glove.
+Support for user interaction with the physics simultation, such as dragging
+objects, resetting the simulation to a save point, and launching models into
+the scene. An articulatable hand model supports an immersive simultation
+experience, and includes aupport for the P5 data glove.
 
 \subsection osgdbosgbdynamics osgdb_osgbDynamics
 

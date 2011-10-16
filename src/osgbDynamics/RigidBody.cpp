@@ -94,11 +94,21 @@ btRigidBody* createRigidBody( osgbDynamics::CreationRecord* cr )
             shape = osgbCollision::btTriMeshCollisionShapeFromOSG( tempMtRoot.get() );
             break;
         case CONVEX_TRIANGLEMESH_SHAPE_PROXYTYPE:
-            shape = osgbCollision::btConvexTriMeshCollisionShapeFromOSG( tempMtRoot.get() );
+        {
+            btConvexTriangleMeshShape* cShape = osgbCollision::btConvexTriMeshCollisionShapeFromOSG( tempMtRoot.get() );
+            if( cr->_marginSet )
+                cShape->setMargin( cr->_margin );
+            shape = cShape;
             break;
+        }
         case CONVEX_HULL_SHAPE_PROXYTYPE:
-            shape = osgbCollision::btConvexHullCollisionShapeFromOSG( tempMtRoot.get() );
+        {
+            btConvexHullShape* cShape = osgbCollision::btConvexHullCollisionShapeFromOSG( tempMtRoot.get() );
+            if( cr->_marginSet )
+                cShape->setMargin( cr->_margin );
+            shape = cShape;
             break;
+        }
         }
     }
     else
