@@ -154,8 +154,10 @@ osg::Matrix MotionState::computeOsgWorldToCOLocal() const
     // ...and accound for center of mass and scale.
     osg::Matrix ol2col = computeOsgLocalToCOLocal();
 
+    osg::Matrix scale = osg::Matrix::scale( _scale );
+
     // Return the concatenation of these.
-    return( w2l * ol2col );
+    return( w2l * ol2col * scale );
 }
 osg::Matrix MotionState::computeOsgWorldToBulletWorld() const
 {

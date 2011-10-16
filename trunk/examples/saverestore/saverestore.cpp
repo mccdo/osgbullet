@@ -227,9 +227,15 @@ int main( int argc, char** argv )
 }
 
 
-/** \page saverestore Save and Restore Example
+/** \page saverestoreexample Save and Restore Example
 
 Demonstrates saving and restoring osgBullet data to/from disk.
 
 Use the --debug command line option to enable debug collision object display.
+
+\section saverestorecontrols UI Controls
+
+\li Delete: Reset the physics simulation to its initial state.
+\li ctrl-leftmouse: Select and drag an object.
+
 */

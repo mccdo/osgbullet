@@ -691,7 +691,7 @@ int main( int argc, char** argv )
     //hn->setDebug( true );
 
     osgViewer::Viewer viewer;
-    //viewer.setUpViewInWindow( 10, 30, 960, 600 );
+    viewer.setUpViewInWindow( 30, 30, 768, 480 );
     viewer.setSceneData( root.get() );
     viewer.addEventHandler( new osgbInteraction::VirtualHandTestEventHandler( hn.get() ) );
 
@@ -771,3 +771,22 @@ int main( int argc, char** argv )
     return( 0 );
 }
 
+
+/** \page handphysicsexample The Hand Example
+\c handphysics loads a scene from a configuration file and allows the user
+to interact with the scene using the osgbInteraction::HandNode.
+
+You can use the \c HandNode with keyboard controls or with a P5 data glove.
+To use the P5 data glove, you must example P5 usage in osgBullet's CMake
+system, then rebuild osgBullet with P5 support.
+
+For keyboard controls, see osgbInteraction::VirtualHandTestEventHandler.
+
+An example configuration file, \c concave.txt, is in the \c data directory.
+Run the example like this:
+
+\code
+> handphysics concave.txt
+\endcode
+
+*/

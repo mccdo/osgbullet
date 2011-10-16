@@ -19,18 +19,32 @@
  *************** <auto-copyright.pl END do not edit this line> ***************/
 
 #include <osgDB/ReadFile>
+#include <osgDB/FileUtils>
 #include <osgViewer/Viewer>
 #include <osgGA/TrackballManipulator>
 #include <osg/MatrixTransform>
 #include <osg/ShapeDrawable>
 #include <osg/Geode>
+#include <osgUtil/Optimizer>
+#include <osg/ComputeBoundsVisitor>
+
+#include <osg/Light>
+#include <osg/LightSource>
+#include <osg/Material>
+#include <osg/LightModel>
+#include <osgShadow/ShadowedScene>
+#include <osgShadow/StandardShadowMap>
 
 #include <osgbDynamics/MotionState.h>
 #include <osgbCollision/CollisionShapes.h>
+#include <osgbCollision/RefBulletObject.h>
 #include <osgbDynamics/RigidBody.h>
 #include <osgbDynamics/GroundPlane.h>
 #include <osgbCollision/GLDebugDrawer.h>
 #include <osgbCollision/Utils.h>
+#include <osgbInteraction/DragHandler.h>
+#include <osgbInteraction/LaunchHandler.h>
+#include <osgbInteraction/SaveRestoreHandler.h>
 
 #include <osgwTools/InsertRemove.h>
 #include <osgwTools/FindNamedNode.h>
@@ -60,110 +74,9 @@ unsigned int standCollidesWith( COL_DEFAULT );
 unsigned int defaultCollidesWith( COL_DRAWER | COL_STAND | COL_DEFAULT );
 
 
-/* \cond */
-class InteractionManipulator : public osgGA::GUIEventHandler
-{
-public:
-    InteractionManipulator( btDiscreteDynamicsWorld* world, osg::Group* sg )
-      : _world( world ),
-        _sg( sg )
-    {}
-
-    void setInitialTransform( btRigidBody* rb, osg::Matrix m )
-    {
-        _posMap[ rb ] = m;
-    }
-
-    void updateView( osg::Camera* camera )
-    {
-        osg::Vec3 center, up;
-        camera->getViewMatrixAsLookAt( _viewPos, center, up );
-        _viewDir = center - _viewPos;
-    }
-
-    bool handle( const osgGA::GUIEventAdapter& ea, osgGA::GUIActionAdapter& )
-    {
-        switch( ea.getEventType() )
-        {
-            case osgGA::GUIEventAdapter::KEYUP:
-            {
-                if (ea.getKey()==osgGA::GUIEventAdapter::KEY_BackSpace)
-                {
-                    reset();
-                    return true;
-                }
-                if (ea.getKey()==osgGA::GUIEventAdapter::KEY_Return)
-                {
-                    fire();
-                    return true;
-                }
-
-                return false;
-            }
-
-            default:
-            break;
-        }
-        return false;
-    }
-
-protected:
-    btDiscreteDynamicsWorld* _world;
-    osg::ref_ptr< osg::Group > _sg;
-
-    osg::Vec3 _viewPos, _viewDir;
-
-    typedef std::map< btRigidBody*, osg::Matrix > PosMap;
-    PosMap _posMap;
-
-    typedef std::list< osg::ref_ptr< osg::Node > > NodeList;
-    NodeList _nodeList;
-
-    void reset()
-    {
-        PosMap::iterator it;
-        for( it=_posMap.begin(); it!=_posMap.end(); it++ )
-        {
-            btRigidBody* rb = it->first;
-            btTransform t = osgbCollision::asBtTransform( it->second );
-            rb->setWorldTransform( t );
-        }
-    }
-
-    void fire()
-    {
-        float radius( .15 );
-        const btVector3 velocity = osgbCollision::asBtVector3( _viewDir * 100. * radius );
-
-        osg::Sphere* sp = new osg::Sphere( osg::Vec3( 0., 0., 0. ), radius );
-        osg::ShapeDrawable* shape = new osg::ShapeDrawable( sp );
-        osg::Geode* geode = new osg::Geode();
-        geode->addDrawable( shape );
-        osg::ref_ptr< osgwTools::AbsoluteModelTransform > amt = new osgwTools::AbsoluteModelTransform;
-        amt->addChild( geode );
-        _sg->addChild( amt.get() );
-
-        btSphereShape* collision = new btSphereShape( radius );
-
-        osgbDynamics::MotionState* motion = new osgbDynamics::MotionState;
-        motion->setTransform( amt.get() );
-
-        motion->setParentTransform( osg::Matrix::translate( _viewPos ) );
-
-        btScalar mass( 1. );
-        btVector3 inertia( btVector3( 0., 0., 0. ) );
-        collision->calculateLocalInertia( mass, inertia );
-        btRigidBody::btRigidBodyConstructionInfo rbinfo( mass, motion, collision, inertia );
-        btRigidBody* body = new btRigidBody( rbinfo );
-        body->setLinearVelocity( velocity );
-        _world->addRigidBody( body, COL_DEFAULT, defaultCollidesWith );
-    }
-};
-/* \endcond */
-
 
 btRigidBody* standBody;
-void makeStaticObject( btDiscreteDynamicsWorld* bw, InteractionManipulator* im, osg::Node* node, const osg::Matrix& m )
+void makeStaticObject( btDiscreteDynamicsWorld* bw, osg::Node* node, const osg::Matrix& m )
 {
     osg::ref_ptr< osgbDynamics::CreationRecord > cr = new osgbDynamics::CreationRecord;
     cr->_sceneGraph = node;
@@ -179,7 +92,7 @@ void makeStaticObject( btDiscreteDynamicsWorld* bw, InteractionManipulator* im, 
 }
 
 btRigidBody* drawerBody;
-osg::Transform* makeDrawer( btDiscreteDynamicsWorld* bw, InteractionManipulator* im, osg::Node* node, const osg::Matrix& m )
+osg::Transform* makeDrawer( btDiscreteDynamicsWorld* bw, osgbInteraction::SaveRestoreHandler* srh, osg::Node* node, const osg::Matrix& m )
 {
     osgwTools::AbsoluteModelTransform* amt = new osgwTools::AbsoluteModelTransform;
     amt->setDataVariance( osg::Object::DYNAMIC );
@@ -198,9 +111,10 @@ osg::Transform* makeDrawer( btDiscreteDynamicsWorld* bw, InteractionManipulator*
     bw->addRigidBody( rb, COL_DRAWER, drawerCollidesWith );
     rb->setActivationState( DISABLE_DEACTIVATION );
 
-    // Save RB in global, and also record its initial position in the InteractionManipulator (for reset)
+    // Save RB in global, as AMT UserData (for DragHandler), and in SaveRestoreHandler.
     drawerBody = rb;
-    im->setInitialTransform( rb, m );
+    amt->setUserData( new osgbCollision::RefRigidBody( rb ) );
+    srh->add( "gate", rb );
 
     return( amt );
 }
@@ -237,6 +151,68 @@ osg::Node* findNamedNode( osg::Node* model, const std::string& name, osg::Matrix
     return( fnn._napl[ 0 ].first );
 }
 
+void simpleLighting( osg::Group* root )
+{
+    osg::StateSet* rootState = root->getOrCreateStateSet();
+    rootState->setMode( GL_LIGHT0, osg::StateAttribute::ON );
+
+    osg::LightSource* ls = new osg::LightSource();
+    ls->setReferenceFrame( osg::LightSource::RELATIVE_RF );
+    root->addChild( ls );
+
+    osg::Light* light = new osg::Light;
+    light->setLightNum( 0 );
+    light->setAmbient( osg::Vec4( 1., 1., 1., 1. ) );
+    light->setDiffuse( osg::Vec4( 1., 1., 1., 1. ) );
+    light->setSpecular( osg::Vec4( 1., 1., 1., 1. ) );
+    light->setPosition( osg::Vec4( -.5, -.4, 2., 1. ) );
+    ls->setLight( light );
+
+    osg::LightModel* lm = new osg::LightModel;
+    lm->setAmbientIntensity( osg::Vec4( 0., 0., 0., 1. ) );
+    lm->setColorControl( osg::LightModel::SEPARATE_SPECULAR_COLOR );
+    rootState->setAttribute( lm, osg::StateAttribute::ON );
+}
+
+void nightstandMaterial( osg::Node* root )
+{
+    osg::StateSet* rootState = root->getOrCreateStateSet();
+
+    osg::Material* mat = new osg::Material;
+    mat->setAmbient( osg::Material::FRONT, osg::Vec4( .1, .1, .1, 1. ) );
+    mat->setDiffuse( osg::Material::FRONT, osg::Vec4( 1., 1., 1., 1. ) );
+    mat->setSpecular( osg::Material::FRONT, osg::Vec4( 0.6, 0.6, 0.5, 1. ) );
+    mat->setShininess( osg::Material::FRONT, 16.f );
+    rootState->setAttribute( mat, osg::StateAttribute::ON | osg::StateAttribute::OVERRIDE );
+}
+
+void groundMaterial( osg::Node* root )
+{
+    osg::StateSet* rootState = root->getOrCreateStateSet();
+
+    osg::Material* mat = new osg::Material;
+    mat->setAmbient( osg::Material::FRONT, osg::Vec4( .1, .1, .1, 1. ) );
+    mat->setDiffuse( osg::Material::FRONT, osg::Vec4( .75, .75, .75, 1. ) );
+    mat->setSpecular( osg::Material::FRONT, osg::Vec4( 0., 0., 0., 1. ) );
+    rootState->setAttribute( mat, osg::StateAttribute::ON | osg::StateAttribute::OVERRIDE );
+}
+
+void launchMaterial( osg::Node* root )
+{
+    osg::StateSet* rootState = root->getOrCreateStateSet();
+
+    osg::Material* mat = new osg::Material;
+    mat->setAmbient( osg::Material::FRONT, osg::Vec4( .2, .2, .3, 1. ) );
+    mat->setDiffuse( osg::Material::FRONT, osg::Vec4( .4, .4, .5, 1. ) );
+    mat->setSpecular( osg::Material::FRONT, osg::Vec4( .4, .4, .4, 1. ) );
+    mat->setShininess( osg::Material::FRONT, 30.f );
+    rootState->setAttribute( mat, osg::StateAttribute::ON | osg::StateAttribute::OVERRIDE );
+}
+
+#define SHADOW_CASTER 0x1
+#define SHADOW_RECEIVER 0x2
+#define SHADOW_BOTH (SHADOW_CASTER|SHADOW_RECEIVER)
+
 int main( int argc, char** argv )
 {
     osg::ArgumentParser arguments( &argc, argv );
@@ -245,7 +221,12 @@ int main( int argc, char** argv )
     btDiscreteDynamicsWorld* bulletWorld = initPhysics();
     osg::Group* root = new osg::Group;
 
-    InteractionManipulator* im = new InteractionManipulator( bulletWorld, root );
+    simpleLighting( root );
+
+    osg::Group* launchHandlerAttachPoint = new osg::Group;
+    launchHandlerAttachPoint->setNodeMask( SHADOW_BOTH );
+    root->addChild( launchHandlerAttachPoint );
+    launchMaterial( launchHandlerAttachPoint );
 
 
     osg::ref_ptr< osg::Node > rootModel = osgDB::readNodeFile( "NightStand.flt" );
@@ -254,6 +235,8 @@ int main( int argc, char** argv )
         osg::notify( osg::FATAL ) << "hinge: Can't load data file \"NightStand.flt\"." << std::endl;
         return( 1 );
     }
+    rootModel->setNodeMask( SHADOW_BOTH );
+    nightstandMaterial( rootModel.get() );
 
     root->addChild( rootModel.get() );
 
@@ -265,31 +248,39 @@ int main( int argc, char** argv )
     if( ( standNode == NULL ) || ( drawerNode == NULL ) )
         return( 1 );
 
-    // Open the drawer slightly.
-    // TBD this is a hardcoded axis/distance.
-    drawerXform *= osg::Matrix::translate( 0., -.2, 0. );
+    osg::ref_ptr< osgbInteraction::SaveRestoreHandler > srh = new
+        osgbInteraction::SaveRestoreHandler;
 
     // Make Bullet rigid bodies and collision shapes for the drawer...
-    makeDrawer( bulletWorld, im, drawerNode, drawerXform );
+    makeDrawer( bulletWorld, srh.get(), drawerNode, drawerXform );
     // ...and the stand.
-    makeStaticObject( bulletWorld, im, standNode, standXform );
+    makeStaticObject( bulletWorld, standNode, standXform );
 
 
     // Add ground
     const osg::Vec4 plane( 0., 0., 1., 0. );
-    root->addChild( osgbDynamics::generateGroundPlane( plane,
-        bulletWorld, NULL, COL_DEFAULT, defaultCollidesWith ) );
+    osg::Node* groundRoot = osgbDynamics::generateGroundPlane( plane,
+        bulletWorld, NULL, COL_DEFAULT, defaultCollidesWith );
+    groundRoot->setNodeMask( SHADOW_RECEIVER );
+    groundMaterial( groundRoot );
+    root->addChild( groundRoot );
     
 
     // create slider constraint between drawer and groundplane and add it to world
     // Note: Bullet slider is always along x axis. Alter this behavior with reference frames.
+    btSliderConstraint* slider;
+    float drawerMinLimit;
+    btVector3 startPos;
     {
         // Model-specific constants.
         // TBD Should obtain these from model metadata or user input:
         const osg::Vec3 drawerAxis( 0., 1., 0. );
-        const float drawerMinLimit( -1.f );
         const float drawerMaxLimit( 0.f );
 
+        osg::ComputeBoundsVisitor cbv;
+        drawerNode->accept( cbv );
+        const osg::BoundingBox& bb = cbv.getBoundingBox();
+        drawerMinLimit = -( bb.yMax() - bb.yMin() );
 
         // Compute a matrix that transforms the stand's collision shape origin and x axis
         // to the drawer's origin and drawerAxis.
@@ -320,10 +311,13 @@ int main( int argc, char** argv )
             axisRotate * invDrawerCOM );
 
 
-        btSliderConstraint* slider = new btSliderConstraint( *drawerBody, *standBody, drawerFrame, standFrame, false );
+        slider = new btSliderConstraint( *drawerBody, *standBody, drawerFrame, standFrame, false );
         slider->setLowerLinLimit( drawerMinLimit );
 	    slider->setUpperLinLimit( drawerMaxLimit );
         bulletWorld->addConstraint( slider, true );
+
+        btTransform m = drawerBody->getWorldTransform();
+        startPos = m.getOrigin();
     }
 
 
@@ -333,19 +327,65 @@ int main( int argc, char** argv )
         dbgDraw = new osgbCollision::GLDebugDrawer();
         dbgDraw->setDebugMode( ~btIDebugDraw::DBG_DrawText );
         bulletWorld->setDebugDrawer( dbgDraw );
-        root->addChild( dbgDraw->getSceneGraph() );
+        osg::Node* dbgRoot = dbgDraw->getSceneGraph();
+        dbgRoot->setNodeMask( ~SHADOW_BOTH );
+        root->addChild( dbgRoot );
+    }
+
+
+    osgShadow::ShadowedScene* sceneRoot = new osgShadow::ShadowedScene;
+    sceneRoot->setCastsShadowTraversalMask( SHADOW_CASTER );
+    sceneRoot->setReceivesShadowTraversalMask( SHADOW_RECEIVER );
+    sceneRoot->addChild( root );
+    {
+        osgShadow::StandardShadowMap* sTex = new osgShadow::StandardShadowMap;
+
+        // Workaround the fact that OSG StandardShadowMap fragment shader
+        // doesn't add in the specular color.
+        osg::Shader* shader = new osg::Shader( osg::Shader::FRAGMENT );
+        shader->setName( "ShadowMap-Main.fs" );
+        shader->loadShaderSourceFromFile( osgDB::findDataFile( shader->getName() ) );
+        sTex->setMainFragmentShader( shader );
+
+        sceneRoot->setShadowTechnique( sTex );
     }
 
 
     osgViewer::Viewer viewer( arguments );
     viewer.setUpViewInWindow( 30, 30, 768, 480 );
-    viewer.setSceneData( root );
-    viewer.addEventHandler( im );
+    viewer.setSceneData( sceneRoot );
 
     osgGA::TrackballManipulator* tb = new osgGA::TrackballManipulator;
-    tb->setHomePosition( osg::Vec3( 1., -7., 2. ), osg::Vec3( 0., 0., 1. ), osg::Vec3( 0., 0., 1. ) ); 
+    tb->setHomePosition( osg::Vec3( .8, -5., 1.6 ), osg::Vec3( 0., 0., .5 ), osg::Vec3( 0., 0., 1. ) ); 
     viewer.setCameraManipulator( tb );
     viewer.getCamera()->setClearColor( osg::Vec4( .5, .5, .5, 1. ) );
+
+    // Create the launch handler.
+    osgbInteraction::LaunchHandler* lh = new osgbInteraction::LaunchHandler(
+        bulletWorld, launchHandlerAttachPoint, viewer.getCamera() );
+    {
+        // Use a custom launch model: A scaled-down teapot.
+        osg::ref_ptr< osg::MatrixTransform > mt = new osg::MatrixTransform(
+            osg::Matrix::scale( 0.2, 0.2, 0.2 ) );
+        mt->addChild( osgDB::readNodeFile( "teapot.osg" ) );
+        osgUtil::Optimizer opt;
+        opt.optimize( mt.get(), osgUtil::Optimizer::FLATTEN_STATIC_TRANSFORMS );
+        mt->getOrCreateStateSet()->setMode( GL_NORMALIZE, osg::StateAttribute::ON );
+
+        lh->setLaunchModel( mt.get() );
+        lh->setInitialVelocity( 10. );
+
+        // Also add the proper collision masks
+        lh->setCollisionFlags( COL_DEFAULT, defaultCollidesWith );
+
+        viewer.addEventHandler( lh );
+    }
+
+    srh->setLaunchHandler( lh );
+    srh->capture();
+    viewer.addEventHandler( srh.get() );
+    viewer.addEventHandler( new osgbInteraction::DragHandler(
+        bulletWorld, viewer.getCamera() ) );
 
     viewer.realize();
     double prevSimTime = 0.;
@@ -366,7 +406,18 @@ int main( int argc, char** argv )
 
         viewer.frame();
 
-        im->updateView( viewer.getCamera() );
+        if( slider->isEnabled() )
+        {
+            btTransform m = drawerBody->getWorldTransform();
+            btVector3 v = m.getOrigin();
+            if( ( v[ 1 ] - startPos[ 1 ] ) < drawerMinLimit )
+            {
+                slider->setEnabled( false );
+                bulletWorld->removeConstraint( slider );
+                drawerBody->getBroadphaseProxy()->m_collisionFilterGroup = COL_DEFAULT;
+                drawerBody->getBroadphaseProxy()->m_collisionFilterMask = defaultCollidesWith;
+            }
+        }
     }
 
     return( 0 );
@@ -378,4 +429,11 @@ int main( int argc, char** argv )
 Demonstrates coding directly to the Bullet API to create a slider constraint.
 
 Use the --debug command line option to enable debug collision object display.
+
+\section slidercontrols UI Controls
+
+\li Delete: Reset the physics simulation to its initial state.
+\li ctrl-leftmouse: Select and drag an object.
+\li shift-leftmouse: Launches a sphere into the scene.
+
 */

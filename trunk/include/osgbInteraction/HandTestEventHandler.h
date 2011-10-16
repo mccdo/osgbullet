@@ -65,6 +65,18 @@ class OSGBINTERACTION_EXPORT VirtualHandTestEventHandler : public osgGA::GUIEven
 public:
     VirtualHandTestEventHandler( osgbInteraction::HandNode* hn );
 
+    /** \brief Handle events.
+    \li Home: Go to the default position.
+    \li End: Hook the index finger.
+    \li PgUp: Point the index finger/
+    \li PgDn: Make a fist.
+    \li F1-F5: Specify a single finger to articulate.
+    \li Scroll: With shift, ctrl, and alt, exercises articulations for the selected finger.
+    \li Right mouse drag + ctrl: xy motion.
+    \li Right mouse drag + shift: z motion.
+    \li Left mouse drag + ctrl: heading and pitch
+    \li Left mouse drag + shift: roll
+    */
     bool handle( const osgGA::GUIEventAdapter& ea, osgGA::GUIActionAdapter& );
 
 protected:

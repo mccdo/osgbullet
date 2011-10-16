@@ -398,9 +398,8 @@ int main( int argc, char* argv[] )
 
     osgViewer::Viewer::Cameras cams;
     viewer.getCameras( cams );
-    osg::ref_ptr< osgbInteraction::DragHandler > dh =
-        new osgbInteraction::DragHandler( dynamicsWorld, cams[ 0 ] );
-    viewer.addEventHandler( dh.get() );
+    viewer.addEventHandler( new osgbInteraction::DragHandler(
+        dynamicsWorld, cams[ 0 ] ) );
 
     // Do this now, before getting the start time, so that it doesn't
     // negatively impact the first frame of the physics sim.
@@ -443,7 +442,8 @@ Use osgbpp to create a rigid body from \c dice.osg, one of the osgBullet data fi
 C:\Projects>osgbpp dice.osg
 \endcode
 
-To see the model fall again, hit the Delete key.
+To see the model fall again, hit the Delete key. To drag the model, hold
+down the control key and use the left mouse button.
 
 By default, osgbpp creates a Bullet box collision shape. You can visualize the
 collision shape with the --debug command line option:
@@ -482,7 +482,12 @@ In the first command, osgBullet creates two box shapes, one for each model, and 
 into a single btCompoundShape. In the second example, osgBullet creates a single box shape
 around both models.
 
-\section clp Command Line Parameters
+\section osgbppcontrols UI Controls
+
+\li Delete: Reset the physics simulation to its initial state.
+\li ctrl-leftmouse: Select and drag an object.
+
+\section osgbppclp Command Line Parameters
 <table border="0">
   <tr>
     <td><b>--axis &lt;a&gt;</b></td>
