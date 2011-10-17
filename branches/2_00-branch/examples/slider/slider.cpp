@@ -58,6 +58,66 @@
 
 
 
+/** \cond */
+
+// Derive a class from StandardShadowMap so we have better control over
+// the direction of the depth map generation Camera.
+class ControlledShadowMap : public osgShadow::StandardShadowMap
+{
+public:
+    ControlledShadowMap()
+      : osgShadow::StandardShadowMap()
+    {
+        // Improve on the defaults.
+        _textureSize = osg::Vec2s( 2048, 2048 ),
+        // StandardShadowMap doesn't appear to provide accessors for these values...
+        _polygonOffsetFactor = 2.f;
+        _polygonOffsetUnits = 2.f;
+    }
+
+protected:
+    struct ViewData : public osgShadow::StandardShadowMap::ViewData
+    {
+        virtual void aimShadowCastingCamera( 
+            const osg::BoundingSphere& bounds,
+            const osg::Light* light,
+            const osg::Vec4& worldLightPos,
+            const osg::Vec3& worldLightDir,                                       
+            const osg::Vec3& worldLightUp = osg::Vec3( 0, 1,0 ) )
+        {
+            // For out case, we have a point light source, but we always want
+            // the center of the depth map at the center of the scene. We don't
+            // care of objects away from the center don't cast a shadow. So we
+            // override aimShadowCastingCamera() to compute the depth map generation
+            // Camera the way we want it.
+
+            osg::Matrixd& view = _camera->getViewMatrix();
+            osg::Matrixd& projection = _camera->getProjectionMatrix();
+
+            osg::Vec3 up = worldLightUp;
+            if( up.length2() <= 0 )
+                up.set( 0, 1, 0 );
+
+            osg::Vec3 position( worldLightPos.x(), worldLightPos.y(), worldLightPos.z() );
+            view.makeLookAt( position, osg::Vec3( 0., 0., 0. ), up );
+
+            const double distance( ( bounds.center() - position ).length() );
+            const double zFar = distance + bounds.radius();
+            const double zNear = osg::maximum< double >( (zFar * 0.001), (distance-bounds.radius()) );
+            const float fovy = 120.f;
+            projection.makePerspective( fovy, 1.0, zNear, zFar );
+            _camera->setComputeNearFarMode( osg::CullSettings::DO_NOT_COMPUTE_NEAR_FAR );
+        }
+    };
+
+    friend struct ViewData;
+
+    META_ViewDependentShadowTechniqueData( ControlledShadowMap, ControlledShadowMap::ViewData )
+};
+
+/** \endcond */
+
+
 // Filter out collisions between the drawer and nightstand.
 //
 // Bullet collision filtering tutorial:
@@ -169,10 +229,6 @@ void simpleLighting( osg::Group* root )
 
     osg::Vec3 pos( -.5, -.4, 2. );
     light->setPosition( osg::Vec4( pos, 1. ) );
-    // Making this a spotlight caused StandardShadowMap to keep the depth map
-    // generation Camera centered on the view direction.
-    light->setDirection( osg::Vec3( -.5, -.4, 0. ) - pos );
-    light->setSpotCutoff( 80.f );
     ls->setLight( light );
 
     osg::LightModel* lm = new osg::LightModel;
@@ -345,7 +401,7 @@ int main( int argc, char** argv )
     sceneRoot->setReceivesShadowTraversalMask( SHADOW_RECEIVER );
     sceneRoot->addChild( root );
     {
-        osgShadow::StandardShadowMap* sTex = new osgShadow::StandardShadowMap;
+        ControlledShadowMap* sTex = new ControlledShadowMap;
 
         // Workaround the fact that OSG StandardShadowMap fragment shader
         // doesn't add in the specular color.
