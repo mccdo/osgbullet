@@ -428,8 +428,11 @@ int main( int argc, char** argv )
                 bulletWorld->removeConstraint( slider );
                 delete slider;
                 slider = NULL;
-                drawerBody->getBroadphaseProxy()->m_collisionFilterGroup = COL_DEFAULT;
-                drawerBody->getBroadphaseProxy()->m_collisionFilterMask = defaultCollidesWith;
+                // Advice from Bullet forum is that the correct way to change the collision filters
+                // is to remove the body and add it back:
+                // http://bulletphysics.org/Bullet/phpBB3/viewtopic.php?f=9&t=7538
+                bulletWorld->removeRigidBody( drawerBody );
+                bulletWorld->addRigidBody( drawerBody, COL_DEFAULT, defaultCollidesWith );
             }
         }
     }
