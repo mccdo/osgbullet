@@ -67,6 +67,8 @@ class OSGBINTERACTION_EXPORT LaunchHandler : public osgGA::GUIEventHandler
 public:
     /** \brief Constructor.
     \param dw LaunchHandler adds launched rigid bodies to this dynamics world.
+    Note that if you intend to set collision filters, \c dw must be a
+    btDiscreteDynamicsWorld. See setCollisionFilters().
     \param attachPoint LaunchHandler adds instances of the launch model to this node
     in the scene graph.
     \param camera LaunchHandler uses this Camera to compute the launch direction
@@ -114,13 +116,15 @@ public:
     void setInitialVelocity( double velocity ) { _initialVelocity = velocity; }
     double getInitialVelocity() const { return( _initialVelocity ); }
 
-    /** \brief Specify collision flags for Bullet's addRigidBody() call.
+    /** \brief Specify collision filters for Bullet's addRigidBody() call.
 
-    By default, there are no collision flags, and LaunchHandler uses the simple form
+    By default, there are no collision filters, and LaunchHandler uses the simple form
     of addRigidBody(btRigidBody*) when adding a launched object. Call this function
-    to specify collision flags, which will cause LaunchHandler to use the extended
-    form of addRigidBody(btRigidBody*,short,short). */
-    void setCollisionFlags( short group, short mask ) { _group = group; _mask = mask; }
+    to specify collision filters, which will cause LaunchHandler to use the extended
+    form of addRigidBody(btRigidBody*,short,short). Note that when using collision
+    filters, the constructor's dynamics world parameter \c dw must be an instance of a
+    btDiscreteDynamicsWorld. */
+    void setCollisionFilters( short group, short mask ) { _group = group; _mask = mask; }
 
     /** \brief Specify the camera used to compute the launch direction vector, if not
     specified in the constructor. */
