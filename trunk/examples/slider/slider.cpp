@@ -389,7 +389,7 @@ int main( int argc, char** argv )
         lh->setInitialVelocity( 10. );
 
         // Also add the proper collision masks
-        lh->setCollisionFlags( COL_DEFAULT, defaultCollidesWith );
+        lh->setCollisionFilters( COL_DEFAULT, defaultCollidesWith );
 
         viewer.addEventHandler( lh );
     }
@@ -419,14 +419,15 @@ int main( int argc, char** argv )
 
         viewer.frame();
 
-        if( slider->isEnabled() )
+        if( slider != NULL )
         {
             btTransform m = drawerBody->getWorldTransform();
             btVector3 v = m.getOrigin();
             if( ( v[ 1 ] - startPos[ 1 ] ) < ( drawerMinLimit * 1.02 ) )
             {
-                slider->setEnabled( false );
                 bulletWorld->removeConstraint( slider );
+                delete slider;
+                slider = NULL;
                 drawerBody->getBroadphaseProxy()->m_collisionFilterGroup = COL_DEFAULT;
                 drawerBody->getBroadphaseProxy()->m_collisionFilterMask = defaultCollidesWith;
             }
