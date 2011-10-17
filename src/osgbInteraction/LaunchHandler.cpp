@@ -144,11 +144,24 @@ bool LaunchHandler::handle( const osgGA::GUIEventAdapter& ea, osgGA::GUIActionAd
     if( _pt != NULL )
         _pt->pause( true );
 
+    bool added( false );
     amt->setUserData( new osgbCollision::RefRigidBody( rb ) );
     if( (_group != 0) || (_mask != 0) )
-        _dw->addRigidBody( rb, _group, _mask );
-    else
+    {
+        // Collision filters were specified. Get the discrete dynamics world.
+        btDiscreteDynamicsWorld* ddw = dynamic_cast< btDiscreteDynamicsWorld* >( _dw );
+        if( ddw != NULL )
+        {
+            ddw->addRigidBody( rb, _group, _mask );
+            added = true;
+        }
+    }
+    if( !added )
+    {
+        // This is both the main path for not using collision filters, and
+        // also the fallback if the btDiscreteDynamicsWorld* dynamic cast fails.
         _dw->addRigidBody( rb );
+    }
 
     if( _pt != NULL )
         _pt->pause( false );
