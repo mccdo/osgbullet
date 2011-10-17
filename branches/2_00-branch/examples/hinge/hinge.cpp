@@ -332,7 +332,7 @@ int main( int argc, char** argv )
         lh->setInitialVelocity( 20. );
 
         // Also add the proper collision masks
-        lh->setCollisionFlags( COL_DEFAULT, defaultCollidesWith );
+        lh->setCollisionFilters( COL_DEFAULT, defaultCollidesWith );
 
         viewer.addEventHandler( lh );
     }
