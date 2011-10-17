@@ -166,7 +166,13 @@ void simpleLighting( osg::Group* root )
     light->setAmbient( osg::Vec4( 1., 1., 1., 1. ) );
     light->setDiffuse( osg::Vec4( 1., 1., 1., 1. ) );
     light->setSpecular( osg::Vec4( 1., 1., 1., 1. ) );
-    light->setPosition( osg::Vec4( -.5, -.4, 2., 1. ) );
+
+    osg::Vec3 pos( -.5, -.4, 2. );
+    light->setPosition( osg::Vec4( pos, 1. ) );
+    // Making this a spotlight caused StandardShadowMap to keep the depth map
+    // generation Camera centered on the view direction.
+    light->setDirection( osg::Vec3( -.5, -.4, 0. ) - pos );
+    light->setSpotCutoff( 80.f );
     ls->setLight( light );
 
     osg::LightModel* lm = new osg::LightModel;
