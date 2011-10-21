@@ -2,17 +2,17 @@
 
 <wiki:toc />
 
-= v2.0 Release Candidate 3 =
+= v2.0 Release Candidate 4 =
 
 This is a release candidate for v2.0.
 
 == Source ==
 
-[http://osgbullet.googlecode.com/files/osgBullet_02_00_00-rc3.zip osgBullet_02_00_00-rc3.zip]
+[http://osgbullet.googlecode.com/files/osgBullet_02_00_00-rc4.zip osgBullet_02_00_00-rc4.zip]
 
-Use this URL to checkout a v2.0 RC2 source tree:
+Use this URL to checkout a v2.0 RC4 source tree:
 
-`http://osgbullet.googlecode.com/svn/tags/osgBullet_02_00_00-rc3`
+`http://osgbullet.googlecode.com/svn/tags/osgBullet_02_00_00-rc4`
 
 = v1.1 Current Release =
 
