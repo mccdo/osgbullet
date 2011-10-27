@@ -78,11 +78,6 @@ else()
 endif()
 
 
-option( OSGBULLET_USE_DOUBLE_PRECISION "Use Bullet built with double precision" OFF )
-if( OSGBULLET_USE_DOUBLE_PRECISION )
-    ADD_DEFINITIONS( -DBT_USE_DOUBLE_PRECISION)
-endif()
-
 
 OPTION( OSGBULLET_BUILD_APPLICATIONS "Enable to build applications" ON )
 IF( OSGBULLET_BUILD_APPLICATIONS )
