@@ -1,4 +1,4 @@
-#summary Plans for upcoming osgBullet releases
+#summary Release info and plans for upcoming releases
 
 <wiki:toc />
 
