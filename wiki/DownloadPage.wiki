@@ -64,10 +64,6 @@ Use this URL to checkout a v1.0 source tree:
 
 `http://osgbullet.googlecode.com/svn/tags/osgBullet_01_00_00`
 
-== Binaries ==
-
-Sorry, binary packages are not currently available.
-
 ----
 
 = All Downloads =
