@@ -160,3 +160,29 @@ set( CMAKE_LIBRARY_PATH ${CMAKE_LIBRARY_PATH_SAVE} )
 
 # Mark Bullet variables as advanced
 mark_as_advanced( BULLET_INCLUDE_DIR )
+
+
+# If we had to look for Bullet, *and* we found it,
+# then let's see whether Bullet was built using
+# double precision or not...
+#
+if( _needToFindBullet AND BULLET_FOUND )
+    message( STATUS "Trying to build and link against Bullet using double precision..." )
+    set( _result )
+    set( _buildOut )
+    try_compile( _result ${PROJECT_BINARY_DIR}
+        ${PROJECT_SOURCE_DIR}/CMakeModules/bulletDoublePrecisionTest.cpp
+        CMAKE_FLAGS
+            "-DINCLUDE_DIRECTORIES:string=${BULLET_INCLUDE_DIRS}"
+            "-DLINK_LIBRARIES:string=${BULLET_LIBRARIES}"
+        COMPILE_DEFINITIONS
+            "-DBT_USE_DOUBLE_PRECISION"
+        OUTPUT_VARIABLE _buildOut
+    )
+    if( _result )
+        message( STATUS "Success. Automatically defining BT_USE_DOUBLE_PRECISION for osgBullet." )
+        add_definitions( -DBT_USE_DOUBLE_PRECISION )
+    else()
+        message( STATUS "Failure. osgBullet will build without defining BT_USE_DOUBLE_PRECISION." )
+    endif()
+endif()
