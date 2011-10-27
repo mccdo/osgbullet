@@ -5,7 +5,7 @@
 
 = v2.0 Current Release =
 
-Released 27 Oct 2011, v2.0 is the current stable release.
+Released 26 Oct 2011, v2.0 is the current stable release.
 
 == Source ==
 
