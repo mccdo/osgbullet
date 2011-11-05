@@ -44,6 +44,13 @@ include( FindBulletHelper )
 FIND_PACKAGE( OSGWorks REQUIRED )
 
 
+# OSGBULLET_USE_DOUBLE_PRECISION gets set to TRUE or FALSE in FindBulletHelper.cmake.
+# If TRUE, add the BT double precision definition globally.
+if( OSGBULLET_USE_DOUBLE_PRECISION )
+    add_definitions( -DBT_USE_DOUBLE_PRECISION )
+endif()
+
+
 option( OSGBULLET_P5_SUPPORT "Enable to include support for the P5 glove and build the related test code" OFF )
 if( OSGBULLET_P5_SUPPORT )
     add_definitions( -DUSE_P5 )

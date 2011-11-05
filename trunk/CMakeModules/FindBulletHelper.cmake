@@ -167,7 +167,8 @@ mark_as_advanced( BULLET_INCLUDE_DIR )
 # double precision or not...
 #
 if( _needToFindBullet AND BULLET_FOUND )
-    message( STATUS "Trying to build and link against Bullet using double precision..." )
+    message( STATUS "Testing Bullet for use of double precision..." )
+    set( OSGBULLET_USE_DOUBLE_PRECISION FALSE CACHE BOOL "Select to force compiling with -DBT_USE_DOUBLE_PRECISION." )
     set( _result )
     set( _buildOut )
     try_compile( _result ${PROJECT_BINARY_DIR}
@@ -180,9 +181,25 @@ if( _needToFindBullet AND BULLET_FOUND )
         OUTPUT_VARIABLE _buildOut
     )
     if( _result )
-        message( STATUS "Success. Automatically defining BT_USE_DOUBLE_PRECISION for osgBullet." )
-        add_definitions( -DBT_USE_DOUBLE_PRECISION )
+        message( STATUS "Bullet double precision detected. Automatically defining BT_USE_DOUBLE_PRECISION for osgBullet." )
+        set( OSGBULLET_USE_DOUBLE_PRECISION TRUE )
     else()
-        message( STATUS "Failure. osgBullet will build without defining BT_USE_DOUBLE_PRECISION." )
+        # Try it *without* -DBT_USE_DOUBLE_PRECISION to make sure it's single...
+        set( _result )
+        set( _buildOut )
+        try_compile( _result ${PROJECT_BINARY_DIR}
+            ${PROJECT_SOURCE_DIR}/CMakeModules/bulletDoublePrecisionTest.cpp
+            CMAKE_FLAGS
+                "-DINCLUDE_DIRECTORIES:string=${BULLET_INCLUDE_DIRS}"
+                "-DLINK_LIBRARIES:string=${BULLET_LIBRARIES}"
+            OUTPUT_VARIABLE _buildOut
+        )
+        if( _result )
+            message( STATUS "Bullet single precision detected. Not defining BT_USE_DOUBLE_PRECISION for osgBullet." )
+        else()
+            message( WARNING "Unable to determine single or double precision. Contact development staff." )
+            message( WARNING "Build output follows:" )
+            message( WARNING "${_buildOut}" )
+        endif()
     endif()
 endif()
