@@ -31,7 +31,7 @@ for single precision physics.
 */
 
 
-#include <BulletCollision/btBulletCollisionCommon.h>
+#include <btBulletCollisionCommon.h>
 
 int main()
 {
