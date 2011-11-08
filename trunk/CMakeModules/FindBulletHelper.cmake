@@ -171,6 +171,15 @@ if( _needToFindBullet AND BULLET_FOUND )
     set( OSGBULLET_USE_DOUBLE_PRECISION FALSE CACHE BOOL "Select to force compiling with -DBT_USE_DOUBLE_PRECISION." )
     set( _result )
     set( _buildOut )
+    
+    # Configure for the correct build type to allow successful VS 2010 links
+    # if Bullet was built release-only.
+    if( BULLET_DYNAMICS_LIBRARY )
+        set( CMAKE_TRY_COMPILE_CONFIGURATION Release )
+    else()
+        set( CMAKE_TRY_COMPILE_CONFIGURATION Debug )
+    endif()
+    
     try_compile( _result ${PROJECT_BINARY_DIR}
         ${PROJECT_SOURCE_DIR}/CMakeModules/bulletDoublePrecisionTest.cpp
         CMAKE_FLAGS
