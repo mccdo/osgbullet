@@ -182,7 +182,7 @@ if( _needToFindBullet AND BULLET_FOUND )
     )
     if( _result )
         message( STATUS "Bullet double precision detected. Automatically defining BT_USE_DOUBLE_PRECISION for osgBullet." )
-        set( OSGBULLET_USE_DOUBLE_PRECISION TRUE )
+        set( OSGBULLET_USE_DOUBLE_PRECISION ON CACHE BOOL "" FORCE )
     else()
         # Try it *without* -DBT_USE_DOUBLE_PRECISION to make sure it's single...
         set( _result )
