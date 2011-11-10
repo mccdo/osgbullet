@@ -329,7 +329,7 @@ int main( int argc, char** argv )
     root->addChild( groundRoot );
     
 
-    // create slider constraint between drawer and groundplane and add it to world
+    // create slider constraint between drawer and stand, and add it to world.
     // Note: Bullet slider is always along x axis. Alter this behavior with reference frames.
     btSliderConstraint* slider;
     float drawerMinLimit;
@@ -427,7 +427,7 @@ int main( int argc, char** argv )
 
 
     osgViewer::Viewer viewer( arguments );
-    viewer.setUpViewInWindow( 30, 30, 768, 480 );
+    viewer.setUpViewInWindow( 30, 30, 800, 450 );
     viewer.setSceneData( sceneRoot );
 
     osgGA::TrackballManipulator* tb = new osgGA::TrackballManipulator;
