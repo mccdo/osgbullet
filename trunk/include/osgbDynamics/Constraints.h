@@ -90,6 +90,12 @@ public:
         return( "SliderConstraint" );
     }
 
+    void setRigidBodies( btRigidBody* rbA, btRigidBody* rbB=NULL );
+    void getRigidBodies( btRigidBody* rbA, btRigidBody* rbB )
+    {
+        rbA = _rbA; rbB = _rbB;
+    }
+
     void setAXform( const osg::Matrix& rbAXform );
     osg::Matrix getAXform() const
     {
