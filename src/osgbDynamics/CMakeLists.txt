@@ -5,6 +5,7 @@ add_definitions( -DOSGBDYNAMICS_LIBRARY )
 
 set( LIB_PUBLIC_HEADERS
     ${HEADER_PATH}/Export.h
+    ${HEADER_PATH}/Constraints.h
     ${HEADER_PATH}/CreationRecord.h
     ${HEADER_PATH}/GroundPlane.h
     ${HEADER_PATH}/MotionState.h
@@ -16,6 +17,7 @@ set( LIB_PUBLIC_HEADERS
 )
 
 set( _osgBulletSourceFiles
+    Constraints.cpp
     CreationRecord.cpp
     GroundPlane.cpp
     MotionState.cpp
