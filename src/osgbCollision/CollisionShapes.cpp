@@ -48,9 +48,16 @@ namespace osgbCollision
 
 btSphereShape* btSphereCollisionShapeFromOSG( osg::Node* node )
 {
-    osg::BoundingSphere sphere = node->getBound();
-    float radius = sphere.radius();
-
+    osg::ComputeBoundsVisitor cbv;
+    node->accept( cbv );
+    const osg::BoundingBox bb( cbv.getBoundingBox() );
+    osg::Vec3 ext( bb._max - bb._min );
+    ext = ext * 0.5;
+    float radius = 0.;
+    for( size_t i = 0; i < 3; ++i )
+    {
+        radius = std::max( radius, ext[ i ] );
+    }
     btSphereShape* shape = new btSphereShape( radius );
 
     return( shape );
@@ -68,8 +75,8 @@ btBoxShape* btBoxCollisionShapeFromOSG( osg::Node* node, const osg::BoundingBox*
         bbox = visitor.getBoundingBox();
     }
 
-    btBoxShape* shape = new btBoxShape( btVector3( ( bbox.xMax() - bbox.xMin() ) / 2.0,
-        ( bbox.yMax() - bbox.yMin() ) / 2.0, ( bbox.zMax() - bbox.zMin() ) / 2.0 ) );
+    btBoxShape* shape = new btBoxShape( btVector3( ( bbox.xMax() - bbox.xMin() ) * 0.5,
+        ( bbox.yMax() - bbox.yMin() ) * 0.5, ( bbox.zMax() - bbox.zMin() ) * 0.5 ) );
     return( shape );
 }
 
@@ -212,6 +219,7 @@ btCompoundShape* btCompoundShapeFromOSGGeometry( osg::Node* node )
 btCompoundShape* btCompoundShapeFromBounds( osg::Node* node,
     const BroadphaseNativeTypes shapeType, const osgbCollision::AXIS axis )
 {
+std::cout << " test 1 " << shapeType << std::endl;
     btCollisionShape* shape( NULL );
     switch( shapeType )
     {
