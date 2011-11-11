@@ -220,9 +220,16 @@ int main( int argc, char** argv )
         const osg::BoundingBox& bb = cbv.getBoundingBox();
         float drawerMinLimit = -( bb.yMax() - bb.yMin() );
 
+#if 0
         osg::ref_ptr< osgbDynamics::SliderConstraint > sc = new osgbDynamics::SliderConstraint(
             drawerBody, drawerXform, standBody, standXform, drawerAxis,
             osg::Vec2( drawerMinLimit, drawerMaxLimit ) );
+#else
+        standXform = osg::Matrix::identity();
+        osg::ref_ptr< osgbDynamics::SliderConstraint > sc = new osgbDynamics::SliderConstraint(
+            drawerBody, drawerXform, NULL, standXform, drawerAxis,
+            osg::Vec2( drawerMinLimit, drawerMaxLimit ) );
+#endif
 
         slider = sc->getAsBtSlider();
         bulletWorld->addConstraint( slider, true );

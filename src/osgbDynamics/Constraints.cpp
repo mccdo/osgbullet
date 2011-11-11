@@ -98,6 +98,12 @@ btSliderConstraint* SliderConstraint::getAsBtSlider() const
     return( static_cast< btSliderConstraint* >( _constraint ) );
 }
 
+void SliderConstraint::setRigidBodies( btRigidBody* rbA, btRigidBody* rbB )
+{
+    _rbA = rbA;
+    _rbB = rbB;
+    createConstraint();
+}
 void SliderConstraint::setAXform( const osg::Matrix& rbAXform )
 {
     _rbAXform = rbAXform;
@@ -139,13 +145,19 @@ void SliderConstraint::createConstraint()
     const osg::Matrix axisRotate( osg::Matrix::rotate( bulletSliderAxis, _slideAxisInA ) );
     //
     //   2. Inverse B center of mass offset.
-    osgbDynamics::MotionState* motion = dynamic_cast< osgbDynamics::MotionState* >( _rbB->getMotionState() );
-    if( motion == NULL )
+    osg::Vec3 bCom;
+    osgbDynamics::MotionState* motion;
+    if( _rbB != NULL )
     {
-        osg::notify( osg::WARN ) << "SliderConstraint: Invalid MotionState." << std::endl;
-        return;
+        motion = dynamic_cast< osgbDynamics::MotionState* >( _rbB->getMotionState() );
+        if( motion == NULL )
+        {
+            osg::notify( osg::WARN ) << "SliderConstraint: Invalid MotionState." << std::endl;
+            return;
+        }
+        bCom = motion->getCenterOfMass();
     }
-    const osg::Matrix invBCOM( osg::Matrix::translate( -( motion->getCenterOfMass() ) ) );
+    const osg::Matrix invBCOM( osg::Matrix::translate( -( bCom ) ) );
     //
     //   3. Transform from B's origin to A's origin.
     const osg::Matrix rbBToRbA( osg::Matrix::inverse( _rbBXform ) * _rbAXform );
@@ -171,7 +183,11 @@ void SliderConstraint::createConstraint()
         axisRotate * invACOM );
 
 
-    btSliderConstraint* sc = new btSliderConstraint( *_rbA, *_rbB, rbAFrame, rbBFrame, false );
+    btSliderConstraint* sc;
+    if( _rbB != NULL )
+        sc = new btSliderConstraint( *_rbA, *_rbB, rbAFrame, rbBFrame, false );
+    else
+        sc = new btSliderConstraint( *_rbA, rbAFrame, true );
     sc->setLowerLinLimit( _slideLimit[0] );
     sc->setUpperLinLimit( _slideLimit[1] );
     _constraint = sc;
