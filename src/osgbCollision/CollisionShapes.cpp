@@ -219,7 +219,6 @@ btCompoundShape* btCompoundShapeFromOSGGeometry( osg::Node* node )
 btCompoundShape* btCompoundShapeFromBounds( osg::Node* node,
     const BroadphaseNativeTypes shapeType, const osgbCollision::AXIS axis )
 {
-std::cout << " test 1 " << shapeType << std::endl;
     btCollisionShape* shape( NULL );
     switch( shapeType )
     {
