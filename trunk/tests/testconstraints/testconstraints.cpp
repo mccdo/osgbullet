@@ -91,7 +91,7 @@ int main( int argc, char** argv )
         osg::Node* node = osgDB::readNodeFile( "tetra.osg" );
         if( node == NULL )
             return( 1 );
-        osg::Matrix aXform = osg::Matrix::translate( 4., 2., 0. );
+        osg::Matrix aXform = osg::Matrix::translate( 8., 2., 0. );
 
         osgwTools::AbsoluteModelTransform* amt = new osgwTools::AbsoluteModelTransform;
         amt->setDataVariance( osg::Object::DYNAMIC );
@@ -102,6 +102,7 @@ int main( int argc, char** argv )
         cr->_sceneGraph = amt;
         cr->_shapeType = BOX_SHAPE_PROXYTYPE;
         cr->_mass = 0.5;
+        cr->_scale = osg::Vec3( 2., 2., 2. );
         cr->_parentTransform = aXform;
         btRigidBody* rbA = osgbDynamics::createRigidBody( cr.get() );
         amt->setUserData( new osgbCollision::RefRigidBody( rbA ) );
