@@ -48,13 +48,13 @@ class OSGBDYNAMICS_EXPORT Constraint : public osg::Object
 {
 public:
     Constraint();
+    Constraint( btRigidBody* rbA, btRigidBody* rbB=NULL );
+    Constraint( btRigidBody* rbA, const osg::Matrix& rbAXform,
+            btRigidBody* rbB, const osg::Matrix& rbBXform );
     Constraint( const Constraint& rhs, const osg::CopyOp& copyop=osg::CopyOp::SHALLOW_COPY );
     META_Object(osgbDynamics,Constraint);
 
-    virtual btTypedConstraint* getConstraint() const
-    {
-        return( _constraint );
-    }
+    virtual btTypedConstraint* getConstraint() const;
     virtual btSliderConstraint* getAsBtSlider() const { return( NULL ); }
 
     virtual std::string getTypeName() const
@@ -62,10 +62,48 @@ public:
         return( "Constraint" );
     }
 
+    void setRigidBodies( btRigidBody* rbA, btRigidBody* rbB=NULL );
+    void getRigidBodies( btRigidBody* rbA, btRigidBody* rbB )
+    {
+        rbA = _rbA; rbB = _rbB;
+    }
+
+    void setAXform( const osg::Matrix& rbAXform );
+    osg::Matrix getAXform() const
+    {
+        return( _rbAXform );
+    }
+
+    void setBXform( const osg::Matrix& rbBXform );
+    osg::Matrix getBXform() const
+    {
+        return( _rbBXform );
+    }
+
+    void setDirty( bool dirty )
+    {
+        _dirty = dirty;
+    }
+    bool getDirty() const
+    {
+        return( _dirty );
+    }
+
 protected:
     virtual ~Constraint();
 
+    /**
+    Note: Use of META_Object inhibits making this function pure virtual.
+    */
+    virtual void createConstraint() {}
+
     btTypedConstraint* _constraint;
+    bool _dirty;
+
+    btRigidBody* _rbA;
+    btRigidBody* _rbB;
+    osg::Matrix _rbAXform;
+    osg::Matrix _rbBXform;
 };
 typedef std::list< osg::ref_ptr< Constraint > > ConstraintList;
 
@@ -90,24 +128,6 @@ public:
         return( "SliderConstraint" );
     }
 
-    void setRigidBodies( btRigidBody* rbA, btRigidBody* rbB=NULL );
-    void getRigidBodies( btRigidBody* rbA, btRigidBody* rbB )
-    {
-        rbA = _rbA; rbB = _rbB;
-    }
-
-    void setAXform( const osg::Matrix& rbAXform );
-    osg::Matrix getAXform() const
-    {
-        return( _rbAXform );
-    }
-
-    void setBXform( const osg::Matrix& rbBXform );
-    osg::Matrix getBXform() const
-    {
-        return( _rbBXform );
-    }
-
     void setAxisInA( const osg::Vec3& axisInA );
     osg::Vec3 getAxisInA() const
     {
@@ -123,12 +143,8 @@ public:
 protected:
     virtual ~SliderConstraint();
 
-    void createConstraint();
+    virtual void createConstraint();
 
-    btRigidBody* _rbA;
-    btRigidBody* _rbB;
-    osg::Matrix _rbAXform;
-    osg::Matrix _rbBXform;
     osg::Vec3 _slideAxisInA;
     osg::Vec2 _slideLimit;
 };

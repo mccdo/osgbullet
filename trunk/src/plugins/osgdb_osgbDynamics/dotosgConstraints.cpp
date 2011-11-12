@@ -59,34 +59,41 @@ osgDB::RegisterDotOsgWrapperProxy SliderConstraint_Proxy
 
 bool Constraint_readLocalData( osg::Object& obj, osgDB::Input& fr )
 {
-    return( false );
+    osgbDynamics::Constraint& cons = static_cast< osgbDynamics::Constraint& >( obj );
+
+    osg::Matrix m;
+    if( readMatrix( m, fr, "rbAXform" ) )
+        cons.setAXform( m );
+    else
+    {
+        osg::notify( osg::WARN ) << "Constraint_readLocalData: Bad input data at \"rbAXform\"." << std::endl;
+        return( false );
+    }
+
+    if( readMatrix( m, fr, "rbBXform" ) )
+        cons.setBXform( m );
+    else
+    {
+        osg::notify( osg::WARN ) << "Constraint_readLocalData: Bad input data at \"rbBXform\"." << std::endl;
+        return( false );
+    }
+
+    return( true );
 }
 bool Constraint_writeLocalData( const osg::Object& obj, osgDB::Output& fw )
 {
-    return( false );
+    const osgbDynamics::Constraint& cons = static_cast< const osgbDynamics::Constraint& >( obj );
+
+    writeMatrix( cons.getAXform(), fw, "rbAXform" );
+    writeMatrix( cons.getBXform(), fw, "rbBXform" );
+
+    return( true );
 }
 
 
 bool SliderConstraint_readLocalData( osg::Object& obj, osgDB::Input& fr )
 {
     osgbDynamics::SliderConstraint& sc = static_cast< osgbDynamics::SliderConstraint& >( obj );
-
-    osg::Matrix m;
-    if( readMatrix( m, fr, "rbAXform" ) )
-        sc.setAXform( m );
-    else
-    {
-        osg::notify( osg::WARN ) << "SliderConstraint_readLocalData: Bad input data at \"rbAXform\"." << std::endl;
-        return( false );
-    }
-
-    if( readMatrix( m, fr, "rbBXform" ) )
-        sc.setBXform( m );
-    else
-    {
-        osg::notify( osg::WARN ) << "SliderConstraint_readLocalData: Bad input data at \"rbBXform\"." << std::endl;
-        return( false );
-    }
 
     if( fr.matchSequence( "Axis %f %f %f" ) )
     {
@@ -123,8 +130,6 @@ bool SliderConstraint_writeLocalData( const osg::Object& obj, osgDB::Output& fw 
 {
     const osgbDynamics::SliderConstraint& sc = static_cast< const osgbDynamics::SliderConstraint& >( obj );
 
-    writeMatrix( sc.getAXform(), fw, "rbAXform" );
-    writeMatrix( sc.getBXform(), fw, "rbBXform" );
     fw.indent() << "Axis " << sc.getAxisInA() << std::endl;
     fw.indent() << "Limit " << sc.getLimit() << std::endl;
 

@@ -36,12 +36,38 @@ namespace osgbDynamics
 
 Constraint::Constraint()
   : osg::Object(),
-    _constraint( NULL )
+    _rbA( NULL ),
+    _rbB( NULL ),
+    _constraint( NULL ),
+    _dirty( true )
+{
+}
+Constraint::Constraint( btRigidBody* rbA, btRigidBody* rbB )
+  : osg::Object(),
+    _rbA( rbA ),
+    _rbB( rbB ),
+    _constraint( NULL ),
+    _dirty( true )
+{
+}
+Constraint::Constraint( btRigidBody* rbA, const osg::Matrix& rbAXform,
+        btRigidBody* rbB, const osg::Matrix& rbBXform )
+  : _rbA( rbA ),
+    _rbB( rbB ),
+    _rbAXform( rbAXform ),
+    _rbBXform( rbBXform ),
+    _constraint( NULL ),
+    _dirty( true )
 {
 }
 Constraint::Constraint( const Constraint& rhs, const osg::CopyOp& copyop )
   : osg::Object( rhs, copyop ),
-    _constraint( NULL )
+    _rbA( rhs._rbA ),
+    _rbB( rhs._rbB ),
+    _rbAXform( rhs._rbAXform ),
+    _rbBXform( rhs._rbBXform ),
+    _constraint( rhs._constraint ),
+    _dirty( rhs._dirty )
 {
 }
 Constraint::~Constraint()
@@ -50,40 +76,56 @@ Constraint::~Constraint()
     //delete osgbDynamics::Constraint::getConstraint();
 }
 
+btTypedConstraint* Constraint::getConstraint() const
+{
+    if( getDirty() || ( _constraint == NULL ) )
+    {
+        Constraint* nonConst = const_cast< Constraint* >( this );
+        nonConst->createConstraint();
+    }
+
+    return( _constraint );
+}
+
+void Constraint::setRigidBodies( btRigidBody* rbA, btRigidBody* rbB )
+{
+    _rbA = rbA;
+    _rbB = rbB;
+    setDirty( true );
+}
+void Constraint::setAXform( const osg::Matrix& rbAXform )
+{
+    _rbAXform = rbAXform;
+    setDirty( true );
+}
+void Constraint::setBXform( const osg::Matrix& rbBXform )
+{
+    _rbBXform = rbBXform;
+    setDirty( true );
+}
+
 
 
 SliderConstraint::SliderConstraint()
-  : Constraint(),
-    _rbA( NULL ),
-    _rbB( NULL )
+  : Constraint()
 {
 }
 SliderConstraint::SliderConstraint( btRigidBody* rbA, btRigidBody* rbB )
-  : Constraint(),
-    _rbA( rbA ),
-    _rbB( rbB )
+  : Constraint( rbA, rbB )
 {
-    createConstraint();
+    setDirty( true );
 }
 SliderConstraint::SliderConstraint( btRigidBody* rbA, const osg::Matrix& rbAXform,
         btRigidBody* rbB, const osg::Matrix& rbBXform,
         const osg::Vec3& slideAxisInA, const osg::Vec2& slideLimit )
-  : Constraint(),
-    _rbA( rbA ),
-    _rbB( rbB ),
-    _rbAXform( rbAXform ),
-    _rbBXform( rbBXform ),
+  : Constraint( rbA, rbAXform, rbB, rbBXform ),
     _slideAxisInA( slideAxisInA ),
     _slideLimit( slideLimit )
 {
-    createConstraint();
+    setDirty( true );
 }
 SliderConstraint::SliderConstraint( const SliderConstraint& rhs, const osg::CopyOp& copyop )
   : Constraint( rhs, copyop ),
-    _rbA( rhs._rbA ),
-    _rbB( rhs._rbB ),
-    _rbAXform( rhs._rbAXform ),
-    _rbBXform( rhs._rbBXform ),
     _slideAxisInA( rhs._slideAxisInA ),
     _slideLimit( rhs._slideLimit )
 {
@@ -95,34 +137,18 @@ SliderConstraint::~SliderConstraint()
 
 btSliderConstraint* SliderConstraint::getAsBtSlider() const
 {
-    return( static_cast< btSliderConstraint* >( _constraint ) );
+    return( static_cast< btSliderConstraint* >( getConstraint() ) );
 }
 
-void SliderConstraint::setRigidBodies( btRigidBody* rbA, btRigidBody* rbB )
-{
-    _rbA = rbA;
-    _rbB = rbB;
-    createConstraint();
-}
-void SliderConstraint::setAXform( const osg::Matrix& rbAXform )
-{
-    _rbAXform = rbAXform;
-    createConstraint();
-}
-void SliderConstraint::setBXform( const osg::Matrix& rbBXform )
-{
-    _rbBXform = rbBXform;
-    createConstraint();
-}
 void SliderConstraint::setAxisInA( const osg::Vec3& axisInA )
 {
     _slideAxisInA = axisInA;
-    createConstraint();
+    setDirty( true );
 }
 void SliderConstraint::setLimit( const osg::Vec2& limit )
 {
     _slideLimit = limit;
-    createConstraint();
+    setDirty( true );
 }
 
 void SliderConstraint::createConstraint()
@@ -191,6 +217,8 @@ void SliderConstraint::createConstraint()
     sc->setLowerLinLimit( _slideLimit[0] );
     sc->setUpperLinLimit( _slideLimit[1] );
     _constraint = sc;
+
+    setDirty( false );
 }
 
 
