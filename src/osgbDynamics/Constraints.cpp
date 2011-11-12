@@ -91,17 +91,17 @@ void Constraint::setRigidBodies( btRigidBody* rbA, btRigidBody* rbB )
 {
     _rbA = rbA;
     _rbB = rbB;
-    setDirty( true );
+    setDirty();
 }
 void Constraint::setAXform( const osg::Matrix& rbAXform )
 {
     _rbAXform = rbAXform;
-    setDirty( true );
+    setDirty();
 }
 void Constraint::setBXform( const osg::Matrix& rbBXform )
 {
     _rbBXform = rbBXform;
-    setDirty( true );
+    setDirty();
 }
 
 
@@ -113,7 +113,7 @@ SliderConstraint::SliderConstraint()
 SliderConstraint::SliderConstraint( btRigidBody* rbA, btRigidBody* rbB )
   : Constraint( rbA, rbB )
 {
-    setDirty( true );
+    setDirty();
 }
 SliderConstraint::SliderConstraint( btRigidBody* rbA, const osg::Matrix& rbAXform,
         btRigidBody* rbB, const osg::Matrix& rbBXform,
@@ -122,7 +122,7 @@ SliderConstraint::SliderConstraint( btRigidBody* rbA, const osg::Matrix& rbAXfor
     _slideAxisInA( slideAxisInA ),
     _slideLimit( slideLimit )
 {
-    setDirty( true );
+    setDirty();
 }
 SliderConstraint::SliderConstraint( const SliderConstraint& rhs, const osg::CopyOp& copyop )
   : Constraint( rhs, copyop ),
@@ -143,12 +143,12 @@ btSliderConstraint* SliderConstraint::getAsBtSlider() const
 void SliderConstraint::setAxisInA( const osg::Vec3& axisInA )
 {
     _slideAxisInA = axisInA;
-    setDirty( true );
+    setDirty();
 }
 void SliderConstraint::setLimit( const osg::Vec2& limit )
 {
     _slideLimit = limit;
-    setDirty( true );
+    setDirty();
 }
 
 void SliderConstraint::createConstraint()
