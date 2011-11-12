@@ -242,13 +242,30 @@ void SliderConstraint::createConstraint()
         axisRotate * invACOM );
 
 
+    // Scale limits, if necessary.
+    btScalar loLimit = _slideLimit[ 0 ];
+    btScalar hiLimit = _slideLimit[ 1 ];
+    osg::Vec3 scale( motion->getScale() );
+    if( scale != osg::Vec3( 1., 1., 1. ) )
+    {
+        osg::Vec3 axis = _slideAxisInA;
+        axis.normalize();
+        axis[ 0 ] *= scale[ 0 ];
+        axis[ 1 ] *= scale[ 1 ];
+        axis[ 2 ] *= scale[ 2 ];
+        double len = axis.length();
+        loLimit *= len;
+        hiLimit *= len;
+    }
+
+
     btSliderConstraint* sc;
     if( _rbB != NULL )
         sc = new btSliderConstraint( *_rbA, *_rbB, rbAFrame, rbBFrame, false );
     else
         sc = new btSliderConstraint( *_rbA, rbAFrame, true );
-    sc->setLowerLinLimit( _slideLimit[0] );
-    sc->setUpperLinLimit( _slideLimit[1] );
+    sc->setLowerLinLimit( loLimit );
+    sc->setUpperLinLimit( hiLimit );
     _constraint = sc;
 
     setDirty( false );
