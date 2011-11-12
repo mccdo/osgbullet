@@ -190,6 +190,7 @@ typedef std::list< osg::ref_ptr< Constraint > > ConstraintList;
 
 
 /** \class SliderConstraint SliderConstraint.h <osgbDynamics/Constraint.h>
+\brief Creates a constraint from an axis and movement limits on that axis.
 */
 class OSGBDYNAMICS_EXPORT SliderConstraint : public Constraint
 {
@@ -223,7 +224,11 @@ public:
     /** \brief Specify movement limits along \c _sliderAxisInA.
 
     The limit values are relative to the initial transforms \c _rbAXform
-    and \c _rbBXform. */
+    and \c _rbBXform.
+    
+    If \c _rbA is scaled (with a value other than 1.0) along the \c _slideAxisInA,
+    SliderConstraint will also scale the \c limit values when creating the actual
+    Bullet constraint. However, getLimit() returns the unscaled values. */
     void setLimit( const osg::Vec2& limit );
     osg::Vec2 getLimit() const
     {
