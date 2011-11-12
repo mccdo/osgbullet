@@ -89,6 +89,9 @@ int runCTest()
         osg::ref_ptr< osgbDynamics::SliderConstraint > sc = new osgbDynamics::SliderConstraint(
             rbA, aXform, rbB, bXform, axis, limits );
 
+        if( sc->getAsBtSlider() != NULL )
+            ERROR("SliderConstraint won't typecast as btSliderConstraint.");
+
         if( !( osgDB::writeObjectFile( *sc, fileName ) ) )
             ERROR("SliderConstraint writeObjectFile failed.");
 
