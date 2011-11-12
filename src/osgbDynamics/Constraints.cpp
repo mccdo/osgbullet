@@ -104,6 +104,21 @@ void Constraint::setBXform( const osg::Matrix& rbBXform )
     setDirty();
 }
 
+bool Constraint::operator==( const Constraint& rhs ) const
+{
+    return(
+        ( _rbAXform == rhs._rbAXform ) &&
+        ( _rbBXform == rhs._rbBXform )
+    );
+}
+bool Constraint::operator!=( const Constraint& rhs ) const
+{
+    return(
+        ( _rbAXform != rhs._rbAXform ) ||
+        ( _rbBXform != rhs._rbBXform )
+    );
+}
+
 
 
 SliderConstraint::SliderConstraint()
@@ -150,6 +165,24 @@ void SliderConstraint::setLimit( const osg::Vec2& limit )
     _slideLimit = limit;
     setDirty();
 }
+
+bool SliderConstraint::operator==( const SliderConstraint& rhs ) const
+{
+    return(
+        ( _slideAxisInA == rhs._slideAxisInA ) &&
+        ( _slideLimit == rhs._slideLimit ) &&
+        ( Constraint::operator==( static_cast< const Constraint& >( rhs ) ) )
+    );
+}
+bool SliderConstraint::operator!=( const SliderConstraint& rhs ) const
+{
+    return(
+        ( _slideAxisInA != rhs._slideAxisInA ) ||
+        ( _slideLimit != rhs._slideLimit ) ||
+        ( Constraint::operator!=( static_cast< const Constraint& >( rhs ) ) )
+    );
+}
+
 
 void SliderConstraint::createConstraint()
 {
