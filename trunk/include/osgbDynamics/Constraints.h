@@ -41,8 +41,26 @@ namespace osgbDynamics
 {
 
 
+/** \defgroup constraintsupport Constraint Support
+\brief Convenience objects to support and enhance Bullet's constraint objects.
 
-/** \class CreationRecord CreationRecord.h <osgbDynamics/CreationRecord.h>
+These objects are designed to make it easier for OSG developers to work with
+Bullet constraints. The primary features are:
+
+\li Each class is an osg::Object with dot OSG file format support.
+\li Initial rigid body transforms are osg::Matrix objects representing the initial
+transform of the object in OSG coordinate space.
+\li The classes provide full support for collision shapes with non-origin center of
+mass and non-unit scaling.
+
+Note that the calling code is responsible for deleting the Bullet constraing.
+See Constraint::~Constraint().
+*/
+/**@{*/
+
+/** \class Constraint Constraint.h <osgbDynamics/Constraint.h>
+\brief Base Constraint class with support for rigid bodies and transforms, lazy
+Bullet constraint creation, constraint access, and typecasting.
 */
 class OSGBDYNAMICS_EXPORT Constraint : public osg::Object
 {
@@ -50,37 +68,81 @@ public:
     Constraint();
     Constraint( btRigidBody* rbA, btRigidBody* rbB=NULL );
     Constraint( btRigidBody* rbA, const osg::Matrix& rbAXform,
-            btRigidBody* rbB, const osg::Matrix& rbBXform );
+            btRigidBody* rbB=NULL, const osg::Matrix& rbBXform=osg::Matrix::identity() );
     Constraint( const Constraint& rhs, const osg::CopyOp& copyop=osg::CopyOp::SHALLOW_COPY );
     META_Object(osgbDynamics,Constraint);
 
+    /** \brief Get the constraint as a btTypedConstraint*.
+    
+    Note: This function will perform a const_cast if necessary to create the constraint
+    (if it's dirty or doesn't yet exist). */
     virtual btTypedConstraint* getConstraint() const;
+    /** \brief If the derived subclass uses a btConeTwistConstraint* internally, the subclass
+    will override this function to return non-NULL. The getConstraint() const_cast note also applies. */
+    virtual btConeTwistConstraint* getAsBtConeTwist() const { return( NULL ); }
+    /** \brief If the derived subclass uses a btContactConstraint* internally, the subclass
+    will override this function to return non-NULL. The getConstraint() const_cast note also applies. */
+    virtual btContactConstraint* getAsBtContact() const { return( NULL ); }
+    /** \brief If the derived subclass uses a btGeneric6DofConstraint* internally, the subclass
+    will override this function to return non-NULL. The getConstraint() const_cast note also applies. */
+    virtual btGeneric6DofConstraint* getAsBtGeneric6Dof() const { return( NULL ); }
+    /** \brief If the derived subclass uses a btGeneric6DofSpringConstraint* internally, the subclass
+    will override this function to return non-NULL. The getConstraint() const_cast note also applies. */
+    virtual btGeneric6DofSpringConstraint* getAsBtGeneric6DofSpring() const { return( NULL ); }
+    /** \brief If the derived subclass uses a btHingeConstraint* internally, the subclass
+    will override this function to return non-NULL. The getConstraint() const_cast note also applies. */
+    virtual btHingeConstraint* getAsBtHinge() const { return( NULL ); }
+    /** \brief If the derived subclass uses a btHinge2Constraint* internally, the subclass
+    will override this function to return non-NULL. The getConstraint() const_cast note also applies. */
+    virtual btHinge2Constraint* getAsBtHinge2() const { return( NULL ); }
+    /** \brief If the derived subclass uses a btPoint2PointConstraint* internally, the subclass
+    will override this function to return non-NULL. The getConstraint() const_cast note also applies. */
+    virtual btPoint2PointConstraint* getAsBtPoint2Point() const { return( NULL ); }
+    /** \brief If the derived subclass uses a btSliderConstraint* internally, the subclass
+    will override this function to return non-NULL. The getConstraint() const_cast note also applies. */
     virtual btSliderConstraint* getAsBtSlider() const { return( NULL ); }
+    /** \brief If the derived subclass uses a btUniversalConstraint* internally, the subclass
+    will override this function to return non-NULL. The getConstraint() const_cast note also applies. */
+    virtual btUniversalConstraint* getAsBtUniversal() const { return( NULL ); }
 
-    virtual std::string getTypeName() const
-    {
-        return( "Constraint" );
-    }
+    /** \brief Access the Bullet rigid body (or bodies).
 
+    If only one rigid body is specified, it is constrained to the world.
+    Otherwise, both rigid bodies are constrained together. */
     void setRigidBodies( btRigidBody* rbA, btRigidBody* rbB=NULL );
     void getRigidBodies( btRigidBody* rbA, btRigidBody* rbB )
     {
         rbA = _rbA; rbB = _rbB;
     }
 
+    /** \brief Specify the initial OSG transform of the subgraph corresponding to rigid body A.
+    
+    setAXform() dirties the Constraint, so the next call to getConstraint() will
+    delete the current constraint (if it exists) and create a new one. */
     void setAXform( const osg::Matrix& rbAXform );
     osg::Matrix getAXform() const
     {
         return( _rbAXform );
     }
 
+    /** \brief Specify the initial OSG transform of the subgraph corresponding to rigid body B.
+
+    setBXform() dirties the Constraint, so the next call to getConstraint() will
+    delete the current constraint (if it exists) and create a new one. */
     void setBXform( const osg::Matrix& rbBXform );
     osg::Matrix getBXform() const
     {
         return( _rbBXform );
     }
 
-    void setDirty( bool dirty )
+    /** \brief Set the dirty bit to indicate the constraint paramters have changed.
+
+    This function implements a lazy constraint creation mechanism so that multiple
+    parameters may be changed without deleting and re-creating the constraint multiple
+    times. The getConstraint() function will delete (if necessary) and create the new
+    Bullet constraint if \c _dirty is true. \c _dirty is initially true for all new
+    Constraint and Constraing-derived objects. */
+    void setDirty( bool dirty=true )
     {
         _dirty = dirty;
     }
@@ -90,11 +152,21 @@ public:
     }
 
 protected:
+    /** \brief Destructor.
+    Note that deleting the constraint is up to the calling code. For example:
+    \code
+    delete osgbDynamics::Constraint::getConstraint();
+    osgbDynamics::Constraint::setDirty();
+    \endcode
+    */
     virtual ~Constraint();
 
-    /**
+    /** \brief Create the constraint, if it doesn't exist, or delete it and re-create it if
+    the \c _dirty flag indicates that the parameters have changed.
+
     Note: Use of META_Object inhibits making this function pure virtual.
-    */
+    Constraint::getConstraing() is a no-op, and all derived classes must override this function
+    to implement Bullet constraint creation. */
     virtual void createConstraint() {}
 
     btTypedConstraint* _constraint;
@@ -108,7 +180,7 @@ protected:
 typedef std::list< osg::ref_ptr< Constraint > > ConstraintList;
 
 
-/** \class CreationRecord CreationRecord.h <osgbDynamics/CreationRecord.h>
+/** \class SliderConstraint SliderConstraint.h <osgbDynamics/Constraint.h>
 */
 class OSGBDYNAMICS_EXPORT SliderConstraint : public Constraint
 {
@@ -123,17 +195,26 @@ public:
 
     virtual btSliderConstraint* getAsBtSlider() const;
 
-    virtual std::string getTypeName() const
-    {
-        return( "SliderConstraint" );
-    }
+    /** \brief Specify the slider axis in rigid body A's coordinate system.
 
+    This is the axis along which the two constrained bodies are allowed to move
+    relative to each other. In the common scenario where one rigid body is fixed,
+    the other rigid body moves along this axis. If \c _rbB is NULL, \c _rbA
+    moves along this axis.
+
+    Note: Unless you're doing something extremely unusual, rigid body A's
+    coordinate space and the corresponding OSG subgraph's coordinate space are
+    the same for purposes of specify this axis. */
     void setAxisInA( const osg::Vec3& axisInA );
     osg::Vec3 getAxisInA() const
     {
         return( _slideAxisInA );
     }
 
+    /** \brief Specify movement limits along \c _sliderAxisInA.
+
+    The limit values are relative to the initial transforms \c _rbAXform
+    and \c _rbBXform. */
     void setLimit( const osg::Vec2& limit );
     osg::Vec2 getLimit() const
     {
@@ -148,6 +229,9 @@ protected:
     osg::Vec3 _slideAxisInA;
     osg::Vec2 _slideLimit;
 };
+
+
+/**@}*/
 
 
 // osgbDynamics
