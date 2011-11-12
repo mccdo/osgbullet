@@ -151,6 +151,15 @@ public:
         return( _dirty );
     }
 
+    /** Return true if both rigid body transform member variables are
+    equal to the right-hand-side transforms. This function does not compare
+    rigid body addresses. */
+    virtual bool operator==( const Constraint& rhs ) const;
+    /** Return true if either rigid body transform member variable differs
+    from the right-hand-side transforms. This function does not compare
+    rigid body addresses. */
+    virtual bool operator!=( const Constraint& rhs ) const;
+
 protected:
     /** \brief Destructor.
     Note that deleting the constraint is up to the calling code. For example:
@@ -220,6 +229,13 @@ public:
     {
         return( _slideLimit );
     }
+
+    /** Return true if the axis and limit member variables, and base class, are
+    equal to the right-hand-side axis, limit, and base class. */
+    virtual bool SliderConstraint::operator==( const SliderConstraint& rhs ) const;
+    /** Return true if the axis or limit member variables, or base class, differ
+    from the right-hand-side axis, limit, or base class. */
+    virtual bool SliderConstraint::operator!=( const SliderConstraint& rhs ) const;
 
 protected:
     virtual ~SliderConstraint();
