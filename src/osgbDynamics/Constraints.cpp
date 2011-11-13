@@ -163,7 +163,16 @@ void SliderConstraint::setAxisInA( const osg::Vec3& axisInA )
 void SliderConstraint::setLimit( const osg::Vec2& limit )
 {
     _slideLimit = limit;
-    setDirty();
+
+    if( !getDirty() && ( _constraint != NULL ) )
+    {
+        // Dynamically modify the existing constraint.
+        btSliderConstraint* sc = getAsBtSlider();
+        sc->setLowerLinLimit( _slideLimit[ 0 ] );
+        sc->setUpperLinLimit( _slideLimit[ 1 ] );
+    }
+    else
+        setDirty();
 }
 
 bool SliderConstraint::operator==( const SliderConstraint& rhs ) const
