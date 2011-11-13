@@ -80,58 +80,126 @@ int main( int argc, char** argv )
     osg::Node* groundRoot = osgbDynamics::generateGroundPlane( plane, bulletWorld );
     root->addChild( groundRoot );
 
-    if( arguments.find( "PlaneSlider" ) > 0 )
+
+    osg::Node* nodeA = osgDB::readNodeFile( "tetra.osg" );
+    if( nodeA == NULL )
+        return( 1 );
+
+    osgwTools::AbsoluteModelTransform* amtA = new osgwTools::AbsoluteModelTransform;
+    amtA->setDataVariance( osg::Object::DYNAMIC );
+    amtA->addChild( nodeA );
+    root->addChild( amtA );
+
+    osg::ref_ptr< osgbDynamics::CreationRecord > crA = new osgbDynamics::CreationRecord;
+    crA->_sceneGraph = amtA;
+    crA->_shapeType = BOX_SHAPE_PROXYTYPE;
+    crA->_mass = 0.5;
+
+
+    osg::Node* nodeB = osgDB::readNodeFile( "block.osg" );
+    if( nodeB == NULL )
+        return( 1 );
+
+    osgwTools::AbsoluteModelTransform* amtB = new osgwTools::AbsoluteModelTransform;
+    amtB->setDataVariance( osg::Object::DYNAMIC );
+    amtB->addChild( nodeB );
+    root->addChild( amtB );
+
+    osg::ref_ptr< osgbDynamics::CreationRecord > crB = new osgbDynamics::CreationRecord;
+    crB->_sceneGraph = amtB;
+    crB->_shapeType = BOX_SHAPE_PROXYTYPE;
+    crB->_mass = 4.;
+
+
+    osg::Node* nodeC = osgDB::readNodeFile( "dice.osg" );
+    if( nodeC == NULL )
+        return( 1 );
+
+    osgwTools::AbsoluteModelTransform* amtC = new osgwTools::AbsoluteModelTransform;
+    amtC->setDataVariance( osg::Object::DYNAMIC );
+    amtC->addChild( nodeC );
+    root->addChild( amtC );
+
+    osg::ref_ptr< osgbDynamics::CreationRecord > crC = new osgbDynamics::CreationRecord;
+    crC->_sceneGraph = amtC;
+    crC->_shapeType = CONVEX_HULL_SHAPE_PROXYTYPE;
+    crC->_mass = 1.5;
+
+
+    if( arguments.find( "Planar" ) > 0 )
     {
     }
-    else if( arguments.find( "BoxSlider" ) > 0 )
+    else if( arguments.find( "Box" ) > 0 )
     {
+    }
+    else if( arguments.find( "TwistSlider" ) > 0 )
+    {
+        osg::Matrix aXform = osg::Matrix::translate( 0., 0., 3. );
+        crA->_parentTransform = aXform;
+        btRigidBody* rbA = osgbDynamics::createRigidBody( crA.get() );
+        amtA->setUserData( new osgbCollision::RefRigidBody( rbA ) );
+        bulletWorld->addRigidBody( rbA );
+
+        osg::Matrix bXform = osg::Matrix::identity();
+        crB->_parentTransform = bXform;
+        btRigidBody* rbB = osgbDynamics::createRigidBody( crB.get() );
+        amtB->setUserData( new osgbCollision::RefRigidBody( rbB ) );
+        bulletWorld->addRigidBody( rbB );
+
+        osg::Matrix cXform = osg::Matrix::rotate( osg::PI_4, osg::Vec3( 0., 0., 1. ) ) *
+            osg::Matrix::translate( 2., 12., 5. );
+        crC->_parentTransform = cXform;
+        btRigidBody* rbC = osgbDynamics::createRigidBody( crC.get() );
+        amtC->setUserData( new osgbCollision::RefRigidBody( rbC ) );
+        bulletWorld->addRigidBody( rbC );
+
+        {
+            osg::Vec3 axis( 0., 1., .1 );
+            osg::Vec2 limits( -1., 1. );
+            osg::ref_ptr< osgbDynamics::TwistSliderConstraint > tsc0 = new osgbDynamics::TwistSliderConstraint(
+                rbA, aXform, rbB, bXform, axis, limits );
+            bulletWorld->addConstraint( tsc0->getConstraint() );
+
+            axis.set( 1., 1., 0. );
+            limits.set( -3., 3. );
+            osg::ref_ptr< osgbDynamics::TwistSliderConstraint > tsc1 = new osgbDynamics::TwistSliderConstraint(
+                rbC, cXform, NULL, osg::Matrix::identity(), axis, limits );
+            bulletWorld->addConstraint( tsc1->getConstraint() );
+        }
     }
     else // SliderConstraint by default.
     {
-        osg::Node* node = osgDB::readNodeFile( "tetra.osg" );
-        if( node == NULL )
-            return( 1 );
-        osg::Matrix aXform = osg::Matrix::translate( 8., 2., 0. );
-
-        osgwTools::AbsoluteModelTransform* amt = new osgwTools::AbsoluteModelTransform;
-        amt->setDataVariance( osg::Object::DYNAMIC );
-        amt->addChild( node );
-        root->addChild( amt );
-
-        osg::ref_ptr< osgbDynamics::CreationRecord > cr = new osgbDynamics::CreationRecord;
-        cr->_sceneGraph = amt;
-        cr->_shapeType = BOX_SHAPE_PROXYTYPE;
-        cr->_mass = 0.5;
-        cr->_parentTransform = aXform;
-        btRigidBody* rbA = osgbDynamics::createRigidBody( cr.get() );
-        amt->setUserData( new osgbCollision::RefRigidBody( rbA ) );
+        osg::Matrix aXform = osg::Matrix::translate( 0., 0., 3. );
+        crA->_parentTransform = aXform;
+        btRigidBody* rbA = osgbDynamics::createRigidBody( crA.get() );
+        amtA->setUserData( new osgbCollision::RefRigidBody( rbA ) );
         bulletWorld->addRigidBody( rbA );
 
-        node = osgDB::readNodeFile( "block.osg" );
-        if( node == NULL )
-            return( 1 );
         osg::Matrix bXform = osg::Matrix::identity();
-
-        amt = new osgwTools::AbsoluteModelTransform;
-        amt->setDataVariance( osg::Object::DYNAMIC );
-        amt->addChild( node );
-        root->addChild( amt );
-
-        cr = new osgbDynamics::CreationRecord;
-        cr->_sceneGraph = amt;
-        cr->_shapeType = BOX_SHAPE_PROXYTYPE;
-        cr->_mass = 4.;
-        cr->_parentTransform = bXform;
-        btRigidBody* rbB = osgbDynamics::createRigidBody( cr.get() );
-        amt->setUserData( new osgbCollision::RefRigidBody( rbB ) );
+        crB->_parentTransform = bXform;
+        btRigidBody* rbB = osgbDynamics::createRigidBody( crB.get() );
+        amtB->setUserData( new osgbCollision::RefRigidBody( rbB ) );
         bulletWorld->addRigidBody( rbB );
 
+        osg::Matrix cXform = osg::Matrix::rotate( osg::PI_4, osg::Vec3( 0., 0., 1. ) ) *
+            osg::Matrix::translate( 2., 12., 5. );
+        crC->_parentTransform = cXform;
+        btRigidBody* rbC = osgbDynamics::createRigidBody( crC.get() );
+        amtC->setUserData( new osgbCollision::RefRigidBody( rbC ) );
+        bulletWorld->addRigidBody( rbC );
+
         {
-            osg::Vec3 axis( 0., 0., 1. );
-            osg::Vec2 limits( -4., 4. );
-            osg::ref_ptr< osgbDynamics::SliderConstraint > sc = new osgbDynamics::SliderConstraint(
+            osg::Vec3 axis( 0., 1., .1 );
+            osg::Vec2 limits( -1., 1. );
+            osg::ref_ptr< osgbDynamics::SliderConstraint > sc0 = new osgbDynamics::SliderConstraint(
                 rbA, aXform, rbB, bXform, axis, limits );
-            bulletWorld->addConstraint( sc->getConstraint() );
+            bulletWorld->addConstraint( sc0->getConstraint() );
+
+            axis.set( 1., 1., 0. );
+            limits.set( -3., 3. );
+            osg::ref_ptr< osgbDynamics::SliderConstraint > sc1 = new osgbDynamics::SliderConstraint(
+                rbC, cXform, NULL, osg::Matrix::identity(), axis, limits );
+            bulletWorld->addConstraint( sc1->getConstraint() );
         }
     }
 
