@@ -237,10 +237,10 @@ public:
 
     /** Return true if the axis and limit member variables, and base class, are
     equal to the right-hand-side axis, limit, and base class. */
-    virtual bool SliderConstraint::operator==( const SliderConstraint& rhs ) const;
+    virtual bool operator==( const SliderConstraint& rhs ) const;
     /** Return true if the axis or limit member variables, or base class, differ
     from the right-hand-side axis, limit, or base class. */
-    virtual bool SliderConstraint::operator!=( const SliderConstraint& rhs ) const;
+    virtual bool operator!=( const SliderConstraint& rhs ) const;
 
 protected:
     virtual ~SliderConstraint();
