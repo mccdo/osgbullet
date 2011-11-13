@@ -249,7 +249,7 @@ protected:
 
 
 /** \class TwistSliderConstraint Constraint.h <osgbDynamics/Constraint.h>
-\brief TBD
+\brief A SliderConstraint that allows rotation around the slide axis.
 */
 class OSGBDYNAMICS_EXPORT TwistSliderConstraint : public SliderConstraint
 {
@@ -373,15 +373,45 @@ protected:
 
 
 /** \class BallAndSocketConstraint Constraint.h <osgbDynamics/Constraint.h>
-\brief TBD
+\brief Constrains two rigid bodies at the same world coordinate point.
 */
 class OSGBDYNAMICS_EXPORT BallAndSocketConstraint : public Constraint
 {
 public:
     BallAndSocketConstraint();
+    BallAndSocketConstraint( btRigidBody* rbA, btRigidBody* rbB=NULL );
+    BallAndSocketConstraint( btRigidBody* rbA, const osg::Matrix& rbAXform,
+            btRigidBody* rbB, const osg::Matrix& rbBXform,
+            const osg::Vec3& wcPoint );
+    BallAndSocketConstraint( const BallAndSocketConstraint& rhs, const osg::CopyOp& copyop=osg::CopyOp::SHALLOW_COPY );
+    META_Object(osgbDynamics,BallAndSocketConstraint);
+
+    virtual btPoint2PointConstraint* getAsBtPoint2Point() const;
+
+    /** \brief Specify the common point in world coordinates.
+
+    The rbA and rbB transforms are used to convert this point into local coordinates,
+    which are then passed into the btPoint2PointConstraint constructor.
+    */
+    void setPoint( const osg::Vec3& point );
+    osg::Vec3 getPoint() const
+    {
+        return( _point );
+    }
+
+    /** Return true if the point member variables and base class are
+    equal to the right-hand-side point and base class. */
+    virtual bool operator==( const BallAndSocketConstraint& rhs ) const;
+    /** Return true if the point member variable or base class differ
+    from the right-hand-side point or base class. */
+    virtual bool operator!=( const BallAndSocketConstraint& rhs ) const;
 
 protected:
     virtual ~BallAndSocketConstraint();
+
+    virtual void createConstraint();
+
+    osg::Vec3 _point;
 };
 
 

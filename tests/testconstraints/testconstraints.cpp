@@ -92,7 +92,7 @@ int main( int argc, char** argv )
 
     osg::ref_ptr< osgbDynamics::CreationRecord > crA = new osgbDynamics::CreationRecord;
     crA->_sceneGraph = amtA;
-    crA->_shapeType = BOX_SHAPE_PROXYTYPE;
+    crA->_shapeType = CONVEX_TRIANGLEMESH_SHAPE_PROXYTYPE;
     crA->_mass = 0.5;
 
 
@@ -132,6 +132,39 @@ int main( int argc, char** argv )
     else if( arguments.find( "Box" ) > 0 )
     {
     }
+    else if( arguments.find( "BallAndSocket" ) > 0 )
+    {
+        osg::Matrix aXform = osg::Matrix::translate( 1., 1., 2.5 );
+        crA->_parentTransform = aXform;
+        btRigidBody* rbA = osgbDynamics::createRigidBody( crA.get() );
+        amtA->setUserData( new osgbCollision::RefRigidBody( rbA ) );
+        bulletWorld->addRigidBody( rbA );
+
+        osg::Matrix bXform = osg::Matrix::identity();
+        crB->_parentTransform = bXform;
+        btRigidBody* rbB = osgbDynamics::createRigidBody( crB.get() );
+        amtB->setUserData( new osgbCollision::RefRigidBody( rbB ) );
+        bulletWorld->addRigidBody( rbB );
+
+        osg::Matrix cXform = osg::Matrix::rotate( osg::PI_4, osg::Vec3( 0., 0., 1. ) ) *
+            osg::Matrix::translate( 2., 12., 5. );
+        crC->_parentTransform = cXform;
+        btRigidBody* rbC = osgbDynamics::createRigidBody( crC.get() );
+        amtC->setUserData( new osgbCollision::RefRigidBody( rbC ) );
+        bulletWorld->addRigidBody( rbC );
+
+        {
+            osg::Vec3 point( 0., 0., 1.5 );
+            osg::ref_ptr< osgbDynamics::BallAndSocketConstraint > cons0 = new osgbDynamics::BallAndSocketConstraint(
+                rbA, aXform, rbB, bXform, point );
+            bulletWorld->addConstraint( cons0->getConstraint() );
+
+            point.set( 2., 12., 5. );
+            osg::ref_ptr< osgbDynamics::BallAndSocketConstraint > cons1 = new osgbDynamics::BallAndSocketConstraint(
+                rbC, cXform, NULL, osg::Matrix::identity(), point );
+            bulletWorld->addConstraint( cons1->getConstraint() );
+        }
+    }
     else if( arguments.find( "TwistSlider" ) > 0 )
     {
         osg::Matrix aXform = osg::Matrix::translate( 0., 0., 3. );
@@ -156,15 +189,15 @@ int main( int argc, char** argv )
         {
             osg::Vec3 axis( 0., 1., .1 );
             osg::Vec2 limits( -1., 1. );
-            osg::ref_ptr< osgbDynamics::TwistSliderConstraint > tsc0 = new osgbDynamics::TwistSliderConstraint(
+            osg::ref_ptr< osgbDynamics::TwistSliderConstraint > cons0 = new osgbDynamics::TwistSliderConstraint(
                 rbA, aXform, rbB, bXform, axis, limits );
-            bulletWorld->addConstraint( tsc0->getConstraint() );
+            bulletWorld->addConstraint( cons0->getConstraint() );
 
             axis.set( 1., 1., 0. );
             limits.set( -3., 3. );
-            osg::ref_ptr< osgbDynamics::TwistSliderConstraint > tsc1 = new osgbDynamics::TwistSliderConstraint(
+            osg::ref_ptr< osgbDynamics::TwistSliderConstraint > cons1 = new osgbDynamics::TwistSliderConstraint(
                 rbC, cXform, NULL, osg::Matrix::identity(), axis, limits );
-            bulletWorld->addConstraint( tsc1->getConstraint() );
+            bulletWorld->addConstraint( cons1->getConstraint() );
         }
     }
     else // SliderConstraint by default.
@@ -191,15 +224,15 @@ int main( int argc, char** argv )
         {
             osg::Vec3 axis( 0., 1., .1 );
             osg::Vec2 limits( -1., 1. );
-            osg::ref_ptr< osgbDynamics::SliderConstraint > sc0 = new osgbDynamics::SliderConstraint(
+            osg::ref_ptr< osgbDynamics::SliderConstraint > cons0 = new osgbDynamics::SliderConstraint(
                 rbA, aXform, rbB, bXform, axis, limits );
-            bulletWorld->addConstraint( sc0->getConstraint() );
+            bulletWorld->addConstraint( cons0->getConstraint() );
 
             axis.set( 1., 1., 0. );
             limits.set( -3., 3. );
-            osg::ref_ptr< osgbDynamics::SliderConstraint > sc1 = new osgbDynamics::SliderConstraint(
+            osg::ref_ptr< osgbDynamics::SliderConstraint > cons1 = new osgbDynamics::SliderConstraint(
                 rbC, cXform, NULL, osg::Matrix::identity(), axis, limits );
-            bulletWorld->addConstraint( sc1->getConstraint() );
+            bulletWorld->addConstraint( cons1->getConstraint() );
         }
     }
 
