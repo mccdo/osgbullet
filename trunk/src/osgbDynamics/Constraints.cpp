@@ -214,10 +214,9 @@ void SliderConstraint::createConstraint()
     //
     //   2. Inverse B center of mass offset.
     osg::Vec3 bCom;
-    osgbDynamics::MotionState* motion;
     if( _rbB != NULL )
     {
-        motion = dynamic_cast< osgbDynamics::MotionState* >( _rbB->getMotionState() );
+        osgbDynamics::MotionState* motion = dynamic_cast< osgbDynamics::MotionState* >( _rbB->getMotionState() );
         if( motion == NULL )
         {
             osg::notify( osg::WARN ) << "SliderConstraint: Invalid MotionState." << std::endl;
@@ -238,7 +237,7 @@ void SliderConstraint::createConstraint()
     // Compute a matrix that transforms A's collision shape origin and x axis
     // to A's origin and drawerAxis.
     //   1. A's center of mass offset.
-    motion = dynamic_cast< osgbDynamics::MotionState* >( _rbA->getMotionState() );
+    osgbDynamics::MotionState* motion = dynamic_cast< osgbDynamics::MotionState* >( _rbA->getMotionState() );
     if( motion == NULL )
     {
         osg::notify( osg::WARN ) << "SliderConstraint: Invalid MotionState." << std::endl;
@@ -364,12 +363,124 @@ CardanConstraint::~CardanConstraint()
 {
 }
 
+
+
 BallAndSocketConstraint::BallAndSocketConstraint()
+  : Constraint()
+{
+}
+BallAndSocketConstraint::BallAndSocketConstraint( btRigidBody* rbA, btRigidBody* rbB )
+  : Constraint( rbA, rbB )
+{
+}
+BallAndSocketConstraint::BallAndSocketConstraint( btRigidBody* rbA, const osg::Matrix& rbAXform,
+            btRigidBody* rbB, const osg::Matrix& rbBXform, const osg::Vec3& wcPoint )
+  : Constraint( rbA, rbAXform, rbB, rbBXform ),
+    _point( wcPoint )
+{
+}
+BallAndSocketConstraint::BallAndSocketConstraint( const BallAndSocketConstraint& rhs, const osg::CopyOp& copyop )
+  : Constraint( rhs, copyop ),
+    _point( rhs._point )
 {
 }
 BallAndSocketConstraint::~BallAndSocketConstraint()
 {
 }
+
+btPoint2PointConstraint* BallAndSocketConstraint::getAsBtPoint2Point() const
+{
+    return( static_cast< btPoint2PointConstraint* >( getConstraint() ) );
+}
+
+void BallAndSocketConstraint::setPoint( const osg::Vec3& point )
+{
+    _point = point;
+    setDirty();
+}
+
+bool BallAndSocketConstraint::operator==( const BallAndSocketConstraint& rhs ) const
+{
+    return(
+        ( _point == rhs._point ) &&
+        ( Constraint::operator==( static_cast< const Constraint& >( rhs ) ) )
+    );
+}
+bool BallAndSocketConstraint::operator!=( const BallAndSocketConstraint& rhs ) const
+{
+    return(
+        ( _point != rhs._point ) ||
+        ( Constraint::operator!=( static_cast< const Constraint& >( rhs ) ) )
+    );
+}
+
+void BallAndSocketConstraint::createConstraint()
+{
+    if( _rbA == NULL )
+    {
+        osg::notify( osg::INFO ) << "createConstraint: _rbA == NULL." << std::endl;
+        return;
+    }
+
+    if( _constraint )
+        delete _constraint;
+
+
+    // Compute a matrix that transforms the world coord point into
+    // A's collision shape local coordinates.
+    //
+    //   1. Inverse A center of mass offset.
+    osg::Vec3 aCom;
+    osgbDynamics::MotionState* motion = dynamic_cast< osgbDynamics::MotionState* >( _rbA->getMotionState() );
+    if( motion == NULL )
+    {
+        osg::notify( osg::WARN ) << "BallAndSocketConstraint: Invalid MotionState." << std::endl;
+        return;
+    }
+    aCom = motion->getCenterOfMass();
+    const osg::Matrix invACOM( osg::Matrix::translate( -( aCom ) ) );
+    //
+    //   2. The final transform matrix.
+    osg::Matrix rbAMatrix = osg::Matrix::inverse( invACOM * _rbAXform );
+
+    // And now compute the WC point in rbA space:
+    const btVector3 aPt = osgbCollision::asBtVector3( _point * rbAMatrix );
+
+
+    // Compute a matrix that transforms the world coord point into
+    // B's collision shape local coordinates.
+    //
+    //   1. Inverse B center of mass offset.
+    osg::Vec3 bCom;
+    if( _rbB != NULL )
+    {
+        motion = dynamic_cast< osgbDynamics::MotionState* >( _rbB->getMotionState() );
+        if( motion == NULL )
+        {
+            osg::notify( osg::WARN ) << "BallAndSocketConstraint: Invalid MotionState." << std::endl;
+            return;
+        }
+        bCom = motion->getCenterOfMass();
+    }
+    const osg::Matrix invBCOM( osg::Matrix::translate( -( bCom ) ) );
+    //
+    //   2. The final transform matrix.
+    const osg::Matrix rbBMatrix = osg::Matrix::inverse( invBCOM * _rbBXform );
+
+    // And now compute the WC point in rbB space:
+    const btVector3 bPt = osgbCollision::asBtVector3( _point * rbBMatrix );
+
+
+    btPoint2PointConstraint* cons;
+    if( _rbB != NULL )
+        cons = new btPoint2PointConstraint( *_rbA, *_rbB, aPt, bPt );
+    else
+        cons = new btPoint2PointConstraint( *_rbA, aPt );
+    _constraint = cons;
+
+    setDirty( false );
+}
+
 
 RagdollConstraint::RagdollConstraint()
 {

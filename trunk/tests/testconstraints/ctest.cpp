@@ -137,5 +137,32 @@ int runCTest()
             ERROR(name,"failed to match.");
     }
 
+    //
+    // BallAndSocketConstraint
+    {
+        const std::string name( "BallAndSocketConstraint" );
+        osg::Vec3 point( -5., 5., 3. );
+        osg::ref_ptr< osgbDynamics::BallAndSocketConstraint > cons = new osgbDynamics::BallAndSocketConstraint(
+            rbA, aXform, rbB, bXform, point );
+
+        if( cons->getAsBtPoint2Point() == NULL )
+            ERROR(name,"won't typecast as btPoint2PointConstraint.");
+
+        if( !( osgDB::writeObjectFile( *cons, fileName ) ) )
+            ERROR(name,"writeObjectFile failed.");
+
+        osg::Object* obj = osgDB::readObjectFile( fileName );
+        if( obj == NULL )
+            ERROR(name,"readObjectFile returned NULL.");
+
+        osg::ref_ptr< osgbDynamics::BallAndSocketConstraint > cons2 = dynamic_cast<
+            osgbDynamics::BallAndSocketConstraint* >( obj );
+        if( !( cons2.valid() ) )
+            ERROR(name,"dynamic_cast after readObjectFile failed.");
+
+        if( *cons2 != *cons )
+            ERROR(name,"failed to match.");
+    }
+
     return( 0 );
 }

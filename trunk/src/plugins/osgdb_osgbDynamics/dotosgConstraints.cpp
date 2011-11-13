@@ -249,7 +249,7 @@ bool Constraint_writeLocalData( const osg::Object& obj, osgDB::Output& fw )
 
 bool SliderConstraint_readLocalData( osg::Object& obj, osgDB::Input& fr )
 {
-    osgbDynamics::SliderConstraint& sc = static_cast< osgbDynamics::SliderConstraint& >( obj );
+    osgbDynamics::SliderConstraint& cons = static_cast< osgbDynamics::SliderConstraint& >( obj );
 
     if( fr.matchSequence( "Axis %f %f %f" ) )
     {
@@ -257,7 +257,7 @@ bool SliderConstraint_readLocalData( osg::Object& obj, osgDB::Input& fr )
         fr[1].getFloat( ( axis[0] ) );
         fr[2].getFloat( ( axis[1] ) );
         fr[3].getFloat( ( axis[2] ) );
-        sc.setAxisInA( axis );
+        cons.setAxisInA( axis );
         fr += 4;
     }
     else
@@ -271,7 +271,7 @@ bool SliderConstraint_readLocalData( osg::Object& obj, osgDB::Input& fr )
         osg::Vec2 limit;
         fr[1].getFloat( ( limit[0] ) );
         fr[2].getFloat( ( limit[1] ) );
-        sc.setLimit( limit );
+        cons.setLimit( limit );
         fr += 3;
     }
     else
@@ -284,10 +284,10 @@ bool SliderConstraint_readLocalData( osg::Object& obj, osgDB::Input& fr )
 }
 bool SliderConstraint_writeLocalData( const osg::Object& obj, osgDB::Output& fw )
 {
-    const osgbDynamics::SliderConstraint& sc = static_cast< const osgbDynamics::SliderConstraint& >( obj );
+    const osgbDynamics::SliderConstraint& cons = static_cast< const osgbDynamics::SliderConstraint& >( obj );
 
-    fw.indent() << "Axis " << sc.getAxisInA() << std::endl;
-    fw.indent() << "Limit " << sc.getLimit() << std::endl;
+    fw.indent() << "Axis " << cons.getAxisInA() << std::endl;
+    fw.indent() << "Limit " << cons.getLimit() << std::endl;
 
     return( true );
 }
@@ -403,12 +403,31 @@ bool CardanConstraint_writeLocalData( const osg::Object& obj, osgDB::Output& fw 
 
 bool BallAndSocketConstraint_readLocalData( osg::Object& obj, osgDB::Input& fr )
 {
-    // TBD
+    osgbDynamics::BallAndSocketConstraint& cons = static_cast< osgbDynamics::BallAndSocketConstraint& >( obj );
+
+    if( fr.matchSequence( "Point %f %f %f" ) )
+    {
+        osg::Vec3 point;
+        fr[1].getFloat( ( point[0] ) );
+        fr[2].getFloat( ( point[1] ) );
+        fr[3].getFloat( ( point[2] ) );
+        cons.setPoint( point );
+        fr += 4;
+    }
+    else
+    {
+        osg::notify( osg::WARN ) << "BallAndSocketConstraint_readLocalData: Bad input data at \"Point\"." << std::endl;
+        return( false );
+    }
+
     return( true );
 }
 bool BallAndSocketConstraint_writeLocalData( const osg::Object& obj, osgDB::Output& fw )
 {
-    // TBD
+    const osgbDynamics::BallAndSocketConstraint& cons = static_cast< const osgbDynamics::BallAndSocketConstraint& >( obj );
+
+    fw.indent() << "Point " << cons.getPoint() << std::endl;
+
     return( true );
 }
 
