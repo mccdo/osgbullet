@@ -70,6 +70,149 @@ osgDB::RegisterDotOsgWrapperProxy TwistSliderConstraint_Proxy
 );
 
 
+bool LinearSpringConstraint_readLocalData( osg::Object& obj, osgDB::Input& fr );
+bool LinearSpringConstraint_writeLocalData( const osg::Object& obj, osgDB::Output& fw );
+
+osgDB::RegisterDotOsgWrapperProxy LinearSpringConstraint_Proxy
+(
+    new osgbDynamics::LinearSpringConstraint,
+    "LinearSpringConstraint",
+    "Object Constraint LinearSpringConstraint",
+    LinearSpringConstraint_readLocalData,
+    LinearSpringConstraint_writeLocalData
+);
+
+
+bool AngleSpringConstraint_readLocalData( osg::Object& obj, osgDB::Input& fr );
+bool AngleSpringConstraint_writeLocalData( const osg::Object& obj, osgDB::Output& fw );
+
+osgDB::RegisterDotOsgWrapperProxy AngleSpringConstraint_Proxy
+(
+    new osgbDynamics::AngleSpringConstraint,
+    "AngleSpringConstraint",
+    "Object Constraint AngleSpringConstraint",
+    AngleSpringConstraint_readLocalData,
+    AngleSpringConstraint_writeLocalData
+);
+
+
+bool LinearAngleSpringConstraint_readLocalData( osg::Object& obj, osgDB::Input& fr );
+bool LinearAngleSpringConstraint_writeLocalData( const osg::Object& obj, osgDB::Output& fw );
+
+osgDB::RegisterDotOsgWrapperProxy LinearAngleSpringConstraint_Proxy
+(
+    new osgbDynamics::LinearAngleSpringConstraint,
+    "LinearAngleSpringConstraint",
+    "Object Constraint LinearAngleSpringConstraint",
+    LinearAngleSpringConstraint_readLocalData,
+    LinearAngleSpringConstraint_writeLocalData
+);
+
+
+bool FixedConstraint_readLocalData( osg::Object& obj, osgDB::Input& fr );
+bool FixedConstraint_writeLocalData( const osg::Object& obj, osgDB::Output& fw );
+
+osgDB::RegisterDotOsgWrapperProxy FixedConstraint_Proxy
+(
+    new osgbDynamics::FixedConstraint,
+    "FixedConstraint",
+    "Object Constraint FixedConstraint",
+    FixedConstraint_readLocalData,
+    FixedConstraint_writeLocalData
+);
+
+
+bool PlanarConstraint_readLocalData( osg::Object& obj, osgDB::Input& fr );
+bool PlanarConstraint_writeLocalData( const osg::Object& obj, osgDB::Output& fw );
+
+osgDB::RegisterDotOsgWrapperProxy PlanarConstraint_Proxy
+(
+    new osgbDynamics::PlanarConstraint,
+    "PlanarConstraint",
+    "Object Constraint PlanarConstraint",
+    PlanarConstraint_readLocalData,
+    PlanarConstraint_writeLocalData
+);
+
+
+bool BoxConstraint_readLocalData( osg::Object& obj, osgDB::Input& fr );
+bool BoxConstraint_writeLocalData( const osg::Object& obj, osgDB::Output& fw );
+
+osgDB::RegisterDotOsgWrapperProxy BoxConstraint_Proxy
+(
+    new osgbDynamics::BoxConstraint,
+    "BoxConstraint",
+    "Object Constraint BoxConstraint",
+    BoxConstraint_readLocalData,
+    BoxConstraint_writeLocalData
+);
+
+
+bool HingeConstraint_readLocalData( osg::Object& obj, osgDB::Input& fr );
+bool HingeConstraint_writeLocalData( const osg::Object& obj, osgDB::Output& fw );
+
+osgDB::RegisterDotOsgWrapperProxy HingeConstraint_Proxy
+(
+    new osgbDynamics::HingeConstraint,
+    "HingeConstraint",
+    "Object Constraint HingeConstraint",
+    HingeConstraint_readLocalData,
+    HingeConstraint_writeLocalData
+);
+
+
+bool CardanConstraint_readLocalData( osg::Object& obj, osgDB::Input& fr );
+bool CardanConstraint_writeLocalData( const osg::Object& obj, osgDB::Output& fw );
+
+osgDB::RegisterDotOsgWrapperProxy CardanConstraint_Proxy
+(
+    new osgbDynamics::CardanConstraint,
+    "CardanConstraint",
+    "Object Constraint CardanConstraint",
+    CardanConstraint_readLocalData,
+    CardanConstraint_writeLocalData
+);
+
+
+bool BallAndSocketConstraint_readLocalData( osg::Object& obj, osgDB::Input& fr );
+bool BallAndSocketConstraint_writeLocalData( const osg::Object& obj, osgDB::Output& fw );
+
+osgDB::RegisterDotOsgWrapperProxy BallAndSocketConstraint_Proxy
+(
+    new osgbDynamics::BallAndSocketConstraint,
+    "BallAndSocketConstraint",
+    "Object Constraint BallAndSocketConstraint",
+    BallAndSocketConstraint_readLocalData,
+    BallAndSocketConstraint_writeLocalData
+);
+
+
+bool RagdollConstraint_readLocalData( osg::Object& obj, osgDB::Input& fr );
+bool RagdollConstraint_writeLocalData( const osg::Object& obj, osgDB::Output& fw );
+
+osgDB::RegisterDotOsgWrapperProxy RagdollConstraint_Proxy
+(
+    new osgbDynamics::RagdollConstraint,
+    "RagdollConstraint",
+    "Object Constraint RagdollConstraint",
+    RagdollConstraint_readLocalData,
+    RagdollConstraint_writeLocalData
+);
+
+
+bool WheelSuspensionConstraint_readLocalData( osg::Object& obj, osgDB::Input& fr );
+bool WheelSuspensionConstraint_writeLocalData( const osg::Object& obj, osgDB::Output& fw );
+
+osgDB::RegisterDotOsgWrapperProxy WheelSuspensionConstraint_Proxy
+(
+    new osgbDynamics::WheelSuspensionConstraint,
+    "WheelSuspensionConstraint",
+    "Object Constraint WheelSuspensionConstraint",
+    WheelSuspensionConstraint_readLocalData,
+    WheelSuspensionConstraint_writeLocalData
+);
+
+
 bool Constraint_readLocalData( osg::Object& obj, osgDB::Input& fr )
 {
     osgbDynamics::Constraint& cons = static_cast< osgbDynamics::Constraint& >( obj );
@@ -161,3 +304,134 @@ bool TwistSliderConstraint_writeLocalData( const osg::Object& obj, osgDB::Output
     return( true );
 }
 
+
+bool LinearSpringConstraint_readLocalData( osg::Object& obj, osgDB::Input& fr )
+{
+    // TBD
+    return( true );
+}
+bool LinearSpringConstraint_writeLocalData( const osg::Object& obj, osgDB::Output& fw )
+{
+    // TBD
+    return( true );
+}
+
+
+bool AngleSpringConstraint_readLocalData( osg::Object& obj, osgDB::Input& fr )
+{
+    // TBD
+    return( true );
+}
+bool AngleSpringConstraint_writeLocalData( const osg::Object& obj, osgDB::Output& fw )
+{
+    // TBD
+    return( true );
+}
+
+
+bool LinearAngleSpringConstraint_readLocalData( osg::Object& obj, osgDB::Input& fr )
+{
+    // TBD
+    return( true );
+}
+bool LinearAngleSpringConstraint_writeLocalData( const osg::Object& obj, osgDB::Output& fw )
+{
+    // TBD
+    return( true );
+}
+
+
+bool FixedConstraint_readLocalData( osg::Object& obj, osgDB::Input& fr )
+{
+    // TBD
+    return( true );
+}
+bool FixedConstraint_writeLocalData( const osg::Object& obj, osgDB::Output& fw )
+{
+    // TBD
+    return( true );
+}
+
+
+bool PlanarConstraint_readLocalData( osg::Object& obj, osgDB::Input& fr )
+{
+    // TBD
+    return( true );
+}
+bool PlanarConstraint_writeLocalData( const osg::Object& obj, osgDB::Output& fw )
+{
+    // TBD
+    return( true );
+}
+
+
+bool BoxConstraint_readLocalData( osg::Object& obj, osgDB::Input& fr )
+{
+    // TBD
+    return( true );
+}
+bool BoxConstraint_writeLocalData( const osg::Object& obj, osgDB::Output& fw )
+{
+    // TBD
+    return( true );
+}
+
+
+bool HingeConstraint_readLocalData( osg::Object& obj, osgDB::Input& fr )
+{
+    // TBD
+    return( true );
+}
+bool HingeConstraint_writeLocalData( const osg::Object& obj, osgDB::Output& fw )
+{
+    // TBD
+    return( true );
+}
+
+
+bool CardanConstraint_readLocalData( osg::Object& obj, osgDB::Input& fr )
+{
+    // TBD
+    return( true );
+}
+bool CardanConstraint_writeLocalData( const osg::Object& obj, osgDB::Output& fw )
+{
+    // TBD
+    return( true );
+}
+
+
+bool BallAndSocketConstraint_readLocalData( osg::Object& obj, osgDB::Input& fr )
+{
+    // TBD
+    return( true );
+}
+bool BallAndSocketConstraint_writeLocalData( const osg::Object& obj, osgDB::Output& fw )
+{
+    // TBD
+    return( true );
+}
+
+
+bool RagdollConstraint_readLocalData( osg::Object& obj, osgDB::Input& fr )
+{
+    // TBD
+    return( true );
+}
+bool RagdollConstraint_writeLocalData( const osg::Object& obj, osgDB::Output& fw )
+{
+    // TBD
+    return( true );
+}
+
+
+bool WheelSuspensionConstraint_readLocalData( osg::Object& obj, osgDB::Input& fr )
+{
+    // TBD
+    return( true );
+}
+bool WheelSuspensionConstraint_writeLocalData( const osg::Object& obj, osgDB::Output& fw )
+{
+    // TBD
+    return( true );
+}
