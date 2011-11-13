@@ -31,9 +31,9 @@
 
 
 // Shorthand to display a message and return an error.
-#define ERROR( msg ) \
+#define ERROR( name, msg ) \
     { \
-        osg::notify( osg::WARN ) << msg << std::endl; \
+        osg::notify( osg::WARN ) << name << " " << msg << std::endl; \
         return( 1 ); \
     }
 
@@ -48,7 +48,7 @@ int runCTest()
 
     osg::Node* node = osgDB::readNodeFile( "tetra.osg" );
     if( node == NULL )
-        ERROR("Can't load model data file.");
+        ERROR("Init:","Can't load model data file.");
     osg::Matrix aXform = osg::Matrix::translate( 4., 2., 0. );
 
     osgwTools::AbsoluteModelTransform* amt = new osgwTools::AbsoluteModelTransform;
@@ -66,7 +66,7 @@ int runCTest()
 
     node = osgDB::readNodeFile( "block.osg" );
     if( node == NULL )
-        ERROR("Can't load model data file.");
+        ERROR("Init:","Can't load model data file.");
     osg::Matrix bXform = osg::Matrix::identity();
 
     amt = new osgwTools::AbsoluteModelTransform;
@@ -84,28 +84,57 @@ int runCTest()
     //
     // SliderConstraint
     {
+        const std::string name( "TwistSliderConstraint" );
         osg::Vec3 axis( 0., 0., 1. );
         osg::Vec2 limits( -4., 4. );
-        osg::ref_ptr< osgbDynamics::SliderConstraint > sc = new osgbDynamics::SliderConstraint(
+        osg::ref_ptr< osgbDynamics::SliderConstraint > cons = new osgbDynamics::SliderConstraint(
             rbA, aXform, rbB, bXform, axis, limits );
 
-        if( sc->getAsBtSlider() == NULL )
-            ERROR("SliderConstraint won't typecast as btSliderConstraint.");
+        if( cons->getAsBtSlider() == NULL )
+            ERROR(name,"won't typecast as btSliderConstraint.");
 
-        if( !( osgDB::writeObjectFile( *sc, fileName ) ) )
-            ERROR("SliderConstraint writeObjectFile failed.");
+        if( !( osgDB::writeObjectFile( *cons, fileName ) ) )
+            ERROR(name,"writeObjectFile failed.");
 
         osg::Object* obj = osgDB::readObjectFile( fileName );
         if( obj == NULL )
-            ERROR("SliderConstraint readObjectFile returned NULL.");
+            ERROR(name,"readObjectFile returned NULL.");
 
-        osg::ref_ptr< osgbDynamics::SliderConstraint > sc2 = dynamic_cast<
+        osg::ref_ptr< osgbDynamics::SliderConstraint > cons2 = dynamic_cast<
             osgbDynamics::SliderConstraint* >( obj );
-        if( !( sc2.valid() ) )
-            ERROR("SliderConstraint dynamic_cast after readObjectFile failed.");
+        if( !( cons2.valid() ) )
+            ERROR(name,"dynamic_cast after readObjectFile failed.");
 
-        if( *sc2 != *sc )
-            ERROR("SliderConstraints failed to match.");
+        if( *cons2 != *cons )
+            ERROR(name,"failed to match.");
+    }
+
+    //
+    // TwistSliderConstraint
+    {
+        const std::string name( "TwistSliderConstraint" );
+        osg::Vec3 axis( 0., 0., 1. );
+        osg::Vec2 limits( -4., 4. );
+        osg::ref_ptr< osgbDynamics::TwistSliderConstraint > cons = new osgbDynamics::TwistSliderConstraint(
+            rbA, aXform, rbB, bXform, axis, limits );
+
+        if( cons->getAsBtSlider() == NULL )
+            ERROR(name,"won't typecast as btSliderConstraint.");
+
+        if( !( osgDB::writeObjectFile( *cons, fileName ) ) )
+            ERROR(name,"writeObjectFile failed.");
+
+        osg::Object* obj = osgDB::readObjectFile( fileName );
+        if( obj == NULL )
+            ERROR(name,"readObjectFile returned NULL.");
+
+        osg::ref_ptr< osgbDynamics::SliderConstraint > cons2 = dynamic_cast<
+            osgbDynamics::SliderConstraint* >( obj );
+        if( !( cons2.valid() ) )
+            ERROR(name,"dynamic_cast after readObjectFile failed.");
+
+        if( *cons2 != *cons )
+            ERROR(name,"failed to match.");
     }
 
     return( 0 );
