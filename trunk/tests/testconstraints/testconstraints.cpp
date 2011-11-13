@@ -102,7 +102,6 @@ int main( int argc, char** argv )
         cr->_sceneGraph = amt;
         cr->_shapeType = BOX_SHAPE_PROXYTYPE;
         cr->_mass = 0.5;
-        cr->_scale = osg::Vec3( 2., 2., 2. );
         cr->_parentTransform = aXform;
         btRigidBody* rbA = osgbDynamics::createRigidBody( cr.get() );
         amt->setUserData( new osgbCollision::RefRigidBody( rbA ) );

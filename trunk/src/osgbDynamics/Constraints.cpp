@@ -242,33 +242,138 @@ void SliderConstraint::createConstraint()
         axisRotate * invACOM );
 
 
-    // Scale limits, if necessary.
-    btScalar loLimit = _slideLimit[ 0 ];
-    btScalar hiLimit = _slideLimit[ 1 ];
-    osg::Vec3 scale( motion->getScale() );
-    if( scale != osg::Vec3( 1., 1., 1. ) )
-    {
-        osg::Vec3 axis = _slideAxisInA;
-        axis.normalize();
-        axis[ 0 ] *= scale[ 0 ];
-        axis[ 1 ] *= scale[ 1 ];
-        axis[ 2 ] *= scale[ 2 ];
-        double len = axis.length();
-        loLimit *= len;
-        hiLimit *= len;
-    }
-
-
     btSliderConstraint* sc;
     if( _rbB != NULL )
         sc = new btSliderConstraint( *_rbA, *_rbB, rbAFrame, rbBFrame, false );
     else
         sc = new btSliderConstraint( *_rbA, rbAFrame, true );
+    const btScalar loLimit = _slideLimit[ 0 ];
+    const btScalar hiLimit = _slideLimit[ 1 ];
     sc->setLowerLinLimit( loLimit );
     sc->setUpperLinLimit( hiLimit );
     _constraint = sc;
 
     setDirty( false );
+}
+
+
+
+TwistSliderConstraint::TwistSliderConstraint()
+  : SliderConstraint()
+{
+}
+TwistSliderConstraint::TwistSliderConstraint( btRigidBody* rbA, btRigidBody* rbB )
+  : SliderConstraint( rbA, rbB )
+{
+}
+TwistSliderConstraint::TwistSliderConstraint( btRigidBody* rbA, const osg::Matrix& rbAXform,
+            btRigidBody* rbB, const osg::Matrix& rbBXform,
+            const osg::Vec3& slideAxisInA, const osg::Vec2& slideLimit )
+  : SliderConstraint( rbA, rbAXform, rbB, rbBXform, slideAxisInA, slideLimit )
+{
+}
+TwistSliderConstraint::TwistSliderConstraint( const TwistSliderConstraint& rhs, const osg::CopyOp& copyop )
+  : SliderConstraint( rhs, copyop )
+{
+}
+TwistSliderConstraint::~TwistSliderConstraint()
+{
+}
+
+void TwistSliderConstraint::createConstraint()
+{
+    // Create the constraint using the base class.
+    SliderConstraint::createConstraint();
+    if( _constraint == NULL )
+        return;
+
+    // Base class produces a btSliderConstraint.
+    btSliderConstraint* sc = getAsBtSlider();
+    // All we need to do is disable the angular constraint that exists in
+    // the btSliderConstraint by default.
+    sc->setLowerAngLimit( -osg::PI );
+    sc->setUpperAngLimit( osg::PI );
+
+    setDirty( false );
+}
+
+
+
+LinearSpringConstraint::LinearSpringConstraint()
+{
+}
+LinearSpringConstraint::~LinearSpringConstraint()
+{
+}
+
+AngleSpringConstraint::AngleSpringConstraint()
+{
+}
+AngleSpringConstraint::~AngleSpringConstraint()
+{
+}
+
+LinearAngleSpringConstraint::LinearAngleSpringConstraint()
+{
+}
+LinearAngleSpringConstraint::~LinearAngleSpringConstraint()
+{
+}
+
+FixedConstraint::FixedConstraint()
+{
+}
+FixedConstraint::~FixedConstraint()
+{
+}
+
+PlanarConstraint::PlanarConstraint()
+{
+}
+PlanarConstraint::~PlanarConstraint()
+{
+}
+
+BoxConstraint::BoxConstraint()
+{
+}
+BoxConstraint::~BoxConstraint()
+{
+}
+
+HingeConstraint::HingeConstraint()
+{
+}
+HingeConstraint::~HingeConstraint()
+{
+}
+
+CardanConstraint::CardanConstraint()
+{
+}
+CardanConstraint::~CardanConstraint()
+{
+}
+
+BallAndSocketConstraint::BallAndSocketConstraint()
+{
+}
+BallAndSocketConstraint::~BallAndSocketConstraint()
+{
+}
+
+RagdollConstraint::RagdollConstraint()
+{
+}
+RagdollConstraint::~RagdollConstraint()
+{
+}
+
+WheelSuspensionConstraint::WheelSuspensionConstraint()
+{
+}
+WheelSuspensionConstraint::~WheelSuspensionConstraint()
+{
 }
 
 

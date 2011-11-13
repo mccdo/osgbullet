@@ -57,6 +57,19 @@ osgDB::RegisterDotOsgWrapperProxy SliderConstraint_Proxy
 );
 
 
+bool TwistSliderConstraint_readLocalData( osg::Object& obj, osgDB::Input& fr );
+bool TwistSliderConstraint_writeLocalData( const osg::Object& obj, osgDB::Output& fw );
+
+osgDB::RegisterDotOsgWrapperProxy TwistSliderConstraint_Proxy
+(
+    new osgbDynamics::TwistSliderConstraint,
+    "TwistSliderConstraint",
+    "Object Constraint SliderConstraint TwistSliderConstraint",
+    TwistSliderConstraint_readLocalData,
+    TwistSliderConstraint_writeLocalData
+);
+
+
 bool Constraint_readLocalData( osg::Object& obj, osgDB::Input& fr )
 {
     osgbDynamics::Constraint& cons = static_cast< osgbDynamics::Constraint& >( obj );
@@ -133,6 +146,18 @@ bool SliderConstraint_writeLocalData( const osg::Object& obj, osgDB::Output& fw 
     fw.indent() << "Axis " << sc.getAxisInA() << std::endl;
     fw.indent() << "Limit " << sc.getLimit() << std::endl;
 
+    return( true );
+}
+
+
+bool TwistSliderConstraint_readLocalData( osg::Object& obj, osgDB::Input& fr )
+{
+    // No-op, but this function must exist to supprt the TwistSliderConstraint object.
+    return( true );
+}
+bool TwistSliderConstraint_writeLocalData( const osg::Object& obj, osgDB::Output& fw )
+{
+    // No-op, but this function must exist to supprt the TwistSliderConstraint object.
     return( true );
 }
 
