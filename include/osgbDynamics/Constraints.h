@@ -189,7 +189,7 @@ protected:
 typedef std::list< osg::ref_ptr< Constraint > > ConstraintList;
 
 
-/** \class SliderConstraint SliderConstraint.h <osgbDynamics/Constraint.h>
+/** \class SliderConstraint Constraint.h <osgbDynamics/Constraint.h>
 \brief Creates a constraint from an axis and movement limits on that axis.
 */
 class OSGBDYNAMICS_EXPORT SliderConstraint : public Constraint
@@ -223,12 +223,8 @@ public:
 
     /** \brief Specify movement limits along \c _sliderAxisInA.
 
-    The limit values are relative to the initial transforms \c _rbAXform
-    and \c _rbBXform.
-    
-    If \c _rbA is scaled (with a value other than 1.0) along the \c _slideAxisInA,
-    SliderConstraint will also scale the \c limit values when creating the actual
-    Bullet constraint. However, getLimit() returns the unscaled values. */
+    The limit values are in world coordinates and relative to the initial transforms
+    \c _rbAXform and \c _rbBXform. */
     void setLimit( const osg::Vec2& limit );
     osg::Vec2 getLimit() const
     {
@@ -249,6 +245,169 @@ protected:
 
     osg::Vec3 _slideAxisInA;
     osg::Vec2 _slideLimit;
+};
+
+
+/** \class TwistSliderConstraint Constraint.h <osgbDynamics/Constraint.h>
+\brief TBD
+*/
+class OSGBDYNAMICS_EXPORT TwistSliderConstraint : public SliderConstraint
+{
+public:
+    TwistSliderConstraint();
+    TwistSliderConstraint( btRigidBody* rbA, btRigidBody* rbB=NULL );
+    TwistSliderConstraint( btRigidBody* rbA, const osg::Matrix& rbAXform,
+            btRigidBody* rbB, const osg::Matrix& rbBXform,
+            const osg::Vec3& slideAxisInA, const osg::Vec2& slideLimit );
+    TwistSliderConstraint( const TwistSliderConstraint& rhs, const osg::CopyOp& copyop=osg::CopyOp::SHALLOW_COPY );
+
+protected:
+    virtual ~TwistSliderConstraint();
+
+    virtual void createConstraint();
+};
+
+
+/** \class LinearSpringConstraint Constraint.h <osgbDynamics/Constraint.h>
+\brief TBD
+*/
+class OSGBDYNAMICS_EXPORT LinearSpringConstraint : public Constraint
+{
+public:
+    LinearSpringConstraint();
+
+protected:
+    virtual ~LinearSpringConstraint();
+};
+
+
+/** \class AngleSpringConstraint AngleSpringConstraintConstraint.h <osgbDynamics/Constraint.h>
+\brief TBD
+*/
+class OSGBDYNAMICS_EXPORT AngleSpringConstraint : public Constraint
+{
+public:
+    AngleSpringConstraint();
+
+protected:
+    virtual ~AngleSpringConstraint();
+};
+
+
+/** \class LinearAngleSpringConstraint Constraint.h <osgbDynamics/Constraint.h>
+\brief TBD
+*/
+class OSGBDYNAMICS_EXPORT LinearAngleSpringConstraint : public Constraint
+{
+public:
+    LinearAngleSpringConstraint();
+
+protected:
+    virtual ~LinearAngleSpringConstraint();
+};
+
+
+/** \class FixedConstraint Constraint.h <osgbDynamics/Constraint.h>
+\brief TBD
+*/
+class OSGBDYNAMICS_EXPORT FixedConstraint : public Constraint
+{
+public:
+    FixedConstraint();
+
+protected:
+    virtual ~FixedConstraint();
+};
+
+
+/** \class PlanarConstraint Constraint.h <osgbDynamics/Constraint.h>
+\brief TBD
+*/
+class OSGBDYNAMICS_EXPORT PlanarConstraint : public Constraint
+{
+public:
+    PlanarConstraint();
+
+protected:
+    virtual ~PlanarConstraint();
+};
+
+
+/** \class BoxConstraint Constraint.h <osgbDynamics/Constraint.h>
+\brief TBD
+*/
+class OSGBDYNAMICS_EXPORT BoxConstraint : public Constraint
+{
+public:
+    BoxConstraint();
+
+protected:
+    virtual ~BoxConstraint();
+};
+
+
+/** \class HingeConstraint Constraint.h <osgbDynamics/Constraint.h>
+\brief TBD
+*/
+class OSGBDYNAMICS_EXPORT HingeConstraint : public Constraint
+{
+public:
+    HingeConstraint();
+
+protected:
+    virtual ~HingeConstraint();
+};
+
+
+/** \class CardanConstraint Constraint.h <osgbDynamics/Constraint.h>
+\brief TBD
+*/
+class OSGBDYNAMICS_EXPORT CardanConstraint : public Constraint
+{
+public:
+    CardanConstraint();
+
+protected:
+    virtual ~CardanConstraint();
+};
+
+
+/** \class BallAndSocketConstraint Constraint.h <osgbDynamics/Constraint.h>
+\brief TBD
+*/
+class OSGBDYNAMICS_EXPORT BallAndSocketConstraint : public Constraint
+{
+public:
+    BallAndSocketConstraint();
+
+protected:
+    virtual ~BallAndSocketConstraint();
+};
+
+
+/** \class RagdollConstraint Constraint.h <osgbDynamics/Constraint.h>
+\brief TBD
+*/
+class OSGBDYNAMICS_EXPORT RagdollConstraint : public Constraint
+{
+public:
+    RagdollConstraint();
+
+protected:
+    virtual ~RagdollConstraint();
+};
+
+
+/** \class WheelSuspensionConstraint Constraint.h <osgbDynamics/Constraint.h>
+\brief TBD
+*/
+class OSGBDYNAMICS_EXPORT WheelSuspensionConstraint : public Constraint
+{
+public:
+    WheelSuspensionConstraint();
+
+protected:
+    virtual ~WheelSuspensionConstraint();
 };
 
 
