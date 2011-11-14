@@ -106,10 +106,7 @@ void Constraint::setBXform( const osg::Matrix& rbBXform )
 
 bool Constraint::operator==( const Constraint& rhs ) const
 {
-    return(
-        ( _rbAXform == rhs._rbAXform ) &&
-        ( _rbBXform == rhs._rbBXform )
-    );
+    return( !( operator!=( rhs ) ) );
 }
 bool Constraint::operator!=( const Constraint& rhs ) const
 {
@@ -177,11 +174,7 @@ void SliderConstraint::setLimit( const osg::Vec2& limit )
 
 bool SliderConstraint::operator==( const SliderConstraint& rhs ) const
 {
-    return(
-        ( _slideAxisInA == rhs._slideAxisInA ) &&
-        ( _slideLimit == rhs._slideLimit ) &&
-        ( Constraint::operator==( static_cast< const Constraint& >( rhs ) ) )
-    );
+    return( !( operator!=( rhs ) ) );
 }
 bool SliderConstraint::operator!=( const SliderConstraint& rhs ) const
 {
@@ -401,10 +394,7 @@ void BallAndSocketConstraint::setPoint( const osg::Vec3& point )
 
 bool BallAndSocketConstraint::operator==( const BallAndSocketConstraint& rhs ) const
 {
-    return(
-        ( _point == rhs._point ) &&
-        ( Constraint::operator==( static_cast< const Constraint& >( rhs ) ) )
-    );
+    return( !( operator!=( rhs ) ) );
 }
 bool BallAndSocketConstraint::operator!=( const BallAndSocketConstraint& rhs ) const
 {
