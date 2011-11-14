@@ -131,14 +131,14 @@ SliderConstraint::SliderConstraint( btRigidBody* rbA, const osg::Matrix& rbAXfor
         btRigidBody* rbB, const osg::Matrix& rbBXform,
         const osg::Vec3& slideAxisInA, const osg::Vec2& slideLimit )
   : Constraint( rbA, rbAXform, rbB, rbBXform ),
-    _slideAxisInA( slideAxisInA ),
+    _axis( slideAxisInA ),
     _slideLimit( slideLimit )
 {
     setDirty();
 }
 SliderConstraint::SliderConstraint( const SliderConstraint& rhs, const osg::CopyOp& copyop )
   : Constraint( rhs, copyop ),
-    _slideAxisInA( rhs._slideAxisInA ),
+    _axis( rhs._axis),
     _slideLimit( rhs._slideLimit )
 {
 }
@@ -152,9 +152,9 @@ btSliderConstraint* SliderConstraint::getAsBtSlider() const
     return( static_cast< btSliderConstraint* >( getConstraint() ) );
 }
 
-void SliderConstraint::setAxisInA( const osg::Vec3& axisInA )
+void SliderConstraint::setAxis( const osg::Vec3& axis )
 {
-    _slideAxisInA = axisInA;
+    _axis = axis;
     setDirty();
 }
 void SliderConstraint::setLimit( const osg::Vec2& limit )
@@ -179,7 +179,7 @@ bool SliderConstraint::operator==( const SliderConstraint& rhs ) const
 bool SliderConstraint::operator!=( const SliderConstraint& rhs ) const
 {
     return(
-        ( _slideAxisInA != rhs._slideAxisInA ) ||
+        ( _axis != rhs._axis ) ||
         ( _slideLimit != rhs._slideLimit ) ||
         ( Constraint::operator!=( static_cast< const Constraint& >( rhs ) ) )
     );
@@ -197,13 +197,19 @@ void SliderConstraint::createConstraint()
     if( _constraint )
         delete _constraint;
 
-    const osg::Vec3 bulletSliderAxis( 1., 0., 0. );
 
+    // Transform the world coordinate axis into A's local coordinates.
+    osg::Matrix aOrient = _rbAXform;
+    aOrient.setTrans( 0., 0., 0. );
+    const osg::Vec3 axisInA = _axis * osg::Matrix::inverse( aOrient );
+
+
+    const osg::Vec3 bulletSliderAxis( 1., 0., 0. );
 
     // Compute a matrix that transforms B's collision shape origin and x axis
     // to A's origin and slide axis.
     //   1. Matrix to align the (slider constraint) x axis with A's slide axis.
-    const osg::Matrix axisRotate( osg::Matrix::rotate( bulletSliderAxis, _slideAxisInA ) );
+    const osg::Matrix axisRotate( osg::Matrix::rotate( bulletSliderAxis, axisInA ) );
     //
     //   2. Inverse B center of mass offset.
     osg::Vec3 bCom;

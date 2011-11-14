@@ -257,7 +257,7 @@ bool SliderConstraint_readLocalData( osg::Object& obj, osgDB::Input& fr )
         fr[1].getFloat( ( axis[0] ) );
         fr[2].getFloat( ( axis[1] ) );
         fr[3].getFloat( ( axis[2] ) );
-        cons.setAxisInA( axis );
+        cons.setAxis( axis );
         fr += 4;
     }
     else
@@ -286,7 +286,7 @@ bool SliderConstraint_writeLocalData( const osg::Object& obj, osgDB::Output& fw 
 {
     const osgbDynamics::SliderConstraint& cons = static_cast< const osgbDynamics::SliderConstraint& >( obj );
 
-    fw.indent() << "Axis " << cons.getAxisInA() << std::endl;
+    fw.indent() << "Axis " << cons.getAxis() << std::endl;
     fw.indent() << "Limit " << cons.getLimit() << std::endl;
 
     return( true );

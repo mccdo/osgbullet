@@ -205,20 +205,16 @@ public:
 
     virtual btSliderConstraint* getAsBtSlider() const;
 
-    /** \brief Specify the slider axis in rigid body A's coordinate system.
+    /** \brief Specify the slider axis in the world coordinate space.
 
     This is the axis along which the two constrained bodies are allowed to move
     relative to each other. In the common scenario where one rigid body is fixed,
     the other rigid body moves along this axis. If \c _rbB is NULL, \c _rbA
-    moves along this axis.
-
-    Note: Unless you're doing something extremely unusual, rigid body A's
-    coordinate space and the corresponding OSG subgraph's coordinate space are
-    the same for purposes of specify this axis. */
-    void setAxisInA( const osg::Vec3& axisInA );
-    osg::Vec3 getAxisInA() const
+    moves along this axis. */
+    void setAxis( const osg::Vec3& axis );
+    osg::Vec3 getAxis() const
     {
-        return( _slideAxisInA );
+        return( _axis );
     }
 
     /** \brief Specify movement limits along \c _sliderAxisInA.
@@ -243,7 +239,7 @@ protected:
 
     virtual void createConstraint();
 
-    osg::Vec3 _slideAxisInA;
+    osg::Vec3 _axis;
     osg::Vec2 _slideLimit;
 };
 
