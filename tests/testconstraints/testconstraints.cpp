@@ -167,6 +167,13 @@ int main( int argc, char** argv )
         amtC->setUserData( new osgbCollision::RefRigidBody( rbC ) );
         bulletWorld->addRigidBody( rbC );
 
+        osg::Matrix dXform = osg::Matrix::rotate( .2, osg::Vec3( 0., 0., 1. ) ) *
+            osg::Matrix::translate( -9., 0., 0. );
+        crD->_parentTransform = dXform;
+        btRigidBody* rbD = osgbDynamics::createRigidBody( crD.get() );
+        amtD->setUserData( new osgbCollision::RefRigidBody( rbD ) );
+        bulletWorld->addRigidBody( rbD );
+
         {
             osg::Vec3 point( 0., 0., 1.5 );
             osg::ref_ptr< osgbDynamics::BallAndSocketConstraint > cons0 = new osgbDynamics::BallAndSocketConstraint(
@@ -177,6 +184,12 @@ int main( int argc, char** argv )
             osg::ref_ptr< osgbDynamics::BallAndSocketConstraint > cons1 = new osgbDynamics::BallAndSocketConstraint(
                 rbC, cXform, NULL, osg::Matrix::identity(), point );
             bulletWorld->addConstraint( cons1->getConstraint() );
+
+            // Make point correspond roughly to (1., 0., 1.) in local coords)
+            point = osg::Vec3( 1., 0., 1. ) * dXform;
+            osg::ref_ptr< osgbDynamics::BallAndSocketConstraint > cons2 = new osgbDynamics::BallAndSocketConstraint(
+                rbD, dXform, NULL, osg::Matrix::identity(), point );
+            bulletWorld->addConstraint( cons2->getConstraint() );
         }
     }
     else if( arguments.find( "TwistSlider" ) > 0 )
