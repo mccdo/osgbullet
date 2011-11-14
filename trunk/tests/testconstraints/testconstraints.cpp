@@ -126,6 +126,20 @@ int main( int argc, char** argv )
     crC->_mass = 1.5;
 
 
+    osg::Node* nodeD = osgDB::readNodeFile( "axes.osg" );
+    if( nodeD == NULL )
+        return( 1 );
+
+    osgwTools::AbsoluteModelTransform* amtD = new osgwTools::AbsoluteModelTransform;
+    amtD->setDataVariance( osg::Object::DYNAMIC );
+    amtD->addChild( nodeD );
+    root->addChild( amtD );
+
+    osg::ref_ptr< osgbDynamics::CreationRecord > crD = new osgbDynamics::CreationRecord;
+    crD->_sceneGraph = amtD;
+    crD->_shapeType = BOX_SHAPE_PROXYTYPE;
+
+
     if( arguments.find( "Planar" ) > 0 )
     {
     }
@@ -221,6 +235,13 @@ int main( int argc, char** argv )
         amtC->setUserData( new osgbCollision::RefRigidBody( rbC ) );
         bulletWorld->addRigidBody( rbC );
 
+        osg::Matrix dXform = osg::Matrix::rotate( 0.7, osg::Vec3( 0., 0., 1. ) ) *
+            osg::Matrix::translate( -9., 0., 0. );
+        crD->_parentTransform = dXform;
+        btRigidBody* rbD = osgbDynamics::createRigidBody( crD.get() );
+        amtD->setUserData( new osgbCollision::RefRigidBody( rbD ) );
+        bulletWorld->addRigidBody( rbD );
+
         {
             osg::Vec3 axis( 0., 1., .1 );
             osg::Vec2 limits( -1., 1. );
@@ -233,6 +254,12 @@ int main( int argc, char** argv )
             osg::ref_ptr< osgbDynamics::SliderConstraint > cons1 = new osgbDynamics::SliderConstraint(
                 rbC, cXform, NULL, osg::Matrix::identity(), axis, limits );
             bulletWorld->addConstraint( cons1->getConstraint() );
+
+            axis.set( 0., 1., 0. );
+            limits.set( -1., 1. );
+            osg::ref_ptr< osgbDynamics::SliderConstraint > cons2 = new osgbDynamics::SliderConstraint(
+                rbD, dXform, NULL, osg::Matrix::identity(), axis, limits );
+            bulletWorld->addConstraint( cons2->getConstraint() );
         }
     }
 
