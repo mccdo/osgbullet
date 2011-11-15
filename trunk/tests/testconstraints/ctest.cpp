@@ -164,5 +164,31 @@ int runCTest()
             ERROR(name,"failed to match.");
     }
 
+    //
+    // FixedConstraint
+    {
+        const std::string name( "FixedConstraint" );
+        osg::ref_ptr< osgbDynamics::FixedConstraint > cons = new osgbDynamics::FixedConstraint(
+            rbA, aXform, rbB, bXform );
+
+        if( cons->getAsBtGeneric6Dof() == NULL )
+            ERROR(name,"won't typecast as btGeneric6DofConstraint.");
+
+        if( !( osgDB::writeObjectFile( *cons, fileName ) ) )
+            ERROR(name,"writeObjectFile failed.");
+
+        osg::Object* obj = osgDB::readObjectFile( fileName );
+        if( obj == NULL )
+            ERROR(name,"readObjectFile returned NULL.");
+
+        osg::ref_ptr< osgbDynamics::FixedConstraint > cons2 = dynamic_cast<
+            osgbDynamics::FixedConstraint* >( obj );
+        if( !( cons2.valid() ) )
+            ERROR(name,"dynamic_cast after readObjectFile failed.");
+
+        if( *cons2 != *cons )
+            ERROR(name,"failed to match.");
+    }
+
     return( 0 );
 }
