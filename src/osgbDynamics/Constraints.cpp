@@ -211,34 +211,34 @@ void SliderConstraint::createConstraint()
     aOrient.setTrans( 0., 0., 0. );
     const osg::Vec3 axisInA = _axis * osg::Matrix::inverse( aOrient );
 
-
+    // Compute a matrix to align the slider constraint axis with A's slide axis.
     const osg::Vec3 bulletSliderAxis( 1., 0., 0. );
-
-    // Compute a matrix that transforms B's collision shape origin and x axis
-    // to A's origin and slide axis.
-    //   1. Matrix to align the (slider constraint) x axis with A's slide axis.
     const osg::Matrix axisRotate( osg::Matrix::rotate( bulletSliderAxis, axisInA ) );
-    //
-    //   2. Inverse B center of mass offset.
-    osg::Vec3 bCom;
+
+
+    btTransform rbBFrame; // OK to not initialize.
     if( _rbB != NULL )
     {
+        // Compute a matrix that transforms B's collision shape origin and x axis
+        // to A's origin and slide axis.
+        //
+        //   1. Inverse B center of mass offset.
         osgbDynamics::MotionState* motion = dynamic_cast< osgbDynamics::MotionState* >( _rbB->getMotionState() );
         if( motion == NULL )
         {
             osg::notify( osg::WARN ) << "SliderConstraint: Invalid MotionState." << std::endl;
             return;
         }
-        bCom = motion->getCenterOfMass();
+        const osg::Vec3 bCom = motion->getCenterOfMass();
+        const osg::Matrix invBCOM( osg::Matrix::translate( -( bCom ) ) );
+        //
+        //   2. Transform from B's origin to A's origin.
+        const osg::Matrix rbBToRbA( osg::Matrix::inverse( _rbBXform ) * _rbAXform );
+        //
+        //   3. The final rbB frame matrix.
+        rbBFrame = osgbCollision::asBtTransform(
+            axisRotate * invBCOM * rbBToRbA );
     }
-    const osg::Matrix invBCOM( osg::Matrix::translate( -( bCom ) ) );
-    //
-    //   3. Transform from B's origin to A's origin.
-    const osg::Matrix rbBToRbA( osg::Matrix::inverse( _rbBXform ) * _rbAXform );
-    //
-    //   4. The final rbB frame matrix.
-    btTransform rbBFrame = osgbCollision::asBtTransform(
-        axisRotate * invBCOM * rbBToRbA );
 
 
     // Compute a matrix that transforms A's collision shape origin and x axis
@@ -257,16 +257,16 @@ void SliderConstraint::createConstraint()
         axisRotate * invACOM );
 
 
-    btSliderConstraint* sc;
+    btSliderConstraint* cons;
     if( _rbB != NULL )
-        sc = new btSliderConstraint( *_rbA, *_rbB, rbAFrame, rbBFrame, false );
+        cons = new btSliderConstraint( *_rbA, *_rbB, rbAFrame, rbBFrame, false );
     else
-        sc = new btSliderConstraint( *_rbA, rbAFrame, true );
+        cons = new btSliderConstraint( *_rbA, rbAFrame, true );
     const btScalar loLimit = _slideLimit[ 0 ];
     const btScalar hiLimit = _slideLimit[ 1 ];
-    sc->setLowerLinLimit( loLimit );
-    sc->setUpperLinLimit( hiLimit );
-    _constraint = sc;
+    cons->setLowerLinLimit( loLimit );
+    cons->setUpperLinLimit( hiLimit );
+    _constraint = cons;
 
     setDirty( false );
 }
@@ -340,12 +340,94 @@ LinearAngleSpringConstraint::~LinearAngleSpringConstraint()
 {
 }
 
+
 FixedConstraint::FixedConstraint()
+  : Constraint()
+{
+}
+FixedConstraint::FixedConstraint( btRigidBody* rbA, btRigidBody* rbB )
+  : Constraint( rbA, rbB )
+{
+    setDirty();
+}
+FixedConstraint::FixedConstraint( btRigidBody* rbA, const osg::Matrix& rbAXform,
+        btRigidBody* rbB, const osg::Matrix& rbBXform )
+  : Constraint( rbA, rbAXform, rbB, rbBXform )
+{
+    setDirty();
+}
+FixedConstraint::FixedConstraint( const FixedConstraint& rhs, const osg::CopyOp& copyop )
+  : Constraint( rhs, copyop )
 {
 }
 FixedConstraint::~FixedConstraint()
 {
 }
+
+btGeneric6DofConstraint* FixedConstraint::getAsBtGeneric6Dof() const
+{
+    return( static_cast< btGeneric6DofConstraint* >( getConstraint() ) );
+}
+
+void FixedConstraint::createConstraint()
+{
+    if( _rbA == NULL )
+    {
+        osg::notify( osg::INFO ) << "createConstraint: _rbA == NULL." << std::endl;
+        return;
+    }
+
+    if( _constraint )
+        delete _constraint;
+
+
+    btTransform rbBFrame; // OK to not initialize.
+    if( _rbB != NULL )
+    {
+        // Create a matrix that puts A in B's coordinate space.
+        //
+        //   1. Inverse B center of mass offset.
+        osgbDynamics::MotionState* motion = dynamic_cast< osgbDynamics::MotionState* >( _rbB->getMotionState() );
+        if( motion == NULL )
+        {
+            osg::notify( osg::WARN ) << "SliderConstraint: Invalid MotionState." << std::endl;
+            return;
+        }
+        const osg::Vec3 bCom = motion->getCenterOfMass();
+        const osg::Matrix invBCOM( osg::Matrix::translate( -( bCom ) ) );
+        //
+        //   3. Transform from B's origin to A's origin.
+        const osg::Matrix rbBToRbA( osg::Matrix::inverse( _rbBXform ) * _rbAXform );
+        //
+        //   4. The final rbB frame matrix.
+        rbBFrame = osgbCollision::asBtTransform(
+            invBCOM * rbBToRbA );
+    }
+
+
+    // A's reference frame is just the COM offset.
+    osgbDynamics::MotionState* motion = dynamic_cast< osgbDynamics::MotionState* >( _rbA->getMotionState() );
+    if( motion == NULL )
+    {
+        osg::notify( osg::WARN ) << "SliderConstraint: Invalid MotionState." << std::endl;
+        return;
+    }
+    const osg::Matrix invACOM( osg::Matrix::translate( -( motion->getCenterOfMass() ) ) );
+    btTransform rbAFrame = osgbCollision::asBtTransform( invACOM );
+
+
+    btGeneric6DofConstraint* cons;
+    if( _rbB != NULL )
+        cons = new btGeneric6DofConstraint( *_rbA, *_rbB, rbAFrame, rbBFrame, false );
+    else
+        cons = new btGeneric6DofConstraint( *_rbA, rbAFrame, true );
+    cons->setAngularLowerLimit( btVector3( 0., 0., 0. ) );
+    cons->setAngularUpperLimit( btVector3( 0., 0., 0. ) );
+    _constraint = cons;
+
+    setDirty( false );
+}
+
 
 PlanarConstraint::PlanarConstraint()
 {

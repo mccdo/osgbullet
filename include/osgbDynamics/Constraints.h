@@ -314,9 +314,18 @@ class OSGBDYNAMICS_EXPORT FixedConstraint : public Constraint
 {
 public:
     FixedConstraint();
+    FixedConstraint( btRigidBody* rbA, btRigidBody* rbB=NULL );
+    FixedConstraint( btRigidBody* rbA, const osg::Matrix& rbAXform,
+            btRigidBody* rbB=NULL, const osg::Matrix& rbBXform=osg::Matrix::identity() );
+    FixedConstraint( const FixedConstraint& rhs, const osg::CopyOp& copyop=osg::CopyOp::SHALLOW_COPY );
+    META_Object(osgbDynamics,FixedConstraint);
+
+    virtual btGeneric6DofConstraint* getAsBtGeneric6Dof() const;
 
 protected:
     virtual ~FixedConstraint();
+
+    void createConstraint();
 };
 
 

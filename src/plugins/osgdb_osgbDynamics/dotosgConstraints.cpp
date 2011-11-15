@@ -343,12 +343,12 @@ bool LinearAngleSpringConstraint_writeLocalData( const osg::Object& obj, osgDB::
 
 bool FixedConstraint_readLocalData( osg::Object& obj, osgDB::Input& fr )
 {
-    // TBD
+    // No-op, but this function must exist to supprt the TwistSliderConstraint object.
     return( true );
 }
 bool FixedConstraint_writeLocalData( const osg::Object& obj, osgDB::Output& fw )
 {
-    // TBD
+    // No-op, but this function must exist to supprt the TwistSliderConstraint object.
     return( true );
 }
 

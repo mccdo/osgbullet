@@ -140,11 +140,67 @@ int main( int argc, char** argv )
     crD->_shapeType = BOX_SHAPE_PROXYTYPE;
 
 
+    osg::Node* nodeE = osgDB::readNodeFile( "offcube.osg" );
+    if( nodeE == NULL )
+        return( 1 );
+
+    osgwTools::AbsoluteModelTransform* amtE = new osgwTools::AbsoluteModelTransform;
+    amtE->setDataVariance( osg::Object::DYNAMIC );
+    amtE->addChild( nodeE );
+    root->addChild( amtE );
+
+    osg::ref_ptr< osgbDynamics::CreationRecord > crE = new osgbDynamics::CreationRecord;
+    crE->_sceneGraph = amtE;
+    crE->_shapeType = BOX_SHAPE_PROXYTYPE;
+
+
     if( arguments.find( "Planar" ) > 0 )
     {
     }
     else if( arguments.find( "Box" ) > 0 )
     {
+    }
+    else if( arguments.find( "Fixed" ) > 0 )
+    {
+        osg::Matrix aXform = osg::Matrix::translate( 0., 0., 3. );
+        crA->_parentTransform = aXform;
+        btRigidBody* rbA = osgbDynamics::createRigidBody( crA.get() );
+        amtA->setUserData( new osgbCollision::RefRigidBody( rbA ) );
+        bulletWorld->addRigidBody( rbA );
+
+        osg::Matrix bXform = osg::Matrix::identity();
+        crB->_parentTransform = bXform;
+        btRigidBody* rbB = osgbDynamics::createRigidBody( crB.get() );
+        amtB->setUserData( new osgbCollision::RefRigidBody( rbB ) );
+        bulletWorld->addRigidBody( rbB );
+
+        osg::Matrix cXform = osg::Matrix::rotate( osg::PI_4, osg::Vec3( 0., 0., 1. ) ) *
+            osg::Matrix::translate( 2., 12., 5. );
+        crC->_parentTransform = cXform;
+        btRigidBody* rbC = osgbDynamics::createRigidBody( crC.get() );
+        amtC->setUserData( new osgbCollision::RefRigidBody( rbC ) );
+        bulletWorld->addRigidBody( rbC );
+
+        osg::Matrix eXform = osg::Matrix::translate( -5., -2., 1. );
+        crE->_parentTransform = eXform;
+        btRigidBody* rbE = osgbDynamics::createRigidBody( crE.get() );
+        amtE->setUserData( new osgbCollision::RefRigidBody( rbE ) );
+        bulletWorld->addRigidBody( rbE );
+
+        {
+            osg::ref_ptr< osgbDynamics::FixedConstraint > cons0 = new osgbDynamics::FixedConstraint(
+                rbA, aXform, rbB, bXform );
+            bulletWorld->addConstraint( cons0->getConstraint() );
+
+            osg::ref_ptr< osgbDynamics::FixedConstraint > cons1 = new osgbDynamics::FixedConstraint(
+                rbC, cXform );
+            bulletWorld->addConstraint( cons1->getConstraint() );
+
+            osg::ref_ptr< osgbDynamics::FixedConstraint > cons2 = new osgbDynamics::FixedConstraint(
+                rbB, bXform, rbE, eXform );
+            bulletWorld->addConstraint( cons2->getConstraint() );
+
+        }
     }
     else if( arguments.find( "BallAndSocket" ) > 0 )
     {
