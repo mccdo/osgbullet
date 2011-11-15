@@ -128,6 +128,14 @@ SliderConstraint::SliderConstraint( btRigidBody* rbA, btRigidBody* rbB )
     setDirty();
 }
 SliderConstraint::SliderConstraint( btRigidBody* rbA, const osg::Matrix& rbAXform,
+        const osg::Vec3& slideAxisInA, const osg::Vec2& slideLimit )
+  : Constraint( rbA, rbAXform ),
+    _axis( slideAxisInA ),
+    _slideLimit( slideLimit )
+{
+    setDirty();
+}
+SliderConstraint::SliderConstraint( btRigidBody* rbA, const osg::Matrix& rbAXform,
         btRigidBody* rbB, const osg::Matrix& rbBXform,
         const osg::Vec3& slideAxisInA, const osg::Vec2& slideLimit )
   : Constraint( rbA, rbAXform, rbB, rbBXform ),
@@ -279,6 +287,11 @@ TwistSliderConstraint::TwistSliderConstraint( btRigidBody* rbA, const osg::Matri
   : SliderConstraint( rbA, rbAXform, rbB, rbBXform, slideAxisInA, slideLimit )
 {
 }
+TwistSliderConstraint::TwistSliderConstraint( btRigidBody* rbA, const osg::Matrix& rbAXform,
+            const osg::Vec3& slideAxisInA, const osg::Vec2& slideLimit )
+  : SliderConstraint( rbA, rbAXform, slideAxisInA, slideLimit )
+{
+}
 TwistSliderConstraint::TwistSliderConstraint( const TwistSliderConstraint& rhs, const osg::CopyOp& copyop )
   : SliderConstraint( rhs, copyop )
 {
@@ -375,6 +388,12 @@ BallAndSocketConstraint::BallAndSocketConstraint( btRigidBody* rbA, btRigidBody*
 BallAndSocketConstraint::BallAndSocketConstraint( btRigidBody* rbA, const osg::Matrix& rbAXform,
             btRigidBody* rbB, const osg::Matrix& rbBXform, const osg::Vec3& wcPoint )
   : Constraint( rbA, rbAXform, rbB, rbBXform ),
+    _point( wcPoint )
+{
+}
+BallAndSocketConstraint::BallAndSocketConstraint( btRigidBody* rbA, const osg::Matrix& rbAXform,
+            const osg::Vec3& wcPoint )
+  : Constraint( rbA, rbAXform ),
     _point( wcPoint )
 {
 }
