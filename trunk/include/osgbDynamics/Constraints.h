@@ -336,9 +336,51 @@ class OSGBDYNAMICS_EXPORT PlanarConstraint : public Constraint
 {
 public:
     PlanarConstraint();
+    PlanarConstraint( btRigidBody* rbA, btRigidBody* rbB=NULL,
+            const osg::Vec2& loLimit=osg::Vec2(0.,0.),
+            const osg::Vec2& hiLimit=osg::Vec2(0.,0.),
+            const osg::Matrix& orient=osg::Matrix::identity() );
+    PlanarConstraint( btRigidBody* rbA, const osg::Matrix& rbAXform,
+            btRigidBody* rbB=NULL, const osg::Matrix& rbBXform=osg::Matrix::identity(),
+            const osg::Vec2& loLimit=osg::Vec2(0.,0.),
+            const osg::Vec2& hiLimit=osg::Vec2(0.,0.),
+            const osg::Matrix& orient=osg::Matrix::identity() );
+    PlanarConstraint( const PlanarConstraint& rhs, const osg::CopyOp& copyop=osg::CopyOp::SHALLOW_COPY );
+    META_Object(osgbDynamics,PlanarConstraint);
+
+    virtual btGeneric6DofConstraint* getAsBtGeneric6Dof() const;
+
+    void setLowLimit( const osg::Vec2& loLimit );
+    void setHighLimit( const osg::Vec2& hiLimit );
+    osg::Vec2 getLowLimit() const
+    {
+        return( _loLimit );
+    }
+    osg::Vec2 getHighLimit() const
+    {
+        return( _hiLimit );
+    }
+
+    void setOrientation( const osg::Matrix& orient );
+    osg::Matrix getOrientation() const
+    {
+        return( _orient );
+    }
+
+    /** Return true if the lower and upper limit member variables, and base class, are
+    equal to the right-hand-side lower and upper limits and base class. */
+    virtual bool operator==( const PlanarConstraint& rhs ) const;
+    /** Return true if the lower and upper limit member variables, or base class, differ
+    from the right-hand-side lower and upper limits or base class. */
+    virtual bool operator!=( const PlanarConstraint& rhs ) const;
 
 protected:
     virtual ~PlanarConstraint();
+
+    void createConstraint();
+
+    osg::Vec2 _loLimit, _hiLimit;
+    osg::Matrix _orient;
 };
 
 
@@ -349,9 +391,51 @@ class OSGBDYNAMICS_EXPORT BoxConstraint : public Constraint
 {
 public:
     BoxConstraint();
+    BoxConstraint( btRigidBody* rbA, btRigidBody* rbB=NULL,
+            const osg::Vec3& loLimit=osg::Vec3(0.,0.,0.),
+            const osg::Vec3& hiLimit=osg::Vec3(0.,0.,0.),
+            const osg::Matrix& orient=osg::Matrix::identity() );
+    BoxConstraint( btRigidBody* rbA, const osg::Matrix& rbAXform,
+            btRigidBody* rbB=NULL, const osg::Matrix& rbBXform=osg::Matrix::identity(),
+            const osg::Vec3& loLimit=osg::Vec3(0.,0.,0.),
+            const osg::Vec3& hiLimit=osg::Vec3(0.,0.,0.),
+            const osg::Matrix& orient=osg::Matrix::identity() );
+    BoxConstraint( const BoxConstraint& rhs, const osg::CopyOp& copyop=osg::CopyOp::SHALLOW_COPY );
+    META_Object(osgbDynamics,BoxConstraint);
+
+    virtual btGeneric6DofConstraint* getAsBtGeneric6Dof() const;
+
+    void setLowLimit( const osg::Vec3& loLimit );
+    void setHighLimit( const osg::Vec3& hiLimit );
+    osg::Vec3 getLowLimit() const
+    {
+        return( _loLimit );
+    }
+    osg::Vec3 getHighLimit() const
+    {
+        return( _hiLimit );
+    }
+
+    void setOrientation( const osg::Matrix& orient );
+    osg::Matrix getOrientation() const
+    {
+        return( _orient );
+    }
+
+    /** Return true if the lower and upper limit member variables, and base class, are
+    equal to the right-hand-side lower and upper limits and base class. */
+    virtual bool operator==( const BoxConstraint& rhs ) const;
+    /** Return true if the lower and upper limit member variables, or base class, differ
+    from the right-hand-side lower and upper limits or base class. */
+    virtual bool operator!=( const BoxConstraint& rhs ) const;
 
 protected:
     virtual ~BoxConstraint();
+
+    void createConstraint();
+
+    osg::Vec3 _loLimit, _hiLimit;
+    osg::Matrix _orient;
 };
 
 

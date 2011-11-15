@@ -355,24 +355,112 @@ bool FixedConstraint_writeLocalData( const osg::Object& obj, osgDB::Output& fw )
 
 bool PlanarConstraint_readLocalData( osg::Object& obj, osgDB::Input& fr )
 {
-    // TBD
+    osgbDynamics::PlanarConstraint& cons = static_cast< osgbDynamics::PlanarConstraint& >( obj );
+
+    if( fr.matchSequence( "Low limit %f %f" ) )
+    {
+        osg::Vec2 loLimit;
+        fr[2].getFloat( ( loLimit[0] ) );
+        fr[3].getFloat( ( loLimit[1] ) );
+        cons.setLowLimit( loLimit );
+        fr += 4;
+    }
+    else
+    {
+        osg::notify( osg::WARN ) << "PlanarConstraint_readLocalData: Bad input data at \"Low limit\"." << std::endl;
+        return( false );
+    }
+
+    if( fr.matchSequence( "High limit %f %f" ) )
+    {
+        osg::Vec2 hiLimit;
+        fr[2].getFloat( ( hiLimit[0] ) );
+        fr[3].getFloat( ( hiLimit[1] ) );
+        cons.setHighLimit( hiLimit );
+        fr += 4;
+    }
+    else
+    {
+        osg::notify( osg::WARN ) << "PlanarConstraint_readLocalData: Bad input data at \"High limit\"." << std::endl;
+        return( false );
+    }
+
+    osg::Matrix m;
+    if( readMatrix( m, fr, "Orient" ) )
+        cons.setOrientation( m );
+    else
+    {
+        osg::notify( osg::WARN ) << "PlanarConstraint_readLocalData: Bad input data at \"Orient\"." << std::endl;
+        return( false );
+    }
+
     return( true );
 }
 bool PlanarConstraint_writeLocalData( const osg::Object& obj, osgDB::Output& fw )
 {
-    // TBD
+    const osgbDynamics::PlanarConstraint& cons = static_cast< const osgbDynamics::PlanarConstraint& >( obj );
+
+    fw.indent() << "Low limit " << cons.getLowLimit() << std::endl;
+    fw.indent() << "High limit " << cons.getHighLimit() << std::endl;
+    writeMatrix( cons.getOrientation(), fw, "Orient" );
+
     return( true );
 }
 
 
 bool BoxConstraint_readLocalData( osg::Object& obj, osgDB::Input& fr )
 {
-    // TBD
+    osgbDynamics::BoxConstraint& cons = static_cast< osgbDynamics::BoxConstraint& >( obj );
+
+    if( fr.matchSequence( "Low limit %f %f %f" ) )
+    {
+        osg::Vec3 loLimit;
+        fr[2].getFloat( ( loLimit[0] ) );
+        fr[3].getFloat( ( loLimit[1] ) );
+        fr[4].getFloat( ( loLimit[2] ) );
+        cons.setLowLimit( loLimit );
+        fr += 5;
+    }
+    else
+    {
+        osg::notify( osg::WARN ) << "BoxConstraint_readLocalData: Bad input data at \"Low limit\"." << std::endl;
+        return( false );
+    }
+
+    if( fr.matchSequence( "High limit %f %f %f" ) )
+    {
+        osg::Vec3 hiLimit;
+        fr[2].getFloat( ( hiLimit[0] ) );
+        fr[3].getFloat( ( hiLimit[1] ) );
+        fr[4].getFloat( ( hiLimit[2] ) );
+        cons.setHighLimit( hiLimit );
+        fr += 5;
+    }
+    else
+    {
+        osg::notify( osg::WARN ) << "BoxConstraint_readLocalData: Bad input data at \"High limit\"." << std::endl;
+        return( false );
+    }
+
+    osg::Matrix m;
+    if( readMatrix( m, fr, "Orient" ) )
+        cons.setOrientation( m );
+    else
+    {
+        osg::notify( osg::WARN ) << "BoxConstraint_readLocalData: Bad input data at \"Orient\"." << std::endl;
+        return( false );
+    }
+
     return( true );
 }
 bool BoxConstraint_writeLocalData( const osg::Object& obj, osgDB::Output& fw )
 {
-    // TBD
+    const osgbDynamics::BoxConstraint& cons = static_cast< const osgbDynamics::BoxConstraint& >( obj );
+
+    fw.indent() << "Low limit " << cons.getLowLimit() << std::endl;
+    fw.indent() << "High limit " << cons.getHighLimit() << std::endl;
+    writeMatrix( cons.getOrientation(), fw, "Orient" );
+
     return( true );
 }
 

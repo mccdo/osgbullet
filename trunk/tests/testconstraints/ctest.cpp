@@ -106,6 +106,8 @@ int runCTest()
             ERROR(name,"dynamic_cast after readObjectFile failed.");
 
         if( *cons2 != *cons )
+            // Note matches can fail due to double precision roundoff.
+            // For testing, use only 1s and 0s in matrices.
             ERROR(name,"failed to match.");
     }
 
@@ -134,6 +136,8 @@ int runCTest()
             ERROR(name,"dynamic_cast after readObjectFile failed.");
 
         if( *cons2 != *cons )
+            // Note matches can fail due to double precision roundoff.
+            // For testing, use only 1s and 0s in matrices.
             ERROR(name,"failed to match.");
     }
 
@@ -161,6 +165,8 @@ int runCTest()
             ERROR(name,"dynamic_cast after readObjectFile failed.");
 
         if( *cons2 != *cons )
+            // Note matches can fail due to double precision roundoff.
+            // For testing, use only 1s and 0s in matrices.
             ERROR(name,"failed to match.");
     }
 
@@ -187,6 +193,70 @@ int runCTest()
             ERROR(name,"dynamic_cast after readObjectFile failed.");
 
         if( *cons2 != *cons )
+            // Note matches can fail due to double precision roundoff.
+            // For testing, use only 1s and 0s in matrices.
+            ERROR(name,"failed to match.");
+    }
+
+    //
+    // PlanarConstraint
+    {
+        const std::string name( "PlanarConstraint" );
+        osg::Vec2 loLimit( -2., -3. );
+        osg::Vec2 hiLimit( 1., 4. );
+        osg::Matrix orient( osg::Matrix::identity() );
+        osg::ref_ptr< osgbDynamics::PlanarConstraint > cons = new osgbDynamics::PlanarConstraint(
+            rbA, aXform, rbB, bXform, loLimit, hiLimit, orient );
+
+        if( cons->getAsBtGeneric6Dof() == NULL )
+            ERROR(name,"won't typecast as btGeneric6DofConstraint.");
+
+        if( !( osgDB::writeObjectFile( *cons, fileName ) ) )
+            ERROR(name,"writeObjectFile failed.");
+
+        osg::Object* obj = osgDB::readObjectFile( fileName );
+        if( obj == NULL )
+            ERROR(name,"readObjectFile returned NULL.");
+
+        osg::ref_ptr< osgbDynamics::PlanarConstraint > cons2 = dynamic_cast<
+            osgbDynamics::PlanarConstraint* >( obj );
+        if( !( cons2.valid() ) )
+            ERROR(name,"dynamic_cast after readObjectFile failed.");
+
+        if( *cons2 != *cons )
+            // Note matches can fail due to double precision roundoff.
+            // For testing, use only 1s and 0s in matrices.
+            ERROR(name,"failed to match.");
+    }
+
+    //
+    // BoxConstraint
+    {
+        const std::string name( "BoxConstraint" );
+        osg::Vec3 loLimit( -2., -3., 0. );
+        osg::Vec3 hiLimit( 1., 4., 2. );
+        osg::Matrix orient( osg::Matrix::identity() );
+        osg::ref_ptr< osgbDynamics::BoxConstraint > cons = new osgbDynamics::BoxConstraint(
+            rbA, aXform, rbB, bXform, loLimit, hiLimit, orient );
+
+        if( cons->getAsBtGeneric6Dof() == NULL )
+            ERROR(name,"won't typecast as btGeneric6DofConstraint.");
+
+        if( !( osgDB::writeObjectFile( *cons, fileName ) ) )
+            ERROR(name,"writeObjectFile failed.");
+
+        osg::Object* obj = osgDB::readObjectFile( fileName );
+        if( obj == NULL )
+            ERROR(name,"readObjectFile returned NULL.");
+
+        osg::ref_ptr< osgbDynamics::BoxConstraint > cons2 = dynamic_cast<
+            osgbDynamics::BoxConstraint* >( obj );
+        if( !( cons2.valid() ) )
+            ERROR(name,"dynamic_cast after readObjectFile failed.");
+
+        if( *cons2 != *cons )
+            // Note matches can fail due to double precision roundoff.
+            // For testing, use only 1s and 0s in matrices.
             ERROR(name,"failed to match.");
     }
 
