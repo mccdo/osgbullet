@@ -63,6 +63,8 @@ bool readMatrix( osg::Matrix& matrix, osgDB::Input& fr, const char* keyword )
 
 bool writeMatrix( const osg::Matrix& matrix, osgDB::Output& fw, const char* keyword )
 {
+    std::streamsize oldPrec = fw.precision( 20 );
+
     fw.indent() << keyword <<" {" << std::endl;
     fw.moveIn();
     fw.indent() << matrix(0,0) << " " << matrix(0,1) << " " << matrix(0,2) << " " << matrix(0,3) << std::endl;
@@ -71,6 +73,9 @@ bool writeMatrix( const osg::Matrix& matrix, osgDB::Output& fw, const char* keyw
     fw.indent() << matrix(3,0) << " " << matrix(3,1) << " " << matrix(3,2) << " " << matrix(3,3) << std::endl;
     fw.moveOut();
     fw.indent() << "}"<< std::endl;
+
+    fw.precision( oldPrec );
+
     return true;
 }
 
