@@ -198,6 +198,8 @@ public:
     SliderConstraint();
     SliderConstraint( btRigidBody* rbA, btRigidBody* rbB=NULL );
     SliderConstraint( btRigidBody* rbA, const osg::Matrix& rbAXform,
+            const osg::Vec3& slideAxisInA, const osg::Vec2& slideLimit );
+    SliderConstraint( btRigidBody* rbA, const osg::Matrix& rbAXform,
             btRigidBody* rbB, const osg::Matrix& rbBXform,
             const osg::Vec3& slideAxisInA, const osg::Vec2& slideLimit );
     SliderConstraint( const SliderConstraint& rhs, const osg::CopyOp& copyop=osg::CopyOp::SHALLOW_COPY );
@@ -252,6 +254,8 @@ class OSGBDYNAMICS_EXPORT TwistSliderConstraint : public SliderConstraint
 public:
     TwistSliderConstraint();
     TwistSliderConstraint( btRigidBody* rbA, btRigidBody* rbB=NULL );
+    TwistSliderConstraint( btRigidBody* rbA, const osg::Matrix& rbAXform,
+            const osg::Vec3& slideAxisInA, const osg::Vec2& slideLimit );
     TwistSliderConstraint( btRigidBody* rbA, const osg::Matrix& rbAXform,
             btRigidBody* rbB, const osg::Matrix& rbBXform,
             const osg::Vec3& slideAxisInA, const osg::Vec2& slideLimit );
@@ -376,6 +380,8 @@ class OSGBDYNAMICS_EXPORT BallAndSocketConstraint : public Constraint
 public:
     BallAndSocketConstraint();
     BallAndSocketConstraint( btRigidBody* rbA, btRigidBody* rbB=NULL );
+    BallAndSocketConstraint( btRigidBody* rbA, const osg::Matrix& rbAXform,
+            const osg::Vec3& wcPoint );
     BallAndSocketConstraint( btRigidBody* rbA, const osg::Matrix& rbAXform,
             btRigidBody* rbB, const osg::Matrix& rbBXform,
             const osg::Vec3& wcPoint );
