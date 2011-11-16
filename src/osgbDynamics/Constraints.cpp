@@ -457,6 +457,15 @@ PlanarConstraint::PlanarConstraint( btRigidBody* rbA, btRigidBody* rbB,
     setDirty( true );
 }
 PlanarConstraint::PlanarConstraint( btRigidBody* rbA, const osg::Matrix& rbAXform,
+        const osg::Vec2& loLimit, const osg::Vec2& hiLimit, const osg::Matrix& orient )
+  : Constraint( rbA, rbAXform ),
+    _loLimit( loLimit ),
+    _hiLimit( hiLimit ),
+    _orient( orient )
+{
+    setDirty( true );
+}
+PlanarConstraint::PlanarConstraint( btRigidBody* rbA, const osg::Matrix& rbAXform,
         btRigidBody* rbB, const osg::Matrix& rbBXform,
         const osg::Vec2& loLimit, const osg::Vec2& hiLimit, const osg::Matrix& orient )
   : Constraint( rbA, rbAXform, rbB, rbBXform ),
@@ -588,6 +597,15 @@ BoxConstraint::BoxConstraint()
 BoxConstraint::BoxConstraint( btRigidBody* rbA, btRigidBody* rbB,
         const osg::Vec3& loLimit, const osg::Vec3& hiLimit, const osg::Matrix& orient )
   : Constraint( rbA, rbB ),
+    _loLimit( loLimit ),
+    _hiLimit( hiLimit ),
+    _orient( orient )
+{
+    setDirty( true );
+}
+BoxConstraint::BoxConstraint( btRigidBody* rbA, const osg::Matrix& rbAXform,
+        const osg::Vec3& loLimit, const osg::Vec3& hiLimit, const osg::Matrix& orient )
+  : Constraint( rbA, rbAXform ),
     _loLimit( loLimit ),
     _hiLimit( hiLimit ),
     _orient( orient )

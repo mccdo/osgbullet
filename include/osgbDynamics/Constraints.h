@@ -58,7 +58,7 @@ See Constraint::~Constraint().
 */
 /**@{*/
 
-/** \class Constraint Constraint.h <osgbDynamics/Constraint.h>
+/** \class Constraint Constraints.h <osgbDynamics/Constraints.h>
 \brief Base Constraint class with support for rigid bodies and transforms, lazy
 Bullet constraint creation, constraint access, and typecasting.
 */
@@ -189,7 +189,7 @@ protected:
 typedef std::list< osg::ref_ptr< Constraint > > ConstraintList;
 
 
-/** \class SliderConstraint Constraint.h <osgbDynamics/Constraint.h>
+/** \class SliderConstraint Constraints.h <osgbDynamics/Constraints.h>
 \brief Creates a constraint from an axis and movement limits on that axis.
 */
 class OSGBDYNAMICS_EXPORT SliderConstraint : public Constraint
@@ -246,7 +246,7 @@ protected:
 };
 
 
-/** \class TwistSliderConstraint Constraint.h <osgbDynamics/Constraint.h>
+/** \class TwistSliderConstraint Constraints.h <osgbDynamics/Constraints.h>
 \brief A SliderConstraint that allows rotation around the slide axis.
 */
 class OSGBDYNAMICS_EXPORT TwistSliderConstraint : public SliderConstraint
@@ -268,7 +268,7 @@ protected:
 };
 
 
-/** \class LinearSpringConstraint Constraint.h <osgbDynamics/Constraint.h>
+/** \class LinearSpringConstraint Constraints.h <osgbDynamics/Constraints.h>
 \brief TBD
 */
 class OSGBDYNAMICS_EXPORT LinearSpringConstraint : public Constraint
@@ -281,7 +281,7 @@ protected:
 };
 
 
-/** \class AngleSpringConstraint AngleSpringConstraintConstraint.h <osgbDynamics/Constraint.h>
+/** \class AngleSpringConstraint Constraints.h <osgbDynamics/Constraints.h>
 \brief TBD
 */
 class OSGBDYNAMICS_EXPORT AngleSpringConstraint : public Constraint
@@ -294,7 +294,7 @@ protected:
 };
 
 
-/** \class LinearAngleSpringConstraint Constraint.h <osgbDynamics/Constraint.h>
+/** \class LinearAngleSpringConstraint Constraints.h <osgbDynamics/Constraints.h>
 \brief TBD
 */
 class OSGBDYNAMICS_EXPORT LinearAngleSpringConstraint : public Constraint
@@ -307,7 +307,7 @@ protected:
 };
 
 
-/** \class FixedConstraint Constraint.h <osgbDynamics/Constraint.h>
+/** \class FixedConstraint Constraints.h <osgbDynamics/Constraints.h>
 \brief TBD
 */
 class OSGBDYNAMICS_EXPORT FixedConstraint : public Constraint
@@ -329,14 +329,18 @@ protected:
 };
 
 
-/** \class PlanarConstraint Constraint.h <osgbDynamics/Constraint.h>
-\brief TBD
+/** \class PlanarConstraint Constraints.h <osgbDynamics/Constraints.h>
+\brief Allows bodies to move relative to each other in a plane.
 */
 class OSGBDYNAMICS_EXPORT PlanarConstraint : public Constraint
 {
 public:
     PlanarConstraint();
     PlanarConstraint( btRigidBody* rbA, btRigidBody* rbB=NULL,
+            const osg::Vec2& loLimit=osg::Vec2(0.,0.),
+            const osg::Vec2& hiLimit=osg::Vec2(0.,0.),
+            const osg::Matrix& orient=osg::Matrix::identity() );
+    PlanarConstraint( btRigidBody* rbA, const osg::Matrix& rbAXform,
             const osg::Vec2& loLimit=osg::Vec2(0.,0.),
             const osg::Vec2& hiLimit=osg::Vec2(0.,0.),
             const osg::Matrix& orient=osg::Matrix::identity() );
@@ -384,7 +388,7 @@ protected:
 };
 
 
-/** \class BoxConstraint Constraint.h <osgbDynamics/Constraint.h>
+/** \class BoxConstraint Constraints.h <osgbDynamics/Constraints.h>
 \brief TBD
 */
 class OSGBDYNAMICS_EXPORT BoxConstraint : public Constraint
@@ -397,6 +401,10 @@ public:
             const osg::Matrix& orient=osg::Matrix::identity() );
     BoxConstraint( btRigidBody* rbA, const osg::Matrix& rbAXform,
             btRigidBody* rbB=NULL, const osg::Matrix& rbBXform=osg::Matrix::identity(),
+            const osg::Vec3& loLimit=osg::Vec3(0.,0.,0.),
+            const osg::Vec3& hiLimit=osg::Vec3(0.,0.,0.),
+            const osg::Matrix& orient=osg::Matrix::identity() );
+    BoxConstraint( btRigidBody* rbA, const osg::Matrix& rbAXform,
             const osg::Vec3& loLimit=osg::Vec3(0.,0.,0.),
             const osg::Vec3& hiLimit=osg::Vec3(0.,0.,0.),
             const osg::Matrix& orient=osg::Matrix::identity() );
@@ -439,7 +447,7 @@ protected:
 };
 
 
-/** \class HingeConstraint Constraint.h <osgbDynamics/Constraint.h>
+/** \class HingeConstraint Constraints.h <osgbDynamics/Constraints.h>
 \brief TBD
 */
 class OSGBDYNAMICS_EXPORT HingeConstraint : public Constraint
@@ -452,7 +460,7 @@ protected:
 };
 
 
-/** \class CardanConstraint Constraint.h <osgbDynamics/Constraint.h>
+/** \class CardanConstraint Constraints.h <osgbDynamics/Constraints.h>
 \brief TBD
 */
 class OSGBDYNAMICS_EXPORT CardanConstraint : public Constraint
@@ -465,7 +473,7 @@ protected:
 };
 
 
-/** \class BallAndSocketConstraint Constraint.h <osgbDynamics/Constraint.h>
+/** \class BallAndSocketConstraint Constraints.h <osgbDynamics/Constraints.h>
 \brief Constrains two rigid bodies at the same world coordinate point.
 */
 class OSGBDYNAMICS_EXPORT BallAndSocketConstraint : public Constraint
@@ -510,7 +518,7 @@ protected:
 };
 
 
-/** \class RagdollConstraint Constraint.h <osgbDynamics/Constraint.h>
+/** \class RagdollConstraint Constraints.h <osgbDynamics/Constraints.h>
 \brief TBD
 */
 class OSGBDYNAMICS_EXPORT RagdollConstraint : public Constraint
@@ -523,7 +531,7 @@ protected:
 };
 
 
-/** \class WheelSuspensionConstraint Constraint.h <osgbDynamics/Constraint.h>
+/** \class WheelSuspensionConstraint Constraints.h <osgbDynamics/Constraints.h>
 \brief TBD
 */
 class OSGBDYNAMICS_EXPORT WheelSuspensionConstraint : public Constraint
