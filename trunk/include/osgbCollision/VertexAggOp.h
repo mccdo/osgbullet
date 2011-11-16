@@ -47,7 +47,7 @@ public:
     VertexAggOp();
     VertexAggOp( const VertexAggOp& rhs, const osg::CopyOp& copyOp=osg::CopyOp::SHALLOW_COPY );
 
-    META_Object(osgbInteraction,VertexAggOp)
+    META_Object(osgbInteraction,VertexAggOp);
 
     virtual osg::Geometry* operator()( osg::Geometry& geom );
 

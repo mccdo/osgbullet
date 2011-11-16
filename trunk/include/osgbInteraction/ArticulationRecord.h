@@ -51,7 +51,7 @@ public:
     // TBD Currently, dot OSG ArticulationRecord support is in the 
     // osgdb_osgbDynamics plugin. This should really be in a separate
     // osgdb_osgbInteraction plugin.
-    META_Object(osgbDynamics,ArticulationRecord)
+    META_Object(osgbDynamics,ArticulationRecord);
 
     osg::Vec3d _axis;
     osg::Vec3d _pivotPoint;
