@@ -561,7 +561,7 @@ public:
         return( _axis );
     }
 
-    void setPivotPoint( const osg::Vec3& limit );
+    void setPivotPoint( const osg::Vec3& wcPoint );
     osg::Vec3 getPivotPoint() const
     {
         return( _pivotPoint );
