@@ -467,24 +467,109 @@ bool BoxConstraint_writeLocalData( const osg::Object& obj, osgDB::Output& fw )
 
 bool HingeConstraint_readLocalData( osg::Object& obj, osgDB::Input& fr )
 {
-    // TBD
+    osgbDynamics::HingeConstraint& cons = static_cast< osgbDynamics::HingeConstraint& >( obj );
+
+    if( fr.matchSequence( "Axis %f %f %f" ) )
+    {
+        osg::Vec3 axis;
+        fr[1].getFloat( ( axis[0] ) );
+        fr[2].getFloat( ( axis[1] ) );
+        fr[3].getFloat( ( axis[2] ) );
+        cons.setAxis( axis );
+        fr += 4;
+    }
+    else
+    {
+        osg::notify( osg::WARN ) << "CardanConstraint_readLocalData: Bad input data at \"Axis\"." << std::endl;
+        return( false );
+    }
+
+    if( fr.matchSequence( "Pivot point %f %f %f" ) )
+    {
+        osg::Vec3 point;
+        fr[2].getFloat( point[0] );
+        fr[3].getFloat( point[1] );
+        fr[4].getFloat( point[2] );
+        cons.setPivotPoint( point );
+        fr += 5;
+    }
+    else
+    {
+        osg::notify( osg::WARN ) << "HingeConstraint_readLocalData: Bad input data at \"Pivot point\"." << std::endl;
+        return( false );
+    }
+
+    if( fr.matchSequence( "Limit %f %f" ) )
+    {
+        osg::Vec2 limit;
+        fr[1].getFloat( limit[0] );
+        fr[2].getFloat( limit[1] );
+        cons.setLimit( limit );
+        fr += 3;
+    }
+    else
+    {
+        osg::notify( osg::WARN ) << "HingeConstraint_readLocalData: Bad input data at \"Limit\"." << std::endl;
+        return( false );
+    }
+
     return( true );
 }
 bool HingeConstraint_writeLocalData( const osg::Object& obj, osgDB::Output& fw )
 {
-    // TBD
+    const osgbDynamics::HingeConstraint& cons = static_cast< const osgbDynamics::HingeConstraint& >( obj );
+
+    fw.indent() << "Axis " << cons.getAxis() << std::endl;
+    fw.indent() << "Pivot point " << cons.getPivotPoint() << std::endl;
+    fw.indent() << "Limit " << cons.getLimit() << std::endl;
+
     return( true );
 }
 
 
 bool CardanConstraint_readLocalData( osg::Object& obj, osgDB::Input& fr )
 {
-    // TBD
+    osgbDynamics::CardanConstraint& cons = static_cast< osgbDynamics::CardanConstraint& >( obj );
+
+    if( fr.matchSequence( "AxisA %f %f %f" ) )
+    {
+        osg::Vec3 axis;
+        fr[1].getFloat( ( axis[0] ) );
+        fr[2].getFloat( ( axis[1] ) );
+        fr[3].getFloat( ( axis[2] ) );
+        cons.setAxisA( axis );
+        fr += 4;
+    }
+    else
+    {
+        osg::notify( osg::WARN ) << "CardanConstraint_readLocalData: Bad input data at \"AxisA\"." << std::endl;
+        return( false );
+    }
+
+    if( fr.matchSequence( "AxisB %f %f %f" ) )
+    {
+        osg::Vec3 axis;
+        fr[1].getFloat( ( axis[0] ) );
+        fr[2].getFloat( ( axis[1] ) );
+        fr[3].getFloat( ( axis[2] ) );
+        cons.setAxisB( axis );
+        fr += 4;
+    }
+    else
+    {
+        osg::notify( osg::WARN ) << "CardanConstraint_readLocalData: Bad input data at \"AxisB\"." << std::endl;
+        return( false );
+    }
+
     return( true );
 }
 bool CardanConstraint_writeLocalData( const osg::Object& obj, osgDB::Output& fw )
 {
-    // TBD
+    const osgbDynamics::CardanConstraint& cons = static_cast< const osgbDynamics::CardanConstraint& >( obj );
+
+    fw.indent() << "AxisA " << cons.getAxisA() << std::endl;
+    fw.indent() << "AxisB " << cons.getAxisB() << std::endl;
+
     return( true );
 }
 
@@ -522,23 +607,106 @@ bool BallAndSocketConstraint_writeLocalData( const osg::Object& obj, osgDB::Outp
 
 bool RagdollConstraint_readLocalData( osg::Object& obj, osgDB::Input& fr )
 {
-    // TBD
+    osgbDynamics::RagdollConstraint& cons = static_cast< osgbDynamics::RagdollConstraint& >( obj );
+
+    if( fr.matchSequence( "Point %f %f %f" ) )
+    {
+        osg::Vec3 point;
+        fr[1].getFloat( ( point[0] ) );
+        fr[2].getFloat( ( point[1] ) );
+        fr[3].getFloat( ( point[2] ) );
+        cons.setPoint( point );
+        fr += 4;
+    }
+    else
+    {
+        osg::notify( osg::WARN ) << "RagdollConstraint_readLocalData: Bad input data at \"Point\"." << std::endl;
+        return( false );
+    }
+
+    if( fr.matchSequence( "Axis %f %f %f" ) )
+    {
+        osg::Vec3 axis;
+        fr[1].getFloat( ( axis[0] ) );
+        fr[2].getFloat( ( axis[1] ) );
+        fr[3].getFloat( ( axis[2] ) );
+        cons.setAxis( axis );
+        fr += 4;
+    }
+    else
+    {
+        osg::notify( osg::WARN ) << "RagdollConstraint_readLocalData: Bad input data at \"Axis\"." << std::endl;
+        return( false );
+    }
+
+    if( fr.matchSequence( "Angle %f" ) )
+    {
+        double angle;
+        fr[1].getFloat( angle );
+        cons.setAngle( angle );
+    }
+    else
+    {
+        osg::notify( osg::WARN ) << "RagdollConstraint_readLocalData: Bad input data at \"Angle\"." << std::endl;
+        return( false );
+    }
+
     return( true );
 }
 bool RagdollConstraint_writeLocalData( const osg::Object& obj, osgDB::Output& fw )
 {
-    // TBD
+    const osgbDynamics::RagdollConstraint& cons = static_cast< const osgbDynamics::RagdollConstraint& >( obj );
+
+    fw.indent() << "Point " << cons.getPoint() << std::endl;
+    fw.indent() << "Axis " << cons.getAxis() << std::endl;
+    fw.indent() << "Angle " << cons.getAngle() << std::endl;
+
     return( true );
 }
 
 
 bool WheelSuspensionConstraint_readLocalData( osg::Object& obj, osgDB::Input& fr )
 {
-    // TBD
+    osgbDynamics::WheelSuspensionConstraint& cons = static_cast< osgbDynamics::WheelSuspensionConstraint& >( obj );
+
+    if( fr.matchSequence( "Spring axis %f %f %f" ) )
+    {
+        osg::Vec3 axis;
+        fr[2].getFloat( ( axis[0] ) );
+        fr[3].getFloat( ( axis[1] ) );
+        fr[4].getFloat( ( axis[2] ) );
+        cons.setSpringAxis( axis );
+        fr += 5;
+    }
+    else
+    {
+        osg::notify( osg::WARN ) << "WheelSuspensionConstraint_readLocalData: Bad input data at \"Spring Axis\"." << std::endl;
+        return( false );
+    }
+
+    if( fr.matchSequence( "Axle axis %f %f %f" ) )
+    {
+        osg::Vec3 axis;
+        fr[2].getFloat( ( axis[0] ) );
+        fr[3].getFloat( ( axis[1] ) );
+        fr[4].getFloat( ( axis[2] ) );
+        cons.setAxleAxis( axis );
+        fr += 5;
+    }
+    else
+    {
+        osg::notify( osg::WARN ) << "WheelSuspensionConstraint_readLocalData: Bad input data at \"Axle axis\"." << std::endl;
+        return( false );
+    }
+
     return( true );
 }
 bool WheelSuspensionConstraint_writeLocalData( const osg::Object& obj, osgDB::Output& fw )
 {
-    // TBD
+    const osgbDynamics::WheelSuspensionConstraint& cons = static_cast< const osgbDynamics::WheelSuspensionConstraint& >( obj );
+
+    fw.indent() << "Spring axis " << cons.getSpringAxis() << std::endl;
+    fw.indent() << "Axle axis " << cons.getAxleAxis() << std::endl;
+
     return( true );
 }

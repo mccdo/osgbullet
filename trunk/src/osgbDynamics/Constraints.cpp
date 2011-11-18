@@ -870,10 +870,12 @@ btHingeConstraint* HingeConstraint::getAsBtHinge() const
 
 void HingeConstraint::setAxis( const osg::Vec3& axis )
 {
+    _axis = axis;
     setDirty( true );
 }
-void HingeConstraint::setPivotPoint( const osg::Vec3& limit )
+void HingeConstraint::setPivotPoint( const osg::Vec3& wcPoint )
 {
+    _pivotPoint = wcPoint;
     setDirty( true );
 }
 void HingeConstraint::setLimit( const osg::Vec2& limit )

@@ -276,49 +276,220 @@ int runCTest( const std::string& testName )
     // LinearSpringConstraint
     if( testName == std::string( "LinearSpring" ) )
     {
-        ERROR(testName,"test code not yet written.");
+        osg::ref_ptr< osgbDynamics::LinearSpringConstraint > cons = new osgbDynamics::LinearSpringConstraint(
+            rbA, aXform, rbB, bXform );
+
+        if( cons->getAsBtGeneric6DofSpring() == NULL )
+            ERROR(testName,"won't typecast as btGeneric6DofSpringConstraint.");
+
+        if( !( osgDB::writeObjectFile( *cons, fileName ) ) )
+            ERROR(testName,"writeObjectFile failed.");
+
+        osg::Object* obj = osgDB::readObjectFile( fileName );
+        if( obj == NULL )
+            ERROR(testName,"readObjectFile returned NULL.");
+
+        osg::ref_ptr< osgbDynamics::LinearSpringConstraint > cons2 = dynamic_cast<
+            osgbDynamics::LinearSpringConstraint* >( obj );
+        if( !( cons2.valid() ) )
+            ERROR(testName,"dynamic_cast after readObjectFile failed.");
+
+        if( *cons2 != *cons )
+            // Note matches can fail due to double precision roundoff.
+            // For testing, use only 1s and 0s in matrices.
+            ERROR(testName,"failed to match.");
+
+        return( 0 );
     }
 
     //
     // AngleSpringConstraint
     if( testName == std::string( "AngleSpring" ) )
     {
-        ERROR(testName,"test code not yet written.");
+        osg::ref_ptr< osgbDynamics::AngleSpringConstraint > cons = new osgbDynamics::AngleSpringConstraint(
+            rbA, aXform, rbB, bXform );
+
+        if( cons->getAsBtGeneric6DofSpring() == NULL )
+            ERROR(testName,"won't typecast as btGeneric6DofSpringConstraint.");
+
+        if( !( osgDB::writeObjectFile( *cons, fileName ) ) )
+            ERROR(testName,"writeObjectFile failed.");
+
+        osg::Object* obj = osgDB::readObjectFile( fileName );
+        if( obj == NULL )
+            ERROR(testName,"readObjectFile returned NULL.");
+
+        osg::ref_ptr< osgbDynamics::AngleSpringConstraint > cons2 = dynamic_cast<
+            osgbDynamics::AngleSpringConstraint* >( obj );
+        if( !( cons2.valid() ) )
+            ERROR(testName,"dynamic_cast after readObjectFile failed.");
+
+        if( *cons2 != *cons )
+            // Note matches can fail due to double precision roundoff.
+            // For testing, use only 1s and 0s in matrices.
+            ERROR(testName,"failed to match.");
+
+        return( 0 );
     }
 
     //
     // LinearAngleSpringConstraint
     if( testName == std::string( "LinearAngleSpring" ) )
     {
-        ERROR(testName,"test code not yet written.");
+        osg::ref_ptr< osgbDynamics::LinearAngleSpringConstraint > cons = new osgbDynamics::LinearAngleSpringConstraint(
+            rbA, aXform, rbB, bXform );
+
+        if( cons->getAsBtGeneric6DofSpring() == NULL )
+            ERROR(testName,"won't typecast as btGeneric6DofSpringConstraint.");
+
+        if( !( osgDB::writeObjectFile( *cons, fileName ) ) )
+            ERROR(testName,"writeObjectFile failed.");
+
+        osg::Object* obj = osgDB::readObjectFile( fileName );
+        if( obj == NULL )
+            ERROR(testName,"readObjectFile returned NULL.");
+
+        osg::ref_ptr< osgbDynamics::LinearAngleSpringConstraint > cons2 = dynamic_cast<
+            osgbDynamics::LinearAngleSpringConstraint* >( obj );
+        if( !( cons2.valid() ) )
+            ERROR(testName,"dynamic_cast after readObjectFile failed.");
+
+        if( *cons2 != *cons )
+            // Note matches can fail due to double precision roundoff.
+            // For testing, use only 1s and 0s in matrices.
+            ERROR(testName,"failed to match.");
+
+        return( 0 );
     }
 
     //
     // HingeConstraint
     if( testName == std::string( "Hinge" ) )
     {
-        ERROR(testName,"test code not yet written.");
+        osg::Vec3 axis( -1., 0., 0. );
+        osg::Vec3 point( 4., 3., 2. );
+        osg::Vec2 limit( -2., 2. );
+        osg::ref_ptr< osgbDynamics::HingeConstraint > cons = new osgbDynamics::HingeConstraint(
+            rbA, aXform, rbB, bXform, axis, point, limit );
+
+        if( cons->getAsBtHinge() == NULL )
+            ERROR(testName,"won't typecast as btHingeConstraint.");
+
+        if( !( osgDB::writeObjectFile( *cons, fileName ) ) )
+            ERROR(testName,"writeObjectFile failed.");
+
+        osg::Object* obj = osgDB::readObjectFile( fileName );
+        if( obj == NULL )
+            ERROR(testName,"readObjectFile returned NULL.");
+
+        osg::ref_ptr< osgbDynamics::HingeConstraint > cons2 = dynamic_cast<
+            osgbDynamics::HingeConstraint* >( obj );
+        if( !( cons2.valid() ) )
+            ERROR(testName,"dynamic_cast after readObjectFile failed.");
+
+        if( *cons2 != *cons )
+            // Note matches can fail due to double precision roundoff.
+            // For testing, use only 1s and 0s in matrices.
+            ERROR(testName,"failed to match.");
+
+        return( 0 );
     }
 
     //
     // CardanConstraint
     if( testName == std::string( "Cardan" ) )
     {
-        ERROR(testName,"test code not yet written.");
+        osg::Vec3 axisA( -1., 0., 0. );
+        osg::Vec3 axisB( 0., 0., 1. );
+        osg::ref_ptr< osgbDynamics::CardanConstraint > cons = new osgbDynamics::CardanConstraint(
+            rbA, aXform, rbB, bXform, axisA, axisB );
+
+        if( cons->getAsBtUniversal() == NULL )
+            ERROR(testName,"won't typecast as btUniversalConstraint.");
+
+        if( !( osgDB::writeObjectFile( *cons, fileName ) ) )
+            ERROR(testName,"writeObjectFile failed.");
+
+        osg::Object* obj = osgDB::readObjectFile( fileName );
+        if( obj == NULL )
+            ERROR(testName,"readObjectFile returned NULL.");
+
+        osg::ref_ptr< osgbDynamics::CardanConstraint > cons2 = dynamic_cast<
+            osgbDynamics::CardanConstraint* >( obj );
+        if( !( cons2.valid() ) )
+            ERROR(testName,"dynamic_cast after readObjectFile failed.");
+
+        if( *cons2 != *cons )
+            // Note matches can fail due to double precision roundoff.
+            // For testing, use only 1s and 0s in matrices.
+            ERROR(testName,"failed to match.");
+
+        return( 0 );
     }
 
     //
     // RagdollConstraint
     if( testName == std::string( "Ragdoll" ) )
     {
-        ERROR(testName,"test code not yet written.");
+        osg::Vec3 point( 0., 1., 2. );
+        osg::Vec3 axis( 0., 1., 0. );
+        double angle = 2.;
+        osg::ref_ptr< osgbDynamics::RagdollConstraint > cons = new osgbDynamics::RagdollConstraint(
+            rbA, aXform, rbB, bXform, point, axis, angle );
+
+        if( cons->getAsBtConeTwist() == NULL )
+            ERROR(testName,"won't typecast as btConeTwistConstraint.");
+
+        if( !( osgDB::writeObjectFile( *cons, fileName ) ) )
+            ERROR(testName,"writeObjectFile failed.");
+
+        osg::Object* obj = osgDB::readObjectFile( fileName );
+        if( obj == NULL )
+            ERROR(testName,"readObjectFile returned NULL.");
+
+        osg::ref_ptr< osgbDynamics::RagdollConstraint > cons2 = dynamic_cast<
+            osgbDynamics::RagdollConstraint* >( obj );
+        if( !( cons2.valid() ) )
+            ERROR(testName,"dynamic_cast after readObjectFile failed.");
+
+        if( *cons2 != *cons )
+            // Note matches can fail due to double precision roundoff.
+            // For testing, use only 1s and 0s in matrices.
+            ERROR(testName,"failed to match.");
+
+        return( 0 );
     }
 
     //
     // WheelSuspensionConstraint
     if( testName == std::string( "WheelSuspension" ) )
     {
-        ERROR(testName,"test code not yet written.");
+        osg::Vec3 springAxis( 0., 0., 1. );
+        osg::Vec3 axleAxis( 0., 1., 0. );
+        osg::ref_ptr< osgbDynamics::WheelSuspensionConstraint > cons = new osgbDynamics::WheelSuspensionConstraint(
+            rbA, aXform, rbB, bXform, springAxis, axleAxis );
+
+        if( cons->getAsBtHinge2() == NULL )
+            ERROR(testName,"won't typecast as btHinge2Constraint.");
+
+        if( !( osgDB::writeObjectFile( *cons, fileName ) ) )
+            ERROR(testName,"writeObjectFile failed.");
+
+        osg::Object* obj = osgDB::readObjectFile( fileName );
+        if( obj == NULL )
+            ERROR(testName,"readObjectFile returned NULL.");
+
+        osg::ref_ptr< osgbDynamics::WheelSuspensionConstraint > cons2 = dynamic_cast<
+            osgbDynamics::WheelSuspensionConstraint* >( obj );
+        if( !( cons2.valid() ) )
+            ERROR(testName,"dynamic_cast after readObjectFile failed.");
+
+        if( *cons2 != *cons )
+            // Note matches can fail due to double precision roundoff.
+            // For testing, use only 1s and 0s in matrices.
+            ERROR(testName,"failed to match.");
+
+        return( 0 );
     }
 
     ERROR(testName,"unknown test name.");
