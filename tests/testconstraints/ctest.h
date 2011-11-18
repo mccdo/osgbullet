@@ -21,8 +21,10 @@
 #ifndef __CTEST_H__
 #define __CTEST_H__ 1
 
+#include <string>
 
-int runCTest();
+
+int runCTest( const std::string& testName );
 
 
 // __CTEST_H__
