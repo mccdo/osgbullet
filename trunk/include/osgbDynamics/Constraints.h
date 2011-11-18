@@ -191,6 +191,9 @@ typedef std::list< osg::ref_ptr< Constraint > > ConstraintList;
 
 /** \class SliderConstraint Constraints.h <osgbDynamics/Constraints.h>
 \brief Creates a constraint from an axis and movement limits on that axis.
+
+This class uses btSliderConstraint internally. Access the Bullet constraint
+directly with getAsBtSlider().
 */
 class OSGBDYNAMICS_EXPORT SliderConstraint : public Constraint
 {
@@ -248,6 +251,10 @@ protected:
 
 /** \class TwistSliderConstraint Constraints.h <osgbDynamics/Constraints.h>
 \brief A SliderConstraint that allows rotation around the slide axis.
+
+Because this class derives from SliderConstraint, it uses btSliderConstraint
+internally. Access the Bullet constraint directly with
+SliderConstraint::getAsBtSlider().
 */
 class OSGBDYNAMICS_EXPORT TwistSliderConstraint : public SliderConstraint
 {
@@ -260,6 +267,7 @@ public:
             btRigidBody* rbB, const osg::Matrix& rbBXform,
             const osg::Vec3& slideAxisInA, const osg::Vec2& slideLimit );
     TwistSliderConstraint( const TwistSliderConstraint& rhs, const osg::CopyOp& copyop=osg::CopyOp::SHALLOW_COPY );
+    META_Object(osgbDynamics,TwistSliderConstraint);
 
 protected:
     virtual ~TwistSliderConstraint();
@@ -270,45 +278,87 @@ protected:
 
 /** \class LinearSpringConstraint Constraints.h <osgbDynamics/Constraints.h>
 \brief TBD
+
+This class uses btGeneric6DofSpringConstraint internally. Access the Bullet constraint
+directly with getAsBtGeneric6DofSpring().
 */
 class OSGBDYNAMICS_EXPORT LinearSpringConstraint : public Constraint
 {
 public:
     LinearSpringConstraint();
+    LinearSpringConstraint( btRigidBody* rbA, btRigidBody* rbB=NULL );
+    LinearSpringConstraint( btRigidBody* rbA, const osg::Matrix& rbAXform );
+    LinearSpringConstraint( btRigidBody* rbA, const osg::Matrix& rbAXform,
+            btRigidBody* rbB, const osg::Matrix& rbBXform );
+    LinearSpringConstraint( const LinearSpringConstraint& rhs, const osg::CopyOp& copyop=osg::CopyOp::SHALLOW_COPY );
+    META_Object(osgbDynamics,LinearSpringConstraint);
+
+    virtual btGeneric6DofSpringConstraint* getAsBtGeneric6DofSpring() const;
 
 protected:
     virtual ~LinearSpringConstraint();
+
+    virtual void createConstraint();
 };
 
 
 /** \class AngleSpringConstraint Constraints.h <osgbDynamics/Constraints.h>
 \brief TBD
+
+This class uses btGeneric6DofSpringConstraint internally. Access the Bullet constraint
+directly with getAsBtGeneric6DofSpring().
 */
 class OSGBDYNAMICS_EXPORT AngleSpringConstraint : public Constraint
 {
 public:
     AngleSpringConstraint();
+    AngleSpringConstraint( btRigidBody* rbA, btRigidBody* rbB=NULL );
+    AngleSpringConstraint( btRigidBody* rbA, const osg::Matrix& rbAXform );
+    AngleSpringConstraint( btRigidBody* rbA, const osg::Matrix& rbAXform,
+            btRigidBody* rbB, const osg::Matrix& rbBXform );
+    AngleSpringConstraint( const AngleSpringConstraint& rhs, const osg::CopyOp& copyop=osg::CopyOp::SHALLOW_COPY );
+    META_Object(osgbDynamics,AngleSpringConstraint);
+
+    virtual btGeneric6DofSpringConstraint* getAsBtGeneric6DofSpring() const;
 
 protected:
     virtual ~AngleSpringConstraint();
+
+    virtual void createConstraint();
 };
 
 
 /** \class LinearAngleSpringConstraint Constraints.h <osgbDynamics/Constraints.h>
 \brief TBD
+
+This class uses btGeneric6DofSpringConstraint internally. Access the Bullet constraint
+directly with getAsBtGeneric6DofSpring().
 */
 class OSGBDYNAMICS_EXPORT LinearAngleSpringConstraint : public Constraint
 {
 public:
     LinearAngleSpringConstraint();
+    LinearAngleSpringConstraint( btRigidBody* rbA, btRigidBody* rbB=NULL );
+    LinearAngleSpringConstraint( btRigidBody* rbA, const osg::Matrix& rbAXform );
+    LinearAngleSpringConstraint( btRigidBody* rbA, const osg::Matrix& rbAXform,
+            btRigidBody* rbB, const osg::Matrix& rbBXform );
+    LinearAngleSpringConstraint( const LinearAngleSpringConstraint& rhs, const osg::CopyOp& copyop=osg::CopyOp::SHALLOW_COPY );
+    META_Object(osgbDynamics,LinearAngleSpringConstraint);
+
+    virtual btGeneric6DofSpringConstraint* getAsBtGeneric6DofSpring() const;
 
 protected:
     virtual ~LinearAngleSpringConstraint();
+
+    virtual void createConstraint();
 };
 
 
 /** \class FixedConstraint Constraints.h <osgbDynamics/Constraints.h>
 \brief TBD
+
+This class uses btGeneric6DofConstraint internally. Access the Bullet constraint
+directly with getAsBtGeneric6Dof().
 */
 class OSGBDYNAMICS_EXPORT FixedConstraint : public Constraint
 {
@@ -325,12 +375,37 @@ public:
 protected:
     virtual ~FixedConstraint();
 
-    void createConstraint();
+    virtual void createConstraint();
 };
 
 
 /** \class PlanarConstraint Constraints.h <osgbDynamics/Constraints.h>
 \brief Allows bodies to move relative to each other in a plane.
+
+WARNING Not yet fully functional. Encountering some issues with
+orienting the axes of the 6Dof constraint.
+
+INTENDED IMPLEMENTATION
+
+If the orient matrix is identity
+  the axes are in B'a coord system.
+  If B is NULL
+    the axes are in the world coord syste.
+else
+  the axes coord sys is the concat of B's xform and the orient matrix.
+  if B is NULL
+    thw axes coord sus is the orient matrix.
+
+POSSIBLE ALTERNATE IMPLEMENTATION
+
+PlanarConstraint creates a coordinate system to define the plane of
+motion. The coordinate system is the concatenation of \c _rbAXform and
+an orientation matrix (setOrientation()). Movement is restricted to
+the xy plane in that coordinate system. Movement is further restricted
+by x and y lower and upper limits (setLowLimit(), setHighLimit()).
+
+This class uses btGeneric6DofConstraint internally. Access the Bullet constraint
+directly with getAsBtGeneric6Dof().
 */
 class OSGBDYNAMICS_EXPORT PlanarConstraint : public Constraint
 {
@@ -381,7 +456,7 @@ public:
 protected:
     virtual ~PlanarConstraint();
 
-    void createConstraint();
+    virtual void createConstraint();
 
     osg::Vec2 _loLimit, _hiLimit;
     osg::Matrix _orient;
@@ -390,6 +465,11 @@ protected:
 
 /** \class BoxConstraint Constraints.h <osgbDynamics/Constraints.h>
 \brief TBD
+
+WARNING Not yet fully functional. See PlanarConstraint.
+
+This class uses btGeneric6DofConstraint internally. Access the Bullet constraint
+directly with getAsBtGeneric6Dof().
 */
 class OSGBDYNAMICS_EXPORT BoxConstraint : public Constraint
 {
@@ -440,7 +520,7 @@ public:
 protected:
     virtual ~BoxConstraint();
 
-    void createConstraint();
+    virtual void createConstraint();
 
     osg::Vec3 _loLimit, _hiLimit;
     osg::Matrix _orient;
@@ -449,32 +529,129 @@ protected:
 
 /** \class HingeConstraint Constraints.h <osgbDynamics/Constraints.h>
 \brief TBD
+
+This class uses btHingeConstraint internally. Access the Bullet constraint
+directly with getAsBtHinge().
 */
 class OSGBDYNAMICS_EXPORT HingeConstraint : public Constraint
 {
 public:
     HingeConstraint();
+    HingeConstraint( btRigidBody* rbA, btRigidBody* rbB=NULL,
+            const osg::Vec3& axis=osg::Vec3(0.,0.,1.),
+            const osg::Vec3& pivotPoint=osg::Vec3(0.,0.,0.),
+            const osg::Vec2& limit=osg::Vec2(-osg::PI,osg::PI) );
+    HingeConstraint( btRigidBody* rbA, const osg::Matrix& rbAXform,
+            btRigidBody* rbB=NULL, const osg::Matrix& rbBXform=osg::Matrix::identity(),
+            const osg::Vec3& axis=osg::Vec3(0.,0.,1.),
+            const osg::Vec3& pivotPoint=osg::Vec3(0.,0.,0.),
+            const osg::Vec2& limit=osg::Vec2(-osg::PI,osg::PI) );
+    HingeConstraint( btRigidBody* rbA, const osg::Matrix& rbAXform,
+            const osg::Vec3& axis=osg::Vec3(0.,0.,1.),
+            const osg::Vec3& pivotPoint=osg::Vec3(0.,0.,0.),
+            const osg::Vec2& limit=osg::Vec2(-osg::PI,osg::PI) );
+    HingeConstraint( const HingeConstraint& rhs, const osg::CopyOp& copyop=osg::CopyOp::SHALLOW_COPY );
+    META_Object(osgbDynamics,HingeConstraint);
+
+    virtual btHingeConstraint* getAsBtHinge() const;
+
+    void setAxis( const osg::Vec3& axis );
+    osg::Vec3 getAxis() const
+    {
+        return( _axis );
+    }
+
+    void setPivotPoint( const osg::Vec3& limit );
+    osg::Vec3 getPivotPoint() const
+    {
+        return( _pivotPoint );
+    }
+
+    void setLimit( const osg::Vec2& limit );
+    osg::Vec2 getLimit() const
+    {
+        return( _limit );
+    }
+
+    /** Return true if the axis, pivot point, and limit member variables, and base class, are
+    equal to the right-hand-side axis, pivot point, limit, and base class. */
+    virtual bool operator==( const HingeConstraint& rhs ) const;
+    /** Return true if the axis, pivot point, or limit member variables, or base class, differ
+    from the right-hand-side axis, pivot point, limit, or base class. */
+    virtual bool operator!=( const HingeConstraint& rhs ) const;
 
 protected:
     virtual ~HingeConstraint();
+
+    virtual void createConstraint();
+
+    osg::Vec3 _axis;
+    osg::Vec3 _pivotPoint;
+    osg::Vec2 _limit;
 };
 
 
 /** \class CardanConstraint Constraints.h <osgbDynamics/Constraints.h>
 \brief TBD
+
+This class uses btUniversalConstraint internally. Access the Bullet constraint
+directly with getAsBtUniversal().
 */
 class OSGBDYNAMICS_EXPORT CardanConstraint : public Constraint
 {
 public:
     CardanConstraint();
+    CardanConstraint( btRigidBody* rbA, btRigidBody* rbB=NULL );
+    CardanConstraint( btRigidBody* rbA, const osg::Matrix& rbAXform,
+            const osg::Vec3& axisA=osg::Vec3(0.,1.,0.),
+            const osg::Vec3& axisB=osg::Vec3(1.,0.,0.) );
+    CardanConstraint( btRigidBody* rbA, const osg::Matrix& rbAXform,
+            btRigidBody* rbB, const osg::Matrix& rbBXform,
+            const osg::Vec3& axisA=osg::Vec3(0.,1.,0.),
+            const osg::Vec3& axisB=osg::Vec3(1.,0.,0.) );
+    CardanConstraint( const CardanConstraint& rhs, const osg::CopyOp& copyop=osg::CopyOp::SHALLOW_COPY );
+    META_Object(osgbDynamics,CardanConstraint);
+
+    virtual btUniversalConstraint* getAsBtUniversal() const;
+
+    /**
+    */
+    void setAxisA( const osg::Vec3& axisA );
+    osg::Vec3 getAxisA() const
+    {
+        return( _axisA );
+    }
+
+    /**
+    */
+    void setAxisB( const osg::Vec3& axisB );
+    osg::Vec3 getAxisB() const
+    {
+        return( _axisB );
+    }
+
+    /** Return true if the axes member variables, and base class, are
+    equal to the right-hand-side axes and base class. */
+    virtual bool operator==( const CardanConstraint& rhs ) const;
+    /** Return true if the axes member variables, or base class, differ
+    from the right-hand-side axes or base class. */
+    virtual bool operator!=( const CardanConstraint& rhs ) const;
 
 protected:
     virtual ~CardanConstraint();
+
+    virtual void createConstraint();
+
+    osg::Vec3 _axisA;
+    osg::Vec3 _axisB;
 };
 
 
 /** \class BallAndSocketConstraint Constraints.h <osgbDynamics/Constraints.h>
 \brief Constrains two rigid bodies at the same world coordinate point.
+
+This class uses btPoint2PointConstraint internally. Access the Bullet constraint
+directly with getAsBtPoint2Point().
 */
 class OSGBDYNAMICS_EXPORT BallAndSocketConstraint : public Constraint
 {
@@ -482,10 +659,10 @@ public:
     BallAndSocketConstraint();
     BallAndSocketConstraint( btRigidBody* rbA, btRigidBody* rbB=NULL );
     BallAndSocketConstraint( btRigidBody* rbA, const osg::Matrix& rbAXform,
-            const osg::Vec3& wcPoint );
+            const osg::Vec3& wcPoint=osg::Vec3(0.,0.,0.) );
     BallAndSocketConstraint( btRigidBody* rbA, const osg::Matrix& rbAXform,
             btRigidBody* rbB, const osg::Matrix& rbBXform,
-            const osg::Vec3& wcPoint );
+            const osg::Vec3& wcPoint=osg::Vec3(0.,0.,0.) );
     BallAndSocketConstraint( const BallAndSocketConstraint& rhs, const osg::CopyOp& copyop=osg::CopyOp::SHALLOW_COPY );
     META_Object(osgbDynamics,BallAndSocketConstraint);
 
@@ -496,7 +673,7 @@ public:
     The rbA and rbB transforms are used to convert this point into local coordinates,
     which are then passed into the btPoint2PointConstraint constructor.
     */
-    void setPoint( const osg::Vec3& point );
+    void setPoint( const osg::Vec3& wcPoint );
     osg::Vec3 getPoint() const
     {
         return( _point );
@@ -520,27 +697,132 @@ protected:
 
 /** \class RagdollConstraint Constraints.h <osgbDynamics/Constraints.h>
 \brief TBD
+
+This class uses btConeTwistConstraint internally. Access the Bullet constraint
+directly with getAsBtConeTwist().
 */
 class OSGBDYNAMICS_EXPORT RagdollConstraint : public Constraint
 {
 public:
     RagdollConstraint();
+    RagdollConstraint( btRigidBody* rbA, btRigidBody* rbB=NULL );
+    RagdollConstraint( btRigidBody* rbA, const osg::Matrix& rbAXform,
+            const osg::Vec3& wcPoint=osg::Vec3(0.,0.,0),
+            const osg::Vec3& wcAxis=osg::Vec3(1.,0.,0),
+            const double angleRadians=0. );
+    RagdollConstraint( btRigidBody* rbA, const osg::Matrix& rbAXform,
+            btRigidBody* rbB, const osg::Matrix& rbBXform,
+            const osg::Vec3& wcPoint=osg::Vec3(0.,0.,0),
+            const osg::Vec3& wcAxis=osg::Vec3(1.,0.,0),
+            const double angleRadians=0. );
+    RagdollConstraint( const RagdollConstraint& rhs, const osg::CopyOp& copyop=osg::CopyOp::SHALLOW_COPY );
+    META_Object(osgbDynamics,RagdollConstraint);
+
+    virtual btConeTwistConstraint* getAsBtConeTwist() const;
+
+    /** \brief Specify the common point in world coordinates.
+    */
+    void setPoint( const osg::Vec3& wcPoint );
+    osg::Vec3 getPoint() const
+    {
+        return( _point );
+    }
+    /** \brief Specify an axis corresponding to the center of the cone.
+    */
+    void setAxis( const osg::Vec3& wcAxis );
+    osg::Vec3 getAxis() const
+    {
+        return( _axis );
+    }
+    /** \brief Specify the cone spread angle in radians.
+    */
+    void setAngle( const double angleRadians );
+    double getAngle() const
+    {
+        return( _angle );
+    }
+
+    /** Return true if the point, axis, and angle member variables, and base class, are
+    equal to the right-hand-side point, axis, angle, and base class. */
+    virtual bool operator==( const RagdollConstraint& rhs ) const;
+    /** Return true if the point, axis, or angle member variables, or base class, differ
+    from the right-hand-side point, axis, angle, or base class. */
+    virtual bool operator!=( const RagdollConstraint& rhs ) const;
 
 protected:
     virtual ~RagdollConstraint();
+
+    virtual void createConstraint();
+
+    osg::Vec3 _point;
+    osg::Vec3 _axis;
+    double _angle;
 };
 
 
 /** \class WheelSuspensionConstraint Constraints.h <osgbDynamics/Constraints.h>
 \brief TBD
+
+This class uses btHinge2Constraint internally. Access the Bullet constraint
+directly with getAsBtHinge2().
 */
 class OSGBDYNAMICS_EXPORT WheelSuspensionConstraint : public Constraint
 {
 public:
     WheelSuspensionConstraint();
+    WheelSuspensionConstraint( btRigidBody* rbA, btRigidBody* rbB=NULL );
+    WheelSuspensionConstraint( btRigidBody* rbA, const osg::Matrix& rbAXform,
+            const osg::Vec3& springAxis=osg::Vec3(0.,1.,0),
+            const osg::Vec3& axleAxis=osg::Vec3(1.,0.,0) );
+    WheelSuspensionConstraint( btRigidBody* rbA, const osg::Matrix& rbAXform,
+            btRigidBody* rbB, const osg::Matrix& rbBXform,
+            const osg::Vec3& springAxis=osg::Vec3(0.,1.,0),
+            const osg::Vec3& axleAxis=osg::Vec3(1.,0.,0) );
+    WheelSuspensionConstraint( const WheelSuspensionConstraint& rhs, const osg::CopyOp& copyop=osg::CopyOp::SHALLOW_COPY );
+    META_Object(osgbDynamics,WheelSuspensionConstraint);
+
+    virtual btHinge2Constraint* getAsBtHinge2() const;
+
+    /** \brief Specify the spring axis in world space.
+
+    The spring axis allows +/- motion along the axis, as well
+    as arbitrary rotation.
+
+    The spring and axle axes must be orthogonal. This class resolves
+    any non-orthogonality issues when it creates the Bullet constraing
+    (in createConstraing()).
+    */
+    void setSpringAxis( const osg::Vec3& springAxis );
+    osg::Vec3 getSpringAxis() const
+    {
+        return( _springAxis );
+    }
+    /** \brief Specify the axle axis in world space.
+
+    The spring and axle axes must be orthogonal. This class resolves
+    any non-orthogonality issues when it creates the Bullet constraing
+    (in createConstraing()).
+    */
+    void setAxleAxis( const osg::Vec3& axleAxis );
+    osg::Vec3 getAxleAxis() const
+    {
+        return( _axleAxis );
+    }
+
+    /** Return true if the spring and axle axes member variables, and base class, are
+    equal to the right-hand-side spring and axle axes and base class. */
+    virtual bool operator==( const WheelSuspensionConstraint& rhs ) const;
+    /** Return true if the spring and axle axes member variables, or base class, differ
+    from the right-hand-side spring and axle axes, or base class. */
+    virtual bool operator!=( const WheelSuspensionConstraint& rhs ) const;
 
 protected:
     virtual ~WheelSuspensionConstraint();
+
+    virtual void createConstraint();
+
+    osg::Vec3 _springAxis;
+    osg::Vec3 _axleAxis;
 };
 
 

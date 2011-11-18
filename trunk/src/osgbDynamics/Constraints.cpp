@@ -174,9 +174,9 @@ void SliderConstraint::setLimit( const osg::Vec2& limit )
     if( !getDirty() && ( _constraint != NULL ) )
     {
         // Dynamically modify the existing constraint.
-        btSliderConstraint* sc = getAsBtSlider();
-        sc->setLowerLinLimit( _slideLimit[ 0 ] );
-        sc->setUpperLinLimit( _slideLimit[ 1 ] );
+        btSliderConstraint* cons = getAsBtSlider();
+        cons->setLowerLinLimit( _slideLimit[ 0 ] );
+        cons->setUpperLinLimit( _slideLimit[ 1 ] );
     }
     else
         setDirty();
@@ -311,11 +311,11 @@ void TwistSliderConstraint::createConstraint()
         return;
 
     // Base class produces a btSliderConstraint.
-    btSliderConstraint* sc = getAsBtSlider();
+    btSliderConstraint* cons = getAsBtSlider();
     // All we need to do is disable the angular constraint that exists in
     // the btSliderConstraint by default.
-    sc->setLowerAngLimit( -osg::PI );
-    sc->setUpperAngLimit( osg::PI );
+    cons->setLowerAngLimit( -osg::PI );
+    cons->setUpperAngLimit( osg::PI );
 
     setDirty( false );
 }
@@ -324,9 +324,36 @@ void TwistSliderConstraint::createConstraint()
 
 
 LinearSpringConstraint::LinearSpringConstraint()
+  : Constraint()
+{
+}
+LinearSpringConstraint::LinearSpringConstraint( btRigidBody* rbA, btRigidBody* rbB )
+  : Constraint( rbA, rbB )
+{
+}
+LinearSpringConstraint::LinearSpringConstraint( btRigidBody* rbA, const osg::Matrix& rbAXform )
+  : Constraint( rbA, rbAXform )
+{
+}
+LinearSpringConstraint::LinearSpringConstraint( btRigidBody* rbA, const osg::Matrix& rbAXform,
+        btRigidBody* rbB, const osg::Matrix& rbBXform )
+  : Constraint( rbA, rbAXform, rbB, rbBXform )
+{
+}
+LinearSpringConstraint::LinearSpringConstraint( const LinearSpringConstraint& rhs, const osg::CopyOp& copyop )
+  : Constraint( rhs, copyop )
 {
 }
 LinearSpringConstraint::~LinearSpringConstraint()
+{
+}
+
+btGeneric6DofSpringConstraint* LinearSpringConstraint::getAsBtGeneric6DofSpring() const
+{
+    return( static_cast< btGeneric6DofSpringConstraint* >( getConstraint() ) );
+}
+
+void LinearSpringConstraint::createConstraint()
 {
 }
 
@@ -334,9 +361,36 @@ LinearSpringConstraint::~LinearSpringConstraint()
 
 
 AngleSpringConstraint::AngleSpringConstraint()
+  : Constraint()
+{
+}
+AngleSpringConstraint::AngleSpringConstraint( btRigidBody* rbA, btRigidBody* rbB )
+  : Constraint( rbA, rbB )
+{
+}
+AngleSpringConstraint::AngleSpringConstraint( btRigidBody* rbA, const osg::Matrix& rbAXform )
+  : Constraint( rbA, rbAXform )
+{
+}
+AngleSpringConstraint::AngleSpringConstraint( btRigidBody* rbA, const osg::Matrix& rbAXform,
+        btRigidBody* rbB, const osg::Matrix& rbBXform )
+  : Constraint( rbA, rbAXform, rbB, rbBXform )
+{
+}
+AngleSpringConstraint::AngleSpringConstraint( const AngleSpringConstraint& rhs, const osg::CopyOp& copyop )
+  : Constraint( rhs, copyop )
 {
 }
 AngleSpringConstraint::~AngleSpringConstraint()
+{
+}
+
+btGeneric6DofSpringConstraint* AngleSpringConstraint::getAsBtGeneric6DofSpring() const
+{
+    return( static_cast< btGeneric6DofSpringConstraint* >( getConstraint() ) );
+}
+
+void AngleSpringConstraint::createConstraint()
 {
 }
 
@@ -344,9 +398,36 @@ AngleSpringConstraint::~AngleSpringConstraint()
 
 
 LinearAngleSpringConstraint::LinearAngleSpringConstraint()
+  : Constraint()
+{
+}
+LinearAngleSpringConstraint::LinearAngleSpringConstraint( btRigidBody* rbA, btRigidBody* rbB )
+  : Constraint( rbA, rbB )
+{
+}
+LinearAngleSpringConstraint::LinearAngleSpringConstraint( btRigidBody* rbA, const osg::Matrix& rbAXform )
+  : Constraint( rbA, rbAXform )
+{
+}
+LinearAngleSpringConstraint::LinearAngleSpringConstraint( btRigidBody* rbA, const osg::Matrix& rbAXform,
+        btRigidBody* rbB, const osg::Matrix& rbBXform )
+  : Constraint( rbA, rbAXform, rbB, rbBXform )
+{
+}
+LinearAngleSpringConstraint::LinearAngleSpringConstraint( const LinearAngleSpringConstraint& rhs, const osg::CopyOp& copyop )
+  : Constraint( rhs, copyop )
 {
 }
 LinearAngleSpringConstraint::~LinearAngleSpringConstraint()
+{
+}
+
+btGeneric6DofSpringConstraint* LinearAngleSpringConstraint::getAsBtGeneric6DofSpring() const
+{
+    return( static_cast< btGeneric6DofSpringConstraint* >( getConstraint() ) );
+}
+
+void LinearAngleSpringConstraint::createConstraint()
 {
 }
 
@@ -566,14 +647,15 @@ void PlanarConstraint::createConstraint()
         return;
     }
     const osg::Matrix invACOM( osg::Matrix::translate( -( motion->getCenterOfMass() ) ) );
-    btTransform rbAFrame = osgbCollision::asBtTransform( invACOM );
+    btTransform rbAFrame = osgbCollision::asBtTransform( 
+        osg::Matrix::inverse( _rbAXform ) * invACOM );
 
 
     btGeneric6DofConstraint* cons;
     if( _rbB != NULL )
-        cons = new btGeneric6DofConstraint( *_rbA, *_rbB, rbAFrame, rbBFrame, false );
+        cons = new btGeneric6DofConstraint( *_rbA, *_rbB, rbAFrame, rbBFrame, true );
     else
-        cons = new btGeneric6DofConstraint( *_rbA, rbAFrame, true );
+        cons = new btGeneric6DofConstraint( *_rbA, rbAFrame, false );
     cons->setAngularLowerLimit( btVector3( 0., 0., 0. ) );
     cons->setAngularUpperLimit( btVector3( 0., 0., 0. ) );
 
@@ -736,22 +818,196 @@ void BoxConstraint::createConstraint()
 
 
 HingeConstraint::HingeConstraint()
+  : Constraint(),
+    _axis( osg::Vec3( 0., 0., 1. ) ),
+    _pivotPoint( osg::Vec3( 0., 0., 0. ) ),
+    _limit( osg::Vec2( -osg::PI, osg::PI ) )
+{
+}
+HingeConstraint::HingeConstraint( btRigidBody* rbA, btRigidBody* rbB,
+        const osg::Vec3& axis, const osg::Vec3& pivotPoint,
+        const osg::Vec2& limit )
+  : Constraint( rbA, rbB ),
+    _axis( axis ),
+    _pivotPoint( pivotPoint ),
+    _limit( limit )
+{
+}
+HingeConstraint::HingeConstraint( btRigidBody* rbA, const osg::Matrix& rbAXform,
+        btRigidBody* rbB, const osg::Matrix& rbBXform,
+        const osg::Vec3& axis, const osg::Vec3& pivotPoint,
+        const osg::Vec2& limit )
+  : Constraint( rbA, rbAXform, rbB, rbBXform ),
+    _axis( axis ),
+    _pivotPoint( pivotPoint ),
+    _limit( limit )
+{
+}
+HingeConstraint::HingeConstraint( btRigidBody* rbA, const osg::Matrix& rbAXform,
+        const osg::Vec3& axis, const osg::Vec3& pivotPoint,
+        const osg::Vec2& limit )
+  : Constraint( rbA, rbAXform ),
+    _axis( axis ),
+    _pivotPoint( pivotPoint ),
+    _limit( limit )
+{
+}
+HingeConstraint::HingeConstraint( const HingeConstraint& rhs, const osg::CopyOp& copyop )
+  : Constraint( rhs, copyop ),
+    _axis( rhs._axis ),
+    _pivotPoint( rhs._pivotPoint ),
+    _limit( rhs._limit )
 {
 }
 HingeConstraint::~HingeConstraint()
 {
 }
 
+btHingeConstraint* HingeConstraint::getAsBtHinge() const
+{
+    return( static_cast< btHingeConstraint* >( getConstraint() ) );
+}
+
+void HingeConstraint::setAxis( const osg::Vec3& axis )
+{
+    setDirty( true );
+}
+void HingeConstraint::setPivotPoint( const osg::Vec3& limit )
+{
+    setDirty( true );
+}
+void HingeConstraint::setLimit( const osg::Vec2& limit )
+{
+    _limit = limit;
+
+    if( !getDirty() && ( _constraint != NULL ) )
+    {
+        // Dynamically modify the existing constraint.
+        btHingeConstraint* cons = getAsBtHinge();
+        cons->setLimit( _limit[ 0 ], _limit[ 1 ] );
+    }
+    else
+        setDirty();
+}
+
+bool HingeConstraint::operator==( const HingeConstraint& rhs ) const
+{
+    return( !( operator!=( rhs ) ) );
+}
+bool HingeConstraint::operator!=( const HingeConstraint& rhs ) const
+{
+    return(
+        ( _axis != rhs._axis ) ||
+        ( _pivotPoint != rhs._pivotPoint ) ||
+        ( _limit != rhs._limit ) ||
+        ( Constraint::operator!=( static_cast< const Constraint& >( rhs ) ) )
+    );
+}
+
+
+void HingeConstraint::createConstraint()
+{
+    if( _rbA == NULL )
+    {
+        osg::notify( osg::INFO ) << "createConstraint: _rbA == NULL." << std::endl;
+        return;
+    }
+
+    if( _constraint )
+        delete _constraint;
+
+
+    // Pivot point and pivot axis are both in the gate's object space.
+    // Note that the gate is COM-adjusted, so the pivot point must also be
+    // in the gate's COM-adjusted object space.
+    // TBD extract this from hinge data fine.
+
+    btVector3 pivotInA( osgbCollision::asBtVector3( _pivotPoint ) );
+    btVector3 axisInA( osgbCollision::asBtVector3( _axis ) );
+    btVector3 pivotInB( osgbCollision::asBtVector3( _pivotPoint ) );
+    btVector3 axisInB( osgbCollision::asBtVector3( _axis ) );
+
+    btHingeConstraint* hinge;
+    if( _rbB != NULL )
+        hinge = new btHingeConstraint( *_rbA, *_rbB,
+                pivotInA, pivotInB, axisInA, axisInB, false );
+    else
+        hinge = new btHingeConstraint( *_rbA, pivotInA, axisInA, false );
+
+    hinge->setLimit( _limit[ 0 ], _limit[ 1 ] );
+
+    _constraint = hinge;
+}
+
 
 
 
 CardanConstraint::CardanConstraint()
+  : Constraint()
+{
+}
+CardanConstraint::CardanConstraint( btRigidBody* rbA, btRigidBody* rbB )
+  : Constraint( rbA, rbB )
+{
+}
+CardanConstraint::CardanConstraint( btRigidBody* rbA, const osg::Matrix& rbAXform,
+        const osg::Vec3& axisA, const osg::Vec3& axisB )
+  : Constraint( rbA, rbAXform ),
+    _axisA( axisA ),
+    _axisB( axisB )
+{
+}
+CardanConstraint::CardanConstraint( btRigidBody* rbA, const osg::Matrix& rbAXform,
+        btRigidBody* rbB, const osg::Matrix& rbBXform,
+        const osg::Vec3& axisA, const osg::Vec3& axisB )
+  : Constraint( rbA, rbAXform, rbB, rbBXform ),
+    _axisA( axisA ),
+    _axisB( axisB )
+{
+}
+CardanConstraint::CardanConstraint( const CardanConstraint& rhs, const osg::CopyOp& copyop )
+  : Constraint( rhs, copyop ),
+    _axisA( rhs._axisA ),
+    _axisB( rhs._axisB )
 {
 }
 CardanConstraint::~CardanConstraint()
 {
 }
 
+btUniversalConstraint* CardanConstraint::getAsBtUniversal() const
+{
+    return( static_cast< btUniversalConstraint* >( getConstraint() ) );
+}
+
+void CardanConstraint::setAxisA( const osg::Vec3& axisA )
+{
+    _axisA = axisA;
+    setDirty( true );
+}
+void CardanConstraint::setAxisB( const osg::Vec3& axisB )
+{
+    _axisB = axisB;
+    setDirty( true );
+}
+
+bool CardanConstraint::operator==( const CardanConstraint& rhs ) const
+{
+    return( !( operator!=( rhs ) ) );
+}
+bool CardanConstraint::operator!=( const CardanConstraint& rhs ) const
+{
+    return(
+        ( _axisA != rhs._axisA ) ||
+        ( _axisB != rhs._axisB ) ||
+        ( Constraint::operator!=( static_cast< const Constraint& >( rhs ) ) )
+    );
+}
+
+void CardanConstraint::createConstraint()
+{
+}
+    
 
 
 
@@ -789,9 +1045,9 @@ btPoint2PointConstraint* BallAndSocketConstraint::getAsBtPoint2Point() const
     return( static_cast< btPoint2PointConstraint* >( getConstraint() ) );
 }
 
-void BallAndSocketConstraint::setPoint( const osg::Vec3& point )
+void BallAndSocketConstraint::setPoint( const osg::Vec3& wcPoint )
 {
-    _point = point;
+    _point = wcPoint;
     setDirty();
 }
 
@@ -877,9 +1133,77 @@ void BallAndSocketConstraint::createConstraint()
 
 
 RagdollConstraint::RagdollConstraint()
+  : Constraint()
+{
+}
+RagdollConstraint::RagdollConstraint( btRigidBody* rbA, btRigidBody* rbB )
+  : Constraint( rbA, rbB )
+{
+}
+RagdollConstraint::RagdollConstraint( btRigidBody* rbA, const osg::Matrix& rbAXform,
+        const osg::Vec3& wcPoint, const osg::Vec3& wcAxis, const double angleRadians )
+  : Constraint( rbA, rbAXform ),
+    _point( wcPoint ),
+    _axis( wcAxis ),
+    _angle( angleRadians )
+{
+}
+RagdollConstraint::RagdollConstraint( btRigidBody* rbA, const osg::Matrix& rbAXform,
+        btRigidBody* rbB, const osg::Matrix& rbBXform,
+        const osg::Vec3& wcPoint, const osg::Vec3& wcAxis, const double angleRadians )
+  : Constraint( rbA, rbAXform, rbB, rbBXform ),
+    _point( wcPoint ),
+    _axis( wcAxis ),
+    _angle( angleRadians )
+{
+}
+RagdollConstraint::RagdollConstraint( const RagdollConstraint& rhs, const osg::CopyOp& copyop )
+  : Constraint( rhs, copyop ),
+    _point( rhs._point ),
+    _axis( rhs._axis ),
+    _angle( rhs._angle )
 {
 }
 RagdollConstraint::~RagdollConstraint()
+{
+}
+
+btConeTwistConstraint* RagdollConstraint::getAsBtConeTwist() const
+{
+    return( static_cast< btConeTwistConstraint* >( getConstraint() ) );
+}
+
+void RagdollConstraint::setPoint( const osg::Vec3& wcPoint )
+{
+    _point = wcPoint;
+    setDirty( true );
+}
+void RagdollConstraint::setAxis( const osg::Vec3& wcAxis )
+{
+    _axis = wcAxis;
+    setDirty( true );
+}
+void RagdollConstraint::setAngle( const double angleRadians )
+{
+    _angle = angleRadians;
+    setDirty( true );
+}
+
+bool RagdollConstraint::operator==( const RagdollConstraint& rhs ) const
+{
+    return( !( operator!=( rhs ) ) );
+}
+bool RagdollConstraint::operator!=( const RagdollConstraint& rhs ) const
+{
+    return(
+        ( _point != rhs._point ) ||
+        ( _axis != rhs._axis ) ||
+        ( _angle != rhs._angle ) ||
+        ( Constraint::operator!=( static_cast< const Constraint& >( rhs ) ) )
+    );
+}
+
+void RagdollConstraint::createConstraint()
 {
 }
 
@@ -887,10 +1211,70 @@ RagdollConstraint::~RagdollConstraint()
 
 
 WheelSuspensionConstraint::WheelSuspensionConstraint()
+  : Constraint()
+{
+}
+WheelSuspensionConstraint::WheelSuspensionConstraint( btRigidBody* rbA, btRigidBody* rbB )
+  : Constraint( rbA, rbB )
+{
+}
+WheelSuspensionConstraint::WheelSuspensionConstraint( btRigidBody* rbA, const osg::Matrix& rbAXform,
+        const osg::Vec3& springAxis, const osg::Vec3& axleAxis )
+  : Constraint( rbA, rbAXform ),
+    _springAxis( springAxis ),
+    _axleAxis( axleAxis )
+{
+}
+WheelSuspensionConstraint::WheelSuspensionConstraint( btRigidBody* rbA, const osg::Matrix& rbAXform,
+        btRigidBody* rbB, const osg::Matrix& rbBXform,
+        const osg::Vec3& springAxis, const osg::Vec3& axleAxis )
+  : Constraint( rbA, rbAXform, rbB, rbBXform ),
+    _springAxis( springAxis ),
+    _axleAxis( axleAxis )
+{
+}
+WheelSuspensionConstraint::WheelSuspensionConstraint( const WheelSuspensionConstraint& rhs, const osg::CopyOp& copyop )
+  : Constraint( rhs, copyop ),
+    _springAxis( rhs._springAxis ),
+    _axleAxis( rhs._axleAxis )
 {
 }
 WheelSuspensionConstraint::~WheelSuspensionConstraint()
 {
+}
+
+btHinge2Constraint* WheelSuspensionConstraint::getAsBtHinge2() const
+{
+    return( static_cast< btHinge2Constraint* >( getConstraint() ) );
+}
+
+void WheelSuspensionConstraint::setSpringAxis( const osg::Vec3& springAxis )
+{
+    _springAxis = springAxis;
+    setDirty( true );
+}
+void WheelSuspensionConstraint::setAxleAxis( const osg::Vec3& axleAxis )
+{
+    _axleAxis = axleAxis;
+    setDirty( true );
+}
+
+bool WheelSuspensionConstraint::operator==( const WheelSuspensionConstraint& rhs ) const
+{
+    return( !( operator!=( rhs ) ) );
+}
+bool WheelSuspensionConstraint::operator!=( const WheelSuspensionConstraint& rhs ) const
+{
+    return(
+        ( _springAxis != rhs._springAxis ) ||
+        ( _axleAxis != rhs._axleAxis ) ||
+        ( Constraint::operator!=( static_cast< const Constraint& >( rhs ) ) )
+    );
+}
+
+void WheelSuspensionConstraint::createConstraint()
+{
+    // TBD make sure spring and axle are at 90 degree angles.
 }
 
 
