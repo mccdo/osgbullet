@@ -66,8 +66,9 @@ int main( int argc, char** argv )
 {
     osg::ArgumentParser arguments( &argc, argv );
 
-    if( arguments.find( "--ctest" ) > 0 )
-        return( runCTest() );
+    int ctestPos = arguments.find( "--ctest" );
+    if( ctestPos > 0 )
+        return( runCTest( arguments[ ctestPos+1 ] ) );
 
     const bool debugDisplay( arguments.find( "--debug" ) > 0 );
 

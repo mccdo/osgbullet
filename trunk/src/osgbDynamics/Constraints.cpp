@@ -1006,6 +1006,7 @@ bool CardanConstraint::operator!=( const CardanConstraint& rhs ) const
 
 void CardanConstraint::createConstraint()
 {
+    // TBD make sure axisA and axisB are at 90 degree angles.
 }
     
 
