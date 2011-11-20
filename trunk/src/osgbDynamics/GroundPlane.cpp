@@ -98,7 +98,7 @@ osg::Node* generateGroundPlane( const osg::Vec4& plane, btDynamicsWorld* bulletW
 
     osg::ref_ptr<osg::Vec4Array> c = new osg::Vec4Array;
     groundGeom->setColorArray( c.get() );
-    c->push_back( osg::Vec4( 0.5f, 0.5f, 0.5f, 1.5f ) );
+    c->push_back( osg::Vec4( 1.f, 1.f, 1.f, 1.f ) );
     groundGeom->setColorBinding( osg::Geometry::BIND_OVERALL );
 
     return( groundPlane.release() );
