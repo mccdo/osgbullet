@@ -55,6 +55,8 @@ mass and non-unit scaling.
 
 Note that the calling code is responsible for deleting the Bullet constraing.
 See Constraint::~Constraint().
+
+\test testconstraint
 */
 /**@{*/
 
@@ -382,27 +384,22 @@ protected:
 /** \class PlanarConstraint Constraints.h <osgbDynamics/Constraints.h>
 \brief Allows bodies to move relative to each other in a plane.
 
-WARNING Not yet fully functional. Encountering some issues with
-orienting the axes of the 6Dof constraint.
+The user can specify the orientation (\c _orient) of the plane using setOrient(). \c _orient
+matrix determines the plane orientation based on the following pseudocode:
 
-INTENDED IMPLEMENTATION
-
-If the orient matrix is identity
-  the axes are in B'a coord system.
-  If B is NULL
-    the axes are in the world coord syste.
-else
-  the axes coord sys is the concat of B's xform and the orient matrix.
-  if B is NULL
-    thw axes coord sus is the orient matrix.
-
-POSSIBLE ALTERNATE IMPLEMENTATION
-
-PlanarConstraint creates a coordinate system to define the plane of
-motion. The coordinate system is the concatenation of \c _rbAXform and
-an orientation matrix (setOrientation()). Movement is restricted to
-the xy plane in that coordinate system. Movement is further restricted
-by x and y lower and upper limits (setLowLimit(), setHighLimit()).
+\code
+  if _orient is identity
+    the plane is in B'a coord space.
+    if B is NULL
+      the plane is in the world coord space.
+  else
+    the plane coord space is B's coord space, multiplied
+            by _orient.
+    if B is NULL
+      the plane coord space is defined solely by _orient.
+\endcode
+"Coord space" above refers to orientation only. The origin is always based
+on the initial local-to-world transform(s).
 
 This class uses btGeneric6DofConstraint internally. Access the Bullet constraint
 directly with getAsBtGeneric6Dof().
@@ -440,6 +437,10 @@ public:
         return( _hiLimit );
     }
 
+    /** \brief Specify the orienation of the constrained axes.
+
+    Note that this class ignores any translation component in \c orient.
+    */
     void setOrientation( const osg::Matrix& orient );
     osg::Matrix getOrientation() const
     {
@@ -524,6 +525,13 @@ protected:
 
     osg::Vec3 _loLimit, _hiLimit;
     osg::Matrix _orient;
+
+private:
+    friend class PlanarConstraint;
+
+    static void internalPlanarBoxFrameComputation(
+        btTransform& aFrame, btTransform& bFrame,
+        const Constraint* cons, const osg::Matrix& orient );
 };
 
 
