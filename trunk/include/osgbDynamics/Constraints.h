@@ -112,7 +112,7 @@ public:
     If only one rigid body is specified, it is constrained to the world.
     Otherwise, both rigid bodies are constrained together. */
     void setRigidBodies( btRigidBody* rbA, btRigidBody* rbB=NULL );
-    void getRigidBodies( btRigidBody* rbA, btRigidBody* rbB )
+    void getRigidBodies( btRigidBody*& rbA, btRigidBody*& rbB )
     {
         rbA = _rbA; rbB = _rbB;
     }
@@ -531,7 +531,7 @@ private:
 
     static void internalPlanarBoxFrameComputation(
         btTransform& aFrame, btTransform& bFrame,
-        const Constraint* cons, const osg::Matrix& orient );
+        Constraint* cons, const osg::Matrix& orient );
 };
 
 
