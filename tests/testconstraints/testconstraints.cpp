@@ -156,11 +156,29 @@ int main( int argc, char** argv )
     crE->_shapeType = BOX_SHAPE_PROXYTYPE;
 
 
-    if( arguments.find( "Foo" ) > 0 )
+    if( arguments.find( "LinearSpring" ) > 0 )
     {
+        osg::notify( osg::ALWAYS ) << "Test not yet implemented." << std::endl;
     }
-    else if( arguments.find( "Bar" ) > 0 )
+    else if( arguments.find( "AngleSpring" ) > 0 )
     {
+        osg::notify( osg::ALWAYS ) << "Test not yet implemented." << std::endl;
+    }
+    else if( arguments.find( "LinearAngleSpring" ) > 0 )
+    {
+        osg::notify( osg::ALWAYS ) << "Test not yet implemented." << std::endl;
+    }
+    else if( arguments.find( "Cardan" ) > 0 )
+    {
+        osg::notify( osg::ALWAYS ) << "Test not yet implemented." << std::endl;
+    }
+    else if( arguments.find( "Ragdoll" ) > 0 )
+    {
+        osg::notify( osg::ALWAYS ) << "Test not yet implemented." << std::endl;
+    }
+    else if( arguments.find( "WheelSuspension" ) > 0 )
+    {
+        osg::notify( osg::ALWAYS ) << "Test not yet implemented." << std::endl;
     }
     else if( arguments.find( "Planar" ) > 0 )
     {
