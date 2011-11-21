@@ -914,15 +914,57 @@ void HingeConstraint::createConstraint()
         delete _constraint;
 
 
-    // Pivot point and pivot axis are both in the gate's object space.
-    // Note that the gate is COM-adjusted, so the pivot point must also be
-    // in the gate's COM-adjusted object space.
-    // TBD extract this from hinge data fine.
+    // Put pivot point and axis into A's space.
+    // 
+    // 1. Inverse A center of mass:
+    osgbDynamics::MotionState* motion = dynamic_cast< osgbDynamics::MotionState* >( _rbA->getMotionState() );
+    if( motion == NULL )
+    {
+        osg::notify( osg::WARN ) << "HingeConstraint: Invalid MotionState." << std::endl;
+        return;
+    }
+    osg::Matrix invACom = osg::Matrix::translate( -( motion->getCenterOfMass() ) );
+    //
+    // 2. Inverse A transform.
+    osg::Matrix invAXform = osg::Matrix::inverse( _rbAXform );
+    //
+    // 3. A's orientation.
+    osg::Matrix rbAOrient( _rbAXform );
+    rbAOrient.setTrans( 0., 0., 0. );
+    //
+    // Transform the point and axis.
+    btVector3 pivotInA( osgbCollision::asBtVector3(
+        _pivotPoint * invAXform * rbAOrient * invACom ) );
+    btVector3 axisInA( osgbCollision::asBtVector3( _axis * rbAOrient ) );
 
-    btVector3 pivotInA( osgbCollision::asBtVector3( _pivotPoint ) );
-    btVector3 axisInA( osgbCollision::asBtVector3( _axis ) );
-    btVector3 pivotInB( osgbCollision::asBtVector3( _pivotPoint ) );
-    btVector3 axisInB( osgbCollision::asBtVector3( _axis ) );
+
+    btVector3 pivotInB, axisInB;
+    if( _rbB != NULL )
+    {
+        // Put pivot point and axis into B's space.
+        // 
+        // 1. Inverse B center of mass:
+        osgbDynamics::MotionState* motion = dynamic_cast< osgbDynamics::MotionState* >( _rbB->getMotionState() );
+        if( motion == NULL )
+        {
+            osg::notify( osg::WARN ) << "HingeConstraint: Invalid MotionState." << std::endl;
+            return;
+        }
+        osg::Matrix invBCom = osg::Matrix::translate( -( motion->getCenterOfMass() ) );
+        //
+        // 2. Inverse A transform.
+        osg::Matrix invBXform = osg::Matrix::inverse( _rbBXform );
+        //
+        // 3. B's orientation.
+        osg::Matrix rbBOrient( _rbBXform );
+        rbBOrient.setTrans( 0., 0., 0. );
+        //
+        // Transform the point and axis.
+        pivotInB = osgbCollision::asBtVector3(
+            _pivotPoint * invBXform * rbBOrient * invBCom );
+        axisInB = osgbCollision::asBtVector3( _axis * rbBOrient );
+    }
+
 
     btHingeConstraint* hinge;
     if( _rbB != NULL )

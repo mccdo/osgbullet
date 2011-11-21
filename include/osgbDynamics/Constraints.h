@@ -564,18 +564,24 @@ public:
 
     virtual btHingeConstraint* getAsBtHinge() const;
 
+    /** \brief Hinge axis in world coordinates. */
     void setAxis( const osg::Vec3& axis );
     osg::Vec3 getAxis() const
     {
         return( _axis );
     }
 
+    /** brief Hinge pivot point in world coordinates. */
     void setPivotPoint( const osg::Vec3& wcPoint );
     osg::Vec3 getPivotPoint() const
     {
         return( _pivotPoint );
     }
 
+    /** \brief Hinge rotation limits, with 0. corresponding to the
+    initial position of the constrained body/bodies.
+
+    Pass (-osg::PI_2, osg::PI_2) to allow free rotation. */
     void setLimit( const osg::Vec2& limit );
     osg::Vec2 getLimit() const
     {

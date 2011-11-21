@@ -180,6 +180,44 @@ int main( int argc, char** argv )
     {
         osg::notify( osg::ALWAYS ) << "Test not yet implemented." << std::endl;
     }
+    else if( arguments.find( "Hinge" ) > 0 )
+    {
+        osg::Matrix cXform = osg::Matrix::rotate( osg::PI_4, 0., 0., 1. ) *
+            osg::Matrix::translate( 0., 8., 2. );
+        crC->_parentTransform = cXform;
+        btRigidBody* rbC = osgbDynamics::createRigidBody( crC.get() );
+        amtC->setUserData( new osgbCollision::RefRigidBody( rbC ) );
+        bulletWorld->addRigidBody( rbC );
+
+        osg::Matrix bXform = osg::Matrix::translate( 0., 0., 0. );
+        crB->_parentTransform = bXform;
+        btRigidBody* rbB = osgbDynamics::createRigidBody( crB.get() );
+        amtB->setUserData( new osgbCollision::RefRigidBody( rbB ) );
+        bulletWorld->addRigidBody( rbB );
+
+        osg::Matrix eXform = osg::Matrix::translate( 2., -2., .5 );
+        crE->_parentTransform = eXform;
+        btRigidBody* rbE = osgbDynamics::createRigidBody( crE.get() );
+        amtE->setUserData( new osgbCollision::RefRigidBody( rbE ) );
+        bulletWorld->addRigidBody( rbE );
+
+        {
+            osg::Vec3 point( 1., 8., 0. );
+            osg::Vec3 axis( 0., 0., 1. );
+            osg::Vec2 limit( -osg::PI_2, osg::PI_2 );
+
+            osg::ref_ptr< osgbDynamics::HingeConstraint > cons1 = new osgbDynamics::HingeConstraint(
+                rbC, cXform, axis, point, limit );
+            bulletWorld->addConstraint( cons1->getConstraint() );
+
+            axis.set( 0., 1., 0. );
+            point.set( 3., 0., 1.5 );
+            limit.set( -osg::PI_2, osg::PI );
+            osg::ref_ptr< osgbDynamics::HingeConstraint > cons2 = new osgbDynamics::HingeConstraint(
+                rbB, bXform, rbE, eXform, axis, point, limit );
+            bulletWorld->addConstraint( cons2->getConstraint() );
+        }
+    }
     else if( arguments.find( "Planar" ) > 0 )
     {
         /*
