@@ -208,6 +208,47 @@ int main( int argc, char** argv )
     }
     else if( arguments.find( "Box" ) > 0 )
     {
+        /*
+        osg::Matrix aXform = osg::Matrix::translate( 0., 0., 3. );
+        crA->_parentTransform = aXform;
+        btRigidBody* rbA = osgbDynamics::createRigidBody( crA.get() );
+        amtA->setUserData( new osgbCollision::RefRigidBody( rbA ) );
+        bulletWorld->addRigidBody( rbA );
+        */
+
+        osg::Matrix bXform = osg::Matrix::identity();
+        crB->_parentTransform = bXform;
+        btRigidBody* rbB = osgbDynamics::createRigidBody( crB.get() );
+        amtB->setUserData( new osgbCollision::RefRigidBody( rbB ) );
+        bulletWorld->addRigidBody( rbB );
+
+        osg::Matrix cXform = osg::Matrix::rotate( osg::PI_4, 0., 0., 1. ) *
+            osg::Matrix::translate( 0., 8., 2. );
+        crC->_parentTransform = cXform;
+        btRigidBody* rbC = osgbDynamics::createRigidBody( crC.get() );
+        amtC->setUserData( new osgbCollision::RefRigidBody( rbC ) );
+        bulletWorld->addRigidBody( rbC );
+
+        osg::Matrix eXform = osg::Matrix::rotate( osg::PI_4, 0., 0., 1. ) *
+            osg::Matrix::translate( -2., -2., 1. );
+        crE->_parentTransform = eXform;
+        btRigidBody* rbE = osgbDynamics::createRigidBody( crE.get() );
+        amtE->setUserData( new osgbCollision::RefRigidBody( rbE ) );
+        bulletWorld->addRigidBody( rbE );
+
+        {
+            osg::Vec3 loLimit( -4., -1., -1. );
+            osg::Vec3 hiLimit( 2., 1., 5. );
+            osg::Matrix orient = osg::Matrix::rotate( osg::PI_4, 0., 0., 1. );
+
+            osg::ref_ptr< osgbDynamics::BoxConstraint > cons1 = new osgbDynamics::BoxConstraint(
+                rbC, cXform, loLimit, hiLimit, orient );
+            bulletWorld->addConstraint( cons1->getConstraint() );
+
+            osg::ref_ptr< osgbDynamics::BoxConstraint > cons2 = new osgbDynamics::BoxConstraint(
+                rbE, eXform, rbB, bXform, loLimit, hiLimit, orient );
+            bulletWorld->addConstraint( cons2->getConstraint() );
+        }
     }
     else if( arguments.find( "Fixed" ) > 0 )
     {

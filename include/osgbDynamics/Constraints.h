@@ -527,11 +527,12 @@ protected:
     osg::Matrix _orient;
 
 private:
-    friend class PlanarConstraint;
-
+    /** \brief Shared reference frame computation code for both Planar and
+    Box constraints. Access to Planar is allowed via "friend" declarative. */
     static void internalPlanarBoxFrameComputation(
         btTransform& aFrame, btTransform& bFrame,
         Constraint* cons, const osg::Matrix& orient );
+    friend class PlanarConstraint;
 };
 
 
