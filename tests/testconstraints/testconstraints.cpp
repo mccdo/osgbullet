@@ -79,6 +79,7 @@ int main( int argc, char** argv )
     // Add ground
     const osg::Vec4 plane( 0., 0., 1., -1.5 );
     osg::Node* groundRoot = osgbDynamics::generateGroundPlane( plane, bulletWorld );
+    groundRoot->getOrCreateStateSet()->setMode( GL_LIGHTING, osg::StateAttribute::OFF );
     root->addChild( groundRoot );
 
 
@@ -163,9 +164,16 @@ int main( int argc, char** argv )
     }
     else if( arguments.find( "Planar" ) > 0 )
     {
+        /*
+        osg::Matrix aXform = osg::Matrix::translate( 0., 0., 3. );
+        crA->_parentTransform = aXform;
+        btRigidBody* rbA = osgbDynamics::createRigidBody( crA.get() );
+        amtA->setUserData( new osgbCollision::RefRigidBody( rbA ) );
+        bulletWorld->addRigidBody( rbA );
+        */
+
         osg::Matrix bXform = osg::Matrix::identity();
         crB->_parentTransform = bXform;
-        crB->_mass = 0.;
         btRigidBody* rbB = osgbDynamics::createRigidBody( crB.get() );
         amtB->setUserData( new osgbCollision::RefRigidBody( rbB ) );
         bulletWorld->addRigidBody( rbB );
@@ -187,7 +195,7 @@ int main( int argc, char** argv )
         {
             osg::Vec2 loLimit( -4., -1. );
             osg::Vec2 hiLimit( 2., 1. );
-            osg::Matrix orient;
+            osg::Matrix orient = osg::Matrix::rotate( osg::PI_4, 0., 0., 1. );
 
             osg::ref_ptr< osgbDynamics::PlanarConstraint > cons1 = new osgbDynamics::PlanarConstraint(
                 rbC, cXform, loLimit, hiLimit, orient );
@@ -389,7 +397,7 @@ int main( int argc, char** argv )
     viewer.setSceneData( root );
 
     osgGA::TrackballManipulator* tb = new osgGA::TrackballManipulator;
-    tb->setHomePosition( osg::Vec3( 0., -18., 3. ), osg::Vec3( 0., 0., 1.5 ), osg::Vec3( 0., 0., 1. ) ); 
+    tb->setHomePosition( osg::Vec3( 0., -26., 4. ), osg::Vec3( 0., 0., 1.5 ), osg::Vec3( 0., 0., 1. ) ); 
     viewer.setCameraManipulator( tb );
     viewer.getCamera()->setClearColor( osg::Vec4( .5, .5, .5, 1. ) );
 
