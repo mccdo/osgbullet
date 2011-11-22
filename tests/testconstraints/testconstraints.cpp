@@ -178,7 +178,30 @@ int main( int argc, char** argv )
     }
     else if( arguments.find( "WheelSuspension" ) > 0 )
     {
-        osg::notify( osg::ALWAYS ) << "Test not yet implemented." << std::endl;
+        osg::Matrix cXform = osg::Matrix::translate( 0., -3., 1. );
+        crC->_parentTransform = cXform;
+        btRigidBody* rbC = osgbDynamics::createRigidBody( crC.get() );
+        amtC->setUserData( new osgbCollision::RefRigidBody( rbC ) );
+        bulletWorld->addRigidBody( rbC );
+
+        osg::Matrix bXform = osg::Matrix::rotate( osg::PI_2, 0., 1., 0. ) *
+            osg::Matrix::translate( 0., 0., 1.5 );
+        crB->_parentTransform = bXform;
+        crB->_mass = 0.;
+        btRigidBody* rbB = osgbDynamics::createRigidBody( crB.get() );
+        amtB->setUserData( new osgbCollision::RefRigidBody( rbB ) );
+        bulletWorld->addRigidBody( rbB );
+
+        {
+            osg::Vec3 springAxis( 0., 0., 1. );
+            osg::Vec3 axleAxis( 0., 1., 0. );
+            osg::Vec2 limit( -.2, .2 );
+            osg::Vec3 anchor( 0., -3., 1. );
+
+            osg::ref_ptr< osgbDynamics::WheelSuspensionConstraint > cons1 = new osgbDynamics::WheelSuspensionConstraint(
+                rbB, rbC, springAxis, axleAxis, limit, anchor );
+            bulletWorld->addConstraint( cons1->getConstraint() );
+        }
     }
     else if( arguments.find( "Hinge" ) > 0 )
     {
@@ -189,7 +212,7 @@ int main( int argc, char** argv )
         amtC->setUserData( new osgbCollision::RefRigidBody( rbC ) );
         bulletWorld->addRigidBody( rbC );
 
-        osg::Matrix bXform = osg::Matrix::translate( 0., 0., 0. );
+        osg::Matrix bXform = osg::Matrix::identity();
         crB->_parentTransform = bXform;
         btRigidBody* rbB = osgbDynamics::createRigidBody( crB.get() );
         amtB->setUserData( new osgbCollision::RefRigidBody( rbB ) );

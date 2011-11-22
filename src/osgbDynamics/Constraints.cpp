@@ -1251,32 +1251,29 @@ void RagdollConstraint::createConstraint()
 
 
 WheelSuspensionConstraint::WheelSuspensionConstraint()
-  : Constraint()
+  : Constraint(),
+    _springAxis( osg::Vec3( 0., 0., 1. ) ),
+    _axleAxis( osg::Vec3( 0., 1., 0. ) ),
+    _limit( osg::Vec2( -osg::PI_4, osg::PI_4 ) ),
+    _point( osg::Vec3( 0., 0., 0. ) )
 {
 }
-WheelSuspensionConstraint::WheelSuspensionConstraint( btRigidBody* rbA, btRigidBody* rbB )
-  : Constraint( rbA, rbB )
-{
-}
-WheelSuspensionConstraint::WheelSuspensionConstraint( btRigidBody* rbA, const osg::Matrix& rbAXform,
-        const osg::Vec3& springAxis, const osg::Vec3& axleAxis )
-  : Constraint( rbA, rbAXform ),
+WheelSuspensionConstraint::WheelSuspensionConstraint( btRigidBody* rbA, btRigidBody* rbB,
+        const osg::Vec3& springAxis, const osg::Vec3& axleAxis, const osg::Vec2& limit,
+        const osg::Vec3& point )
+  : Constraint( rbA, rbB ),
     _springAxis( springAxis ),
-    _axleAxis( axleAxis )
-{
-}
-WheelSuspensionConstraint::WheelSuspensionConstraint( btRigidBody* rbA, const osg::Matrix& rbAXform,
-        btRigidBody* rbB, const osg::Matrix& rbBXform,
-        const osg::Vec3& springAxis, const osg::Vec3& axleAxis )
-  : Constraint( rbA, rbAXform, rbB, rbBXform ),
-    _springAxis( springAxis ),
-    _axleAxis( axleAxis )
+    _axleAxis( axleAxis ),
+    _limit( limit ),
+    _point( point )
 {
 }
 WheelSuspensionConstraint::WheelSuspensionConstraint( const WheelSuspensionConstraint& rhs, const osg::CopyOp& copyop )
   : Constraint( rhs, copyop ),
     _springAxis( rhs._springAxis ),
-    _axleAxis( rhs._axleAxis )
+    _axleAxis( rhs._axleAxis ),
+    _limit( rhs._limit ),
+    _point( rhs._point )
 {
 }
 WheelSuspensionConstraint::~WheelSuspensionConstraint()
@@ -1298,6 +1295,25 @@ void WheelSuspensionConstraint::setAxleAxis( const osg::Vec3& axleAxis )
     _axleAxis = axleAxis;
     setDirty( true );
 }
+void WheelSuspensionConstraint::setLimit( const osg::Vec2& limit )
+{
+    _limit = limit;
+
+    if( !getDirty() && ( _constraint != NULL ) )
+    {
+        // Dynamically modify the existing constraint.
+        btHinge2Constraint* cons = getAsBtHinge2();
+        cons->setUpperLimit( _limit[ 1 ] );
+        cons->setLowerLimit( _limit[ 1 ] );
+    }
+    else
+        setDirty();
+}
+void WheelSuspensionConstraint::setAnchorPoint( const osg::Vec3& wcPoint )
+{
+    _point = wcPoint;
+    setDirty( true );
+}
 
 bool WheelSuspensionConstraint::operator==( const WheelSuspensionConstraint& rhs ) const
 {
@@ -1308,13 +1324,40 @@ bool WheelSuspensionConstraint::operator!=( const WheelSuspensionConstraint& rhs
     return(
         ( _springAxis != rhs._springAxis ) ||
         ( _axleAxis != rhs._axleAxis ) ||
+        ( _limit != rhs._limit ) ||
+        ( _point != rhs._point ) ||
         ( Constraint::operator!=( static_cast< const Constraint& >( rhs ) ) )
     );
 }
 
 void WheelSuspensionConstraint::createConstraint()
 {
-    // TBD make sure spring and axle are at 90 degree angles.
+    if( ( _rbA == NULL ) || ( _rbB == NULL ) )
+    {
+        osg::notify( osg::INFO ) << "createConstraint: _rbA == NULL or _rbB == NULL." << std::endl;
+        return;
+    }
+
+    if( _constraint )
+        delete _constraint;
+
+
+    // Force _axleAxis to be orthogonal to _springAxis.
+    osg::Vec3 c = _springAxis ^ _axleAxis;
+    btVector3 axle = osgbCollision::asBtVector3( c ^ _springAxis );
+
+    btVector3 spring = osgbCollision::asBtVector3( _springAxis );
+    btVector3 anchor = osgbCollision::asBtVector3( _point );
+
+    // Everything is in world coords, just create the constraint.
+    btHinge2Constraint* cons = new btHinge2Constraint( *_rbA, *_rbB, anchor, spring, axle );
+
+    cons->setLowerLimit( _limit[ 0 ] );
+    cons->setUpperLimit( _limit[ 1 ] );
+
+    _constraint = cons;
+
+    setDirty( false );
 }
 
 
