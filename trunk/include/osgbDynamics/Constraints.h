@@ -776,7 +776,15 @@ protected:
 
 
 /** \class WheelSuspensionConstraint Constraints.h <osgbDynamics/Constraints.h>
-\brief TBD
+\brief Model of a wheel constrained to a vehicle.
+
+The constraint allows up and down spring-like motion along the \x _springAxis.
+Rotation around that axis is controlled with setLimit(), and the default is the
+range -pi/4 to pi/4 radians. The constraint also allows rotation around the
+\c _axleAxis. Both axes pass through \c _point, the center of rotation.
+
+This constraint class, along with the spring constraints, require two rigid
+bodies. This restriction is imposed by the underlying Bullet support classes.
 
 This class uses btHinge2Constraint internally. Access the Bullet constraint
 directly with getAsBtHinge2().
@@ -785,14 +793,11 @@ class OSGBDYNAMICS_EXPORT WheelSuspensionConstraint : public Constraint
 {
 public:
     WheelSuspensionConstraint();
-    WheelSuspensionConstraint( btRigidBody* rbA, btRigidBody* rbB=NULL );
-    WheelSuspensionConstraint( btRigidBody* rbA, const osg::Matrix& rbAXform,
+    WheelSuspensionConstraint( btRigidBody* rbA, btRigidBody* rbB,
             const osg::Vec3& springAxis=osg::Vec3(0.,1.,0),
-            const osg::Vec3& axleAxis=osg::Vec3(1.,0.,0) );
-    WheelSuspensionConstraint( btRigidBody* rbA, const osg::Matrix& rbAXform,
-            btRigidBody* rbB, const osg::Matrix& rbBXform,
-            const osg::Vec3& springAxis=osg::Vec3(0.,1.,0),
-            const osg::Vec3& axleAxis=osg::Vec3(1.,0.,0) );
+            const osg::Vec3& axleAxis=osg::Vec3(1.,0.,0),
+            const osg::Vec2& limit=osg::Vec2( -osg::PI_4, osg::PI_4 ),
+            const osg::Vec3& point=osg::Vec3(0.,0.,0) );
     WheelSuspensionConstraint( const WheelSuspensionConstraint& rhs, const osg::CopyOp& copyop=osg::CopyOp::SHALLOW_COPY );
     META_Object(osgbDynamics,WheelSuspensionConstraint);
 
@@ -801,10 +806,10 @@ public:
     /** \brief Specify the spring axis in world space.
 
     The spring axis allows +/- motion along the axis, as well
-    as arbitrary rotation.
+    as rotation (see setLimit()).
 
     The spring and axle axes must be orthogonal. This class resolves
-    any non-orthogonality issues when it creates the Bullet constraing
+    any non-orthogonality issues when it creates the Bullet constraint
     (in createConstraing()).
     */
     void setSpringAxis( const osg::Vec3& springAxis );
@@ -814,6 +819,8 @@ public:
     }
     /** \brief Specify the axle axis in world space.
 
+    Rotation around the axle axis is unrestricted.
+
     The spring and axle axes must be orthogonal. This class resolves
     any non-orthogonality issues when it creates the Bullet constraing
     (in createConstraing()).
@@ -822,6 +829,25 @@ public:
     osg::Vec3 getAxleAxis() const
     {
         return( _axleAxis );
+    }
+    /** \brief Set the \c _springAxis rotation limits.
+
+    In the typical use case of modeling a vehicle wheel, \c limit indicates
+    the maximum extent the wheel can be turned to the right or left. Limit
+    angle extents are in radians around \c _springAxis. Default is the
+    range -pi/4 to pi/4.
+    */
+    void setLimit( const osg::Vec2& limit );
+    osg::Vec2 getLimit() const
+    {
+        return( _limit );
+    }
+    /** \brief Set the center of rotation, which both axes pass through.
+    */
+    void setAnchorPoint( const osg::Vec3& wcPoint );
+    osg::Vec3 getAnchorPoint() const
+    {
+        return( _point );
     }
 
     /** Return true if the spring and axle axes member variables, and base class, are
@@ -838,6 +864,8 @@ protected:
 
     osg::Vec3 _springAxis;
     osg::Vec3 _axleAxis;
+    osg::Vec2 _limit;
+    osg::Vec3 _point;
 };
 
 

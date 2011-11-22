@@ -466,8 +466,11 @@ int runCTest( const std::string& testName )
     {
         osg::Vec3 springAxis( 0., 0., 1. );
         osg::Vec3 axleAxis( 0., 1., 0. );
+        osg::Vec2 limit( -1., 1. );
+        osg::Vec3 anchor( 0., 1., 2. );
+
         osg::ref_ptr< osgbDynamics::WheelSuspensionConstraint > cons = new osgbDynamics::WheelSuspensionConstraint(
-            rbA, aXform, rbB, bXform, springAxis, axleAxis );
+            rbA, rbB, springAxis, axleAxis, limit, anchor );
 
         if( cons->getAsBtHinge2() == NULL )
             ERROR(testName,"won't typecast as btHinge2Constraint.");
