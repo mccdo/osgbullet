@@ -480,7 +480,7 @@ bool HingeConstraint_readLocalData( osg::Object& obj, osgDB::Input& fr )
     }
     else
     {
-        osg::notify( osg::WARN ) << "CardanConstraint_readLocalData: Bad input data at \"Axis\"." << std::endl;
+        osg::notify( osg::WARN ) << "HingeConstraint_readLocalData: Bad input data at \"Axis\"." << std::endl;
         return( false );
     }
 
@@ -561,6 +561,21 @@ bool CardanConstraint_readLocalData( osg::Object& obj, osgDB::Input& fr )
         return( false );
     }
 
+    if( fr.matchSequence( "Anchor point %f %f %f" ) )
+    {
+        osg::Vec3 point;
+        fr[2].getFloat( ( point[0] ) );
+        fr[3].getFloat( ( point[1] ) );
+        fr[4].getFloat( ( point[2] ) );
+        cons.setAnchorPoint( point );
+        fr += 5;
+    }
+    else
+    {
+        osg::notify( osg::WARN ) << "CardanConstraint_readLocalData: Bad input data at \"Anchor point\"." << std::endl;
+        return( false );
+    }
+
     return( true );
 }
 bool CardanConstraint_writeLocalData( const osg::Object& obj, osgDB::Output& fw )
@@ -569,6 +584,7 @@ bool CardanConstraint_writeLocalData( const osg::Object& obj, osgDB::Output& fw 
 
     fw.indent() << "AxisA " << cons.getAxisA() << std::endl;
     fw.indent() << "AxisB " << cons.getAxisB() << std::endl;
+    fw.indent() << "Anchor point " << cons.getAnchorPoint() << std::endl;
 
     return( true );
 }

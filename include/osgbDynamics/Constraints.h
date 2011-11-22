@@ -607,7 +607,12 @@ protected:
 
 
 /** \class CardanConstraint Constraints.h <osgbDynamics/Constraints.h>
-\brief TBD
+\brief Implements a universal or Cardan constraint.
+
+This constraint requires two rigid bodies. The axes and anchor point are in
+world coordinates. \c _axisA is the rotational axis for \c _rbA, and \c
+_axisB is the rotational axis for \c _rbB. The anchor point (\c _point) is the
+world coordinate point common to both axes.
 
 This class uses btUniversalConstraint internally. Access the Bullet constraint
 directly with getAsBtUniversal().
@@ -616,39 +621,49 @@ class OSGBDYNAMICS_EXPORT CardanConstraint : public Constraint
 {
 public:
     CardanConstraint();
-    CardanConstraint( btRigidBody* rbA, btRigidBody* rbB=NULL );
-    CardanConstraint( btRigidBody* rbA, const osg::Matrix& rbAXform,
-            const osg::Vec3& axisA=osg::Vec3(0.,1.,0.),
-            const osg::Vec3& axisB=osg::Vec3(1.,0.,0.) );
+    CardanConstraint( btRigidBody* rbA, btRigidBody* rbB );
     CardanConstraint( btRigidBody* rbA, const osg::Matrix& rbAXform,
             btRigidBody* rbB, const osg::Matrix& rbBXform,
             const osg::Vec3& axisA=osg::Vec3(0.,1.,0.),
-            const osg::Vec3& axisB=osg::Vec3(1.,0.,0.) );
+            const osg::Vec3& axisB=osg::Vec3(1.,0.,0.),
+            const osg::Vec3& point=osg::Vec3(0.,0.,0.) );
     CardanConstraint( const CardanConstraint& rhs, const osg::CopyOp& copyop=osg::CopyOp::SHALLOW_COPY );
     META_Object(osgbDynamics,CardanConstraint);
 
     virtual btUniversalConstraint* getAsBtUniversal() const;
 
-    /**
+    /** \brief Specify rigid body A's rotational axis in world coords.
+
+    Default is ( 0., 1., 0. ).
     */
     void setAxisA( const osg::Vec3& axisA );
     osg::Vec3 getAxisA() const
     {
         return( _axisA );
     }
+    /** \brief Specify rigid body B's rotational axis in world coords.
 
-    /**
+    Default is ( 1., 0., 0. ).
     */
     void setAxisB( const osg::Vec3& axisB );
     osg::Vec3 getAxisB() const
     {
         return( _axisB );
     }
+    /** \brief Specify the world coordinate anchor point.
 
-    /** Return true if the axes member variables, and base class, are
+    Default is ( 0., 0., 0. ).
+    */
+    void setAnchorPoint( const osg::Vec3& wcPoint );
+    osg::Vec3 getAnchorPoint() const
+    {
+        return( _point );
+    }
+
+    /** Return true if the axes and point member variables, and base class, are
     equal to the right-hand-side axes and base class. */
     virtual bool operator==( const CardanConstraint& rhs ) const;
-    /** Return true if the axes member variables, or base class, differ
+    /** Return true if the axes or point member variables, or base class, differ
     from the right-hand-side axes or base class. */
     virtual bool operator!=( const CardanConstraint& rhs ) const;
 
@@ -659,6 +674,7 @@ protected:
 
     osg::Vec3 _axisA;
     osg::Vec3 _axisB;
+    osg::Vec3 _point;
 };
 
 

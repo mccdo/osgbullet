@@ -815,9 +815,9 @@ void BoxConstraint::internalPlanarBoxFrameComputation(
 
 HingeConstraint::HingeConstraint()
   : Constraint(),
-    _axis( osg::Vec3( 0., 0., 1. ) ),
-    _pivotPoint( osg::Vec3( 0., 0., 0. ) ),
-    _limit( osg::Vec2( -osg::PI, osg::PI ) )
+    _axis( 0., 0., 1. ),
+    _pivotPoint( 0., 0., 0. ),
+    _limit( osg::PI, osg::PI )
 {
 }
 HingeConstraint::HingeConstraint( btRigidBody* rbA, btRigidBody* rbB,
@@ -983,32 +983,33 @@ void HingeConstraint::createConstraint()
 
 
 CardanConstraint::CardanConstraint()
-  : Constraint()
+  : Constraint(),
+    _axisA( 0., 1., 0. ),
+    _axisB( 1., 0., 0. ),
+    _point( 0., 0., 0. )
 {
 }
 CardanConstraint::CardanConstraint( btRigidBody* rbA, btRigidBody* rbB )
-  : Constraint( rbA, rbB )
-{
-}
-CardanConstraint::CardanConstraint( btRigidBody* rbA, const osg::Matrix& rbAXform,
-        const osg::Vec3& axisA, const osg::Vec3& axisB )
-  : Constraint( rbA, rbAXform ),
-    _axisA( axisA ),
-    _axisB( axisB )
+  : Constraint( rbA, rbB ),
+    _axisA( 0., 1., 0. ),
+    _axisB( 1., 0., 0. ),
+    _point( 0., 0., 0. )
 {
 }
 CardanConstraint::CardanConstraint( btRigidBody* rbA, const osg::Matrix& rbAXform,
         btRigidBody* rbB, const osg::Matrix& rbBXform,
-        const osg::Vec3& axisA, const osg::Vec3& axisB )
+        const osg::Vec3& axisA, const osg::Vec3& axisB, const osg::Vec3& point )
   : Constraint( rbA, rbAXform, rbB, rbBXform ),
     _axisA( axisA ),
-    _axisB( axisB )
+    _axisB( axisB ),
+    _point( point )
 {
 }
 CardanConstraint::CardanConstraint( const CardanConstraint& rhs, const osg::CopyOp& copyop )
   : Constraint( rhs, copyop ),
     _axisA( rhs._axisA ),
-    _axisB( rhs._axisB )
+    _axisB( rhs._axisB ),
+    _point( rhs._point )
 {
 }
 CardanConstraint::~CardanConstraint()
@@ -1030,6 +1031,11 @@ void CardanConstraint::setAxisB( const osg::Vec3& axisB )
     _axisB = axisB;
     setDirty( true );
 }
+void CardanConstraint::setAnchorPoint( const osg::Vec3& wcPoint )
+{
+    _point = wcPoint;
+    setDirty( true );
+}
 
 bool CardanConstraint::operator==( const CardanConstraint& rhs ) const
 {
@@ -1040,13 +1046,49 @@ bool CardanConstraint::operator!=( const CardanConstraint& rhs ) const
     return(
         ( _axisA != rhs._axisA ) ||
         ( _axisB != rhs._axisB ) ||
+        ( _point != rhs._point ) ||
         ( Constraint::operator!=( static_cast< const Constraint& >( rhs ) ) )
     );
 }
 
 void CardanConstraint::createConstraint()
 {
-    // TBD make sure axisA and axisB are at 90 degree angles.
+    if( ( _rbA == NULL ) || ( _rbB == NULL ) )
+    {
+        osg::notify( osg::INFO ) << "createConstraint: _rbA == NULL or _rbB == NULL." << std::endl;
+        return;
+    }
+
+    if( _constraint )
+        delete _constraint;
+
+
+    // Transform the world coordinate _axisA into A's local coordinates.
+    osg::Matrix aOrient = _rbAXform;
+    aOrient.setTrans( 0., 0., 0. );
+    btVector3 localAxisA = osgbCollision::asBtVector3(
+        _axisA * osg::Matrix::inverse( aOrient ) );
+    localAxisA.normalize();
+
+
+    // Force _axisB to be orthogonal to _axisA.
+    osg::Vec3 c = _axisA ^ _axisB;
+    osg::Vec3 axisB( c ^ _axisA );
+
+    // Transform the world coordinate _axisB into B's local coordinates.
+    osg::Matrix bOrient = _rbBXform;
+    bOrient.setTrans( 0., 0., 0. );
+    btVector3 localAxisB = osgbCollision::asBtVector3(
+        axisB * osg::Matrix::inverse( bOrient ) );
+    localAxisB.normalize();
+
+
+    btUniversalConstraint* cons = new btUniversalConstraint( *_rbA, *_rbB,
+        osgbCollision::asBtVector3( _point ), localAxisA, localAxisB );
+
+    _constraint = cons;
+
+    setDirty( false );
 }
     
 
@@ -1342,10 +1384,10 @@ void RagdollConstraint::createConstraint()
 
 WheelSuspensionConstraint::WheelSuspensionConstraint()
   : Constraint(),
-    _springAxis( osg::Vec3( 0., 0., 1. ) ),
-    _axleAxis( osg::Vec3( 0., 1., 0. ) ),
-    _limit( osg::Vec2( -osg::PI_4, osg::PI_4 ) ),
-    _point( osg::Vec3( 0., 0., 0. ) )
+    _springAxis( 0., 0., 1. ),
+    _axleAxis( 0., 1., 0. ),
+    _limit( -osg::PI_4, osg::PI_4 ),
+    _point( 0., 0., 0. )
 {
 }
 WheelSuspensionConstraint::WheelSuspensionConstraint( btRigidBody* rbA, btRigidBody* rbB,

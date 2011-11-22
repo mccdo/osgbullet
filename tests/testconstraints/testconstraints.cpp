@@ -170,7 +170,37 @@ int main( int argc, char** argv )
     }
     else if( arguments.find( "Cardan" ) > 0 )
     {
-        osg::notify( osg::ALWAYS ) << "Test not yet implemented." << std::endl;
+        osg::Matrix cXform = osg::Matrix::rotate( .5, 0., 1., 0. ) *
+            osg::Matrix::translate( 0., 0., 8. );
+        crC->_parentTransform = cXform;
+        btRigidBody* rbC = osgbDynamics::createRigidBody( crC.get() );
+        amtC->setUserData( new osgbCollision::RefRigidBody( rbC ) );
+        bulletWorld->addRigidBody( rbC );
+
+        osg::Matrix eXform = osg::Matrix::translate( -2.2, -2., 3. );
+        crE->_parentTransform = eXform;
+        btRigidBody* rbE = osgbDynamics::createRigidBody( crE.get() );
+        amtE->setUserData( new osgbCollision::RefRigidBody( rbE ) );
+        bulletWorld->addRigidBody( rbE );
+
+        {
+            // Use Cardan to constraint C and E together.
+            osg::Vec3 axisA( 0., 1., 0. );
+            osg::Vec3 axisB( -1., 0., 0. );
+            osg::Vec3 anchor( -.2, 0., 7. );
+
+            osg::ref_ptr< osgbDynamics::CardanConstraint > cons1 = new osgbDynamics::CardanConstraint(
+                rbC, cXform, rbE, eXform, axisA, axisB, anchor );
+            bulletWorld->addConstraint( cons1->getConstraint() );
+
+            // Further constraint C in space to that E hangs off it,
+            // and allows user to rotate C. Torque should transfer to E.
+            osg::Vec3 eAxis = osg::Vec3( 0., 0., 1. ) * osg::Matrix::rotate( .5, 0., 1., 0. );
+            osg::Vec2 limits( 0., 0. );
+            osg::ref_ptr< osgbDynamics::TwistSliderConstraint > cons2 = new osgbDynamics::TwistSliderConstraint(
+                rbC, cXform, eAxis, limits );
+            bulletWorld->addConstraint( cons2->getConstraint() );
+        }
     }
     else if( arguments.find( "Ragdoll" ) > 0 )
     {
