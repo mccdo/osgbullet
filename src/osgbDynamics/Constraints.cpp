@@ -211,7 +211,8 @@ void SliderConstraint::createConstraint()
     // Transform the world coordinate axis into A's local coordinates.
     osg::Matrix aOrient = _rbAXform;
     aOrient.setTrans( 0., 0., 0. );
-    const osg::Vec3 axisInA = _axis * osg::Matrix::inverse( aOrient );
+    osg::Vec3 axisInA = _axis * osg::Matrix::inverse( aOrient );
+    axisInA.normalize();
 
     // Compute a matrix to align the slider constraint axis with A's slide axis.
     const osg::Vec3 bulletSliderAxis( 1., 0., 0. );
@@ -1173,11 +1174,13 @@ void BallAndSocketConstraint::createConstraint()
 
 
 RagdollConstraint::RagdollConstraint()
-  : Constraint()
+  : Constraint(),
+    _angle( osg::PI_2 )
 {
 }
 RagdollConstraint::RagdollConstraint( btRigidBody* rbA, btRigidBody* rbB )
-  : Constraint( rbA, rbB )
+  : Constraint( rbA, rbB ),
+    _angle( osg::PI_2 )
 {
 }
 RagdollConstraint::RagdollConstraint( btRigidBody* rbA, const osg::Matrix& rbAXform,
@@ -1226,7 +1229,16 @@ void RagdollConstraint::setAxis( const osg::Vec3& wcAxis )
 void RagdollConstraint::setAngle( const double angleRadians )
 {
     _angle = angleRadians;
-    setDirty( true );
+
+    if( !getDirty() && ( _constraint != NULL ) )
+    {
+        // Dynamically modify the existing constraint.
+        btConeTwistConstraint* cons = getAsBtConeTwist();
+        cons->setLimit( 4, _angle );
+        cons->setLimit( 5, _angle );
+    }
+    else
+        setDirty();
 }
 
 bool RagdollConstraint::operator==( const RagdollConstraint& rhs ) const
@@ -1245,6 +1257,84 @@ bool RagdollConstraint::operator!=( const RagdollConstraint& rhs ) const
 
 void RagdollConstraint::createConstraint()
 {
+    if( ( _rbA == NULL ) || ( _rbB == NULL ) )
+    {
+        osg::notify( osg::INFO ) << "createConstraint: _rbA == NULL or _rbB == NULL." << std::endl;
+        return;
+    }
+
+    if( _constraint )
+        delete _constraint;
+
+
+    // Transform the world coordinate axis into A's local coordinates.
+    osg::Matrix aOrient = _rbAXform;
+    aOrient.setTrans( 0., 0., 0. );
+    osg::Vec3 axisInA = _axis * osg::Matrix::inverse( aOrient );
+    axisInA.normalize();
+
+    // Compute a matrix to align the Bullet cone-twise x axis with A's Ragdoll axis.
+    const osg::Vec3 bulletRagdollAxis( 1., 0., 0. );
+    const osg::Matrix axisRotate( osg::Matrix::rotate( bulletRagdollAxis, axisInA ) );
+
+    // Transform pivot point into A's space.
+    osgbDynamics::MotionState* motion = dynamic_cast< osgbDynamics::MotionState* >( _rbA->getMotionState() );
+    if( motion == NULL )
+    {
+        osg::notify( osg::WARN ) << "RagdollConstraint: Invalid MotionState." << std::endl;
+        return;
+    }
+    const osg::Matrix invAXform = osg::Matrix::inverse( _rbAXform );
+    const osg::Vec3 pointInA = _point * invAXform + motion->getCenterOfMass();
+
+    // Final A reference frame:
+    btTransform rbAFrame = osgbCollision::asBtTransform(
+        axisRotate * osg::Matrix::translate( pointInA ) );
+
+
+    btTransform rbBFrame;
+    if( _rbB != NULL )
+    {
+        // Transform the world coordinate axis into B's local coordinates.
+        osg::Matrix bOrient = _rbBXform;
+        bOrient.setTrans( 0., 0., 0. );
+        osg::Vec3 axisInB = _axis * osg::Matrix::inverse( bOrient );
+        axisInB.normalize();
+
+        // Compute a matrix to align the Bullet cone-twise x axis with B's Ragdoll axis.
+        const osg::Matrix axisRotate( osg::Matrix::rotate( bulletRagdollAxis, axisInB ) );
+
+        // Transform pivot point into B's space.
+        osgbDynamics::MotionState* motion = dynamic_cast< osgbDynamics::MotionState* >( _rbB->getMotionState() );
+        if( motion == NULL )
+        {
+            osg::notify( osg::WARN ) << "RagdollConstraint: Invalid MotionState." << std::endl;
+            return;
+        }
+        const osg::Matrix invBXform = osg::Matrix::inverse( _rbBXform );
+        const osg::Vec3 pointInB = _point * invBXform - motion->getCenterOfMass();
+
+        // Final B reference frame:
+        rbBFrame = osgbCollision::asBtTransform(
+            axisRotate * osg::Matrix::translate( pointInB ) );
+    }
+
+
+    btConeTwistConstraint* cons;
+    if( _rbB != NULL )
+        cons = new btConeTwistConstraint( *_rbA, *_rbB, rbAFrame, rbBFrame );
+    else
+        cons = new btConeTwistConstraint( *_rbA, rbAFrame );
+
+    // The btConeTwistConstraint cone is along axis x (index 3).
+    // It allows an assymetrical cone spread in y and z (indices 4 and 5).
+    // We set both y and z to the same angle for a symmetrical spread.
+    cons->setLimit( 4, _angle );
+    cons->setLimit( 5, _angle );
+
+    _constraint = cons;
+
+    setDirty( false );
 }
 
 

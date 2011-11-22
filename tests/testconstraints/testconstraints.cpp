@@ -174,7 +174,27 @@ int main( int argc, char** argv )
     }
     else if( arguments.find( "Ragdoll" ) > 0 )
     {
-        osg::notify( osg::ALWAYS ) << "Test not yet implemented." << std::endl;
+        osg::Matrix cXform = osg::Matrix::translate( 6.75, 6.75, 0. );
+        crC->_parentTransform = cXform;
+        btRigidBody* rbC = osgbDynamics::createRigidBody( crC.get() );
+        amtC->setUserData( new osgbCollision::RefRigidBody( rbC ) );
+        bulletWorld->addRigidBody( rbC );
+
+        osg::Matrix eXform = osg::Matrix::translate( 2., 2.75, -2. );
+        crE->_parentTransform = eXform;
+        btRigidBody* rbE = osgbDynamics::createRigidBody( crE.get() );
+        amtE->setUserData( new osgbCollision::RefRigidBody( rbE ) );
+        bulletWorld->addRigidBody( rbE );
+
+        {
+            osg::Vec3 point( 5.5, 5.5, 0. );
+            osg::Vec3 axis( 1., 1., 0. );
+            double angle( .75 );
+
+            osg::ref_ptr< osgbDynamics::RagdollConstraint > cons1 = new osgbDynamics::RagdollConstraint(
+                rbC, cXform, rbE, eXform, point, axis, angle );
+            bulletWorld->addConstraint( cons1->getConstraint() );
+        }
     }
     else if( arguments.find( "WheelSuspension" ) > 0 )
     {
@@ -486,7 +506,7 @@ int main( int argc, char** argv )
                 rbA, aXform, rbB, bXform, axis, limits );
             bulletWorld->addConstraint( cons0->getConstraint() );
 
-            axis.set( 1., 1., 0. );
+            axis.set( -1., -1., 0. );
             limits.set( -3., 3. );
             osg::ref_ptr< osgbDynamics::SliderConstraint > cons1 = new osgbDynamics::SliderConstraint(
                 rbC, cXform, NULL, osg::Matrix::identity(), axis, limits );
