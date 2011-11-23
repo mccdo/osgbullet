@@ -366,6 +366,30 @@ void InternalSpringData::apply( btGeneric6DofSpringConstraint* cons ) const
     }
 }
 
+bool InternalSpringData::operator==( const InternalSpringData& rhs ) const
+{
+    return( !( operator!=( rhs ) ) );
+}
+bool InternalSpringData::operator!=( const InternalSpringData& rhs ) const
+{
+    if( ( _linearLowerLimits != rhs._linearLowerLimits ) ||
+        ( _linearUpperLimits != rhs._linearUpperLimits ) ||
+        ( _angularLowerLimits != rhs._angularLowerLimits ) ||
+        ( _angularUpperLimits != rhs._angularUpperLimits ) )
+        return( true );
+
+    int idx;
+    for( idx=0; idx<6; idx++ )
+    {
+        if( ( _enable[ idx ] != rhs._enable[ idx ] ) ||
+            ( _stiffness[ idx ] != rhs._stiffness[ idx ] ) ||
+            ( _damping[ idx ] != rhs._damping[ idx ] ) )
+            return( true );
+    }
+
+    return( false );
+}
+
 
 
 
@@ -450,6 +474,19 @@ void LinearSpringConstraint::setDamping( float damping )
 {
     _data->_damping[ 0 ] = btScalar( damping );
     setSpringData( _data.get() );
+}
+
+bool LinearSpringConstraint::operator==( const LinearSpringConstraint& rhs ) const
+{
+    return( !( operator!=( rhs ) ) );
+}
+bool LinearSpringConstraint::operator!=( const LinearSpringConstraint& rhs ) const
+{
+    return(
+        ( _axis != rhs._axis ) ||
+        ( *_data != *( rhs._data ) ) ||
+        ( Constraint::operator!=( static_cast< const Constraint& >( rhs ) ) )
+    );
 }
 
 void LinearSpringConstraint::createConstraint()
@@ -582,6 +619,19 @@ void AngleSpringConstraint::setDamping( float damping )
     setSpringData( _data.get() );
 }
 
+bool AngleSpringConstraint::operator==( const AngleSpringConstraint& rhs ) const
+{
+    return( !( operator!=( rhs ) ) );
+}
+bool AngleSpringConstraint::operator!=( const AngleSpringConstraint& rhs ) const
+{
+    return(
+        ( _axis != rhs._axis ) ||
+        ( *_data != *( rhs._data ) ) ||
+        ( Constraint::operator!=( static_cast< const Constraint& >( rhs ) ) )
+    );
+}
+
 void AngleSpringConstraint::createConstraint()
 {
     if( _constraint != NULL )
@@ -702,6 +752,19 @@ void LinearAngleSpringConstraint::setAngleDamping( float damping )
 {
     _data->_damping[ 3 ] = btScalar( damping );
     setSpringData( _data.get() );
+}
+
+bool LinearAngleSpringConstraint::operator==( const LinearAngleSpringConstraint& rhs ) const
+{
+    return( !( operator!=( rhs ) ) );
+}
+bool LinearAngleSpringConstraint::operator!=( const LinearAngleSpringConstraint& rhs ) const
+{
+    return(
+        ( _axis != rhs._axis ) ||
+        ( *_data != *( rhs._data ) ) ||
+        ( Constraint::operator!=( static_cast< const Constraint& >( rhs ) ) )
+    );
 }
 
 void LinearAngleSpringConstraint::createConstraint()

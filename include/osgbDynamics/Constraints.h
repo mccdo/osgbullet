@@ -294,6 +294,13 @@ struct OSGBDYNAMICS_EXPORT InternalSpringData : public osg::Object
     */
     void apply( btGeneric6DofSpringConstraint* cons ) const;
 
+    /** Return true if all member variables are equal to their equivalent
+    right-hand-side member variables. */
+    bool operator==( const InternalSpringData& rhs ) const;
+    /** Return true if any member variable differs
+    from its equivalent right-hand-side member variable. */
+    bool operator!=( const InternalSpringData& rhs ) const;
+
     osg::Vec3 _linearLowerLimits;
     osg::Vec3 _linearUpperLimits;
     osg::Vec3 _angularLowerLimits;
@@ -353,6 +360,13 @@ public:
     {
         return( (float)( _data->_damping[ 0 ] ) );
     }
+
+    /** Return true if the axis and data member variables, and base class, are
+    equal to the right-hand-side axis, data, and base class. */
+    virtual bool operator==( const LinearSpringConstraint& rhs ) const;
+    /** Return true if the axis and data member variables, or base class, differ
+    from the right-hand-side axis, data, or base class. */
+    virtual bool operator!=( const LinearSpringConstraint& rhs ) const;
 
 protected:
     virtual ~LinearSpringConstraint();
@@ -422,6 +436,13 @@ public:
     {
         return( (float)( _data->_damping[ 3 ] ) );
     }
+
+    /** Return true if the axis and data member variables, and base class, are
+    equal to the right-hand-side axis, data, and base class. */
+    virtual bool operator==( const AngleSpringConstraint& rhs ) const;
+    /** Return true if the axis and data member variables, or base class, differ
+    from the right-hand-side axis, data, or base class. */
+    virtual bool operator!=( const AngleSpringConstraint& rhs ) const;
 
 protected:
     virtual ~AngleSpringConstraint();
@@ -499,6 +520,13 @@ public:
     {
         return( (float)( _data->_damping[ 3 ] ) );
     }
+
+    /** Return true if the axis and data member variables, and base class, are
+    equal to the right-hand-side axis, data, and base class. */
+    virtual bool operator==( const LinearAngleSpringConstraint& rhs ) const;
+    /** Return true if the axis and data member variables, or base class, differ
+    from the right-hand-side axis, data, or base class. */
+    virtual bool operator!=( const LinearAngleSpringConstraint& rhs ) const;
 
 protected:
     virtual ~LinearAngleSpringConstraint();

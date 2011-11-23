@@ -529,12 +529,36 @@ bool AngleSpringConstraint_writeLocalData( const osg::Object& obj, osgDB::Output
 
 bool LinearAngleSpringConstraint_readLocalData( osg::Object& obj, osgDB::Input& fr )
 {
-    // TBD
+    osgbDynamics::LinearAngleSpringConstraint& cons = static_cast< osgbDynamics::LinearAngleSpringConstraint& >( obj );
+
+    if( fr.matchSequence( "Axis %f %f %f" ) )
+    {
+        osg::Vec3 axis;
+        fr[1].getFloat( ( axis[0] ) );
+        fr[2].getFloat( ( axis[1] ) );
+        fr[3].getFloat( ( axis[2] ) );
+        cons.setAxis( axis );
+        fr += 4;
+    }
+    else
+    {
+        osg::notify( osg::WARN ) << "LinearAngleSpringConstraint_readLocalData: Bad input data at \"Axis\"." << std::endl;
+        return( false );
+    }
+
+    osg::ref_ptr< osgbDynamics::InternalSpringData > isd =
+        static_cast< osgbDynamics::InternalSpringData* >( fr.readObject() );
+    cons.setSpringData( isd.get() );
+
     return( true );
 }
 bool LinearAngleSpringConstraint_writeLocalData( const osg::Object& obj, osgDB::Output& fw )
 {
-    // TBD
+    const osgbDynamics::LinearAngleSpringConstraint& cons = static_cast< const osgbDynamics::LinearAngleSpringConstraint& >( obj );
+
+    fw.indent() << "Axis " << cons.getAxis() << std::endl;
+    fw.writeObject( *( cons.getSpringData() ) );
+
     return( true );
 }
 

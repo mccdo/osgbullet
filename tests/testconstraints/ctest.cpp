@@ -278,6 +278,10 @@ int runCTest( const std::string& testName )
     {
         osg::ref_ptr< osgbDynamics::LinearSpringConstraint > cons = new osgbDynamics::LinearSpringConstraint(
             rbA, aXform, rbB, bXform );
+        cons->setAxis( osg::Vec3( 2., 1., 0. ) );
+        cons->setLimit( osg::Vec2( -2., 3. ) );
+        cons->setStiffness( 40.f );
+        cons->setDamping( .5f );
 
         if( cons->getAsBtGeneric6DofSpring() == NULL )
             ERROR(testName,"won't typecast as btGeneric6DofSpringConstraint.");
@@ -308,6 +312,10 @@ int runCTest( const std::string& testName )
     {
         osg::ref_ptr< osgbDynamics::AngleSpringConstraint > cons = new osgbDynamics::AngleSpringConstraint(
             rbA, aXform, rbB, bXform );
+        cons->setAxis( osg::Vec3( 2., 1., 0. ) );
+        cons->setLimit( osg::Vec2( -2., 1. ) );
+        cons->setStiffness( 50.f );
+        cons->setDamping( 0.f );
 
         if( cons->getAsBtGeneric6DofSpring() == NULL )
             ERROR(testName,"won't typecast as btGeneric6DofSpringConstraint.");
@@ -338,6 +346,13 @@ int runCTest( const std::string& testName )
     {
         osg::ref_ptr< osgbDynamics::LinearAngleSpringConstraint > cons = new osgbDynamics::LinearAngleSpringConstraint(
             rbA, aXform, rbB, bXform );
+        cons->setAxis( osg::Vec3( 2., 1., 0. ) );
+        cons->setLinearLimit( osg::Vec2( -2., 2. ) );
+        cons->setAngleLimit( osg::Vec2( -3., 3. ) );
+        cons->setLinearStiffness( 41.f );
+        cons->setLinearDamping( 1.f );
+        cons->setAngleStiffness( 42.f );
+        cons->setAngleDamping( 2.f );
 
         if( cons->getAsBtGeneric6DofSpring() == NULL )
             ERROR(testName,"won't typecast as btGeneric6DofSpringConstraint.");
