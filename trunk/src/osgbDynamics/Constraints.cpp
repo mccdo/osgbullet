@@ -204,8 +204,11 @@ void SliderConstraint::createConstraint()
         return;
     }
 
-    if( _constraint )
+    if( _constraint != NULL )
+    {
         delete _constraint;
+        _constraint = NULL;
+    }
 
 
     // Transform the world coordinate axis into A's local coordinates.
@@ -324,25 +327,85 @@ void TwistSliderConstraint::createConstraint()
 
 
 
-LinearSpringConstraint::LinearSpringConstraint()
-  : Constraint()
+InternalSpringData::InternalSpringData()
+  : _linearLowerLimits( 0., 0., 0. ),
+    _linearUpperLimits( 0., 0., 0. ),
+    _angularLowerLimits( 0., 0., 0. ),
+    _angularUpperLimits( 0., 0., 0. )
 {
+    for( int idx=0; idx<6; idx++ )
+    {
+        _enable[ idx ] = false;
+        _stiffness[ idx ] = _damping[ idx ] = 0.;
+    }
+}
+InternalSpringData::InternalSpringData( const InternalSpringData& rhs, const osg::CopyOp& copyop )
+  : _linearLowerLimits( rhs._linearLowerLimits ),
+    _linearUpperLimits( rhs._linearUpperLimits ),
+    _angularLowerLimits( rhs._angularLowerLimits ),
+    _angularUpperLimits( rhs._angularUpperLimits )
+{
+    memcpy( _enable, rhs._enable, sizeof( _enable ) );
+    memcpy( _stiffness, rhs._stiffness, sizeof( _stiffness ) );
+    memcpy( _damping, rhs._damping, sizeof( _damping ) );
+}
+
+void InternalSpringData::apply( btGeneric6DofSpringConstraint* cons ) const
+{
+    cons->setLinearLowerLimit( osgbCollision::asBtVector3( _linearLowerLimits ) );
+    cons->setLinearUpperLimit( osgbCollision::asBtVector3( _linearUpperLimits ) );
+    cons->setAngularLowerLimit( osgbCollision::asBtVector3( _angularLowerLimits ) );
+    cons->setAngularUpperLimit( osgbCollision::asBtVector3( _angularUpperLimits ) );
+
+    int idx;
+    for( idx=0; idx<6; idx++ )
+    {
+        cons->enableSpring( idx, _enable[ idx ] );
+        cons->setStiffness( idx, _stiffness[ idx ] );
+        cons->setDamping( idx, _damping[ idx ] );
+    }
+}
+
+
+
+
+LinearSpringConstraint::LinearSpringConstraint()
+  : Constraint(),
+    _data( new InternalSpringData )
+{
+    _data->_enable[ 0 ] = true;
+    _data->_linearLowerLimits[ 0 ] = -1.;
+    _data->_linearUpperLimits[ 0 ] = 1.;
+    _data->_stiffness[ 0 ] = 10.f;
+    _data->_damping[ 0 ] = .1f;
 }
 LinearSpringConstraint::LinearSpringConstraint( btRigidBody* rbA, btRigidBody* rbB )
-  : Constraint( rbA, rbB )
+  : Constraint( rbA, rbB ),
+    _axis( 1., 0., 0. ),
+    _data( new InternalSpringData )
 {
-}
-LinearSpringConstraint::LinearSpringConstraint( btRigidBody* rbA, const osg::Matrix& rbAXform )
-  : Constraint( rbA, rbAXform )
-{
+    _data->_enable[ 0 ] = true;
+    _data->_linearLowerLimits[ 0 ] = -1.;
+    _data->_linearUpperLimits[ 0 ] = 1.;
+    _data->_stiffness[ 0 ] = 10.f;
+    _data->_damping[ 0 ] = .1f;
 }
 LinearSpringConstraint::LinearSpringConstraint( btRigidBody* rbA, const osg::Matrix& rbAXform,
         btRigidBody* rbB, const osg::Matrix& rbBXform )
-  : Constraint( rbA, rbAXform, rbB, rbBXform )
+  : Constraint( rbA, rbAXform, rbB, rbBXform ),
+    _axis( 1., 0., 0. ),
+    _data( new InternalSpringData )
 {
+    _data->_enable[ 0 ] = true;
+    _data->_linearLowerLimits[ 0 ] = -1.;
+    _data->_linearUpperLimits[ 0 ] = 1.;
+    _data->_stiffness[ 0 ] = 10.f;
+    _data->_damping[ 0 ] = .1f;
 }
 LinearSpringConstraint::LinearSpringConstraint( const LinearSpringConstraint& rhs, const osg::CopyOp& copyop )
-  : Constraint( rhs, copyop )
+  : Constraint( rhs, copyop ),
+    _axis( rhs._axis ),
+    _data( rhs._data )
 {
 }
 LinearSpringConstraint::~LinearSpringConstraint()
@@ -354,32 +417,125 @@ btGeneric6DofSpringConstraint* LinearSpringConstraint::getAsBtGeneric6DofSpring(
     return( static_cast< btGeneric6DofSpringConstraint* >( getConstraint() ) );
 }
 
+void LinearSpringConstraint::setSpringData( InternalSpringData* data )
+{
+    _data = data;
+
+    if( !getDirty() && ( _constraint != NULL ) )
+    {
+        // Dynamically modify the existing constraint.
+        btGeneric6DofSpringConstraint* cons = getAsBtGeneric6DofSpring();
+        _data->apply( cons );
+    }
+    else
+        setDirty();
+}
+void LinearSpringConstraint::setAxis( const osg::Vec3& axis )
+{
+    _axis = axis;
+    setDirty();
+}
+void LinearSpringConstraint::setLimit( const osg::Vec2& limit )
+{
+    _data->_linearLowerLimits[ 0 ] = limit[ 0 ];
+    _data->_linearUpperLimits[ 0 ] = limit[ 1 ];
+    setSpringData( _data.get() );
+}
+void LinearSpringConstraint::setStiffness( float stiffness )
+{
+    _data->_stiffness[ 0 ] = btScalar( stiffness );
+    setSpringData( _data.get() );
+}
+void LinearSpringConstraint::setDamping( float damping )
+{
+    _data->_damping[ 0 ] = btScalar( damping );
+    setSpringData( _data.get() );
+}
+
 void LinearSpringConstraint::createConstraint()
 {
+    if( _constraint != NULL )
+    {
+        delete _constraint;
+        _constraint = NULL;
+    }
+
+    _constraint = internalCreateSpringConstraint( this, _axis, _data.get() );
+
+    setDirty( _constraint == NULL );
+}
+
+btGeneric6DofSpringConstraint* LinearSpringConstraint::internalCreateSpringConstraint(
+    Constraint* cons, const osg::Vec3& axis,
+    const InternalSpringData* isd )
+{
+    btRigidBody* rbA, * rbB;
+    cons->getRigidBodies( rbA, rbB );
+
+    if( ( rbA == NULL ) || ( rbB == NULL ) )
+    {
+        osg::notify( osg::INFO ) << "createConstraint: _rbA == NULL or _rbB == NULL." << std::endl;
+        return( NULL );
+    }
+
+
+    const osg::Matrix aXform = cons->getAXform();
+    const osg::Matrix bXform = cons->getBXform();
+
+    // TBD correct computation of reference frames.
+    btTransform rbAFrame, rbBFrame;
+    rbAFrame.setIdentity();
+    rbBFrame = osgbCollision::asBtTransform( osg::Matrix::inverse( bXform ) );
+
+
+    btGeneric6DofSpringConstraint* springCons = new btGeneric6DofSpringConstraint( *rbA, *rbB, rbAFrame, rbBFrame, false );
+    isd->apply( springCons );
+    springCons->setEquilibriumPoint();
+
+    return( springCons );
 }
 
 
 
 
 AngleSpringConstraint::AngleSpringConstraint()
-  : Constraint()
+  : Constraint(),
+    _axis( 1., 0., 0. ),
+    _data( new InternalSpringData )
 {
+    _data->_enable[ 3 ] = true;
+    _data->_angularLowerLimits[ 0 ] = -osg::PI_2;
+    _data->_angularUpperLimits[ 0 ] = osg::PI_2;
+    _data->_stiffness[ 3 ] = 10.f;
+    _data->_damping[ 3 ] = .1f;
 }
 AngleSpringConstraint::AngleSpringConstraint( btRigidBody* rbA, btRigidBody* rbB )
-  : Constraint( rbA, rbB )
+  : Constraint( rbA, rbB ),
+    _axis( 1., 0., 0. ),
+    _data( new InternalSpringData )
 {
-}
-AngleSpringConstraint::AngleSpringConstraint( btRigidBody* rbA, const osg::Matrix& rbAXform )
-  : Constraint( rbA, rbAXform )
-{
+    _data->_enable[ 3 ] = true;
+    _data->_angularLowerLimits[ 0 ] = -osg::PI_2;
+    _data->_angularUpperLimits[ 0 ] = osg::PI_2;
+    _data->_stiffness[ 3 ] = 10.f;
+    _data->_damping[ 3 ] = .1f;
 }
 AngleSpringConstraint::AngleSpringConstraint( btRigidBody* rbA, const osg::Matrix& rbAXform,
         btRigidBody* rbB, const osg::Matrix& rbBXform )
-  : Constraint( rbA, rbAXform, rbB, rbBXform )
+  : Constraint( rbA, rbAXform, rbB, rbBXform ),
+    _axis( 1., 0., 0. ),
+    _data( new InternalSpringData )
 {
+    _data->_enable[ 3 ] = true;
+    _data->_angularLowerLimits[ 0 ] = -osg::PI_2;
+    _data->_angularUpperLimits[ 0 ] = osg::PI_2;
+    _data->_stiffness[ 3 ] = 10.f;
+    _data->_damping[ 3 ] = .1f;
 }
 AngleSpringConstraint::AngleSpringConstraint( const AngleSpringConstraint& rhs, const osg::CopyOp& copyop )
-  : Constraint( rhs, copyop )
+  : Constraint( rhs, copyop ),
+    _axis( rhs._axis ),
+    _data( rhs._data )
 {
 }
 AngleSpringConstraint::~AngleSpringConstraint()
@@ -391,32 +547,101 @@ btGeneric6DofSpringConstraint* AngleSpringConstraint::getAsBtGeneric6DofSpring()
     return( static_cast< btGeneric6DofSpringConstraint* >( getConstraint() ) );
 }
 
+void AngleSpringConstraint::setSpringData( InternalSpringData* data )
+{
+    _data = data;
+
+    if( !getDirty() && ( _constraint != NULL ) )
+    {
+        // Dynamically modify the existing constraint.
+        btGeneric6DofSpringConstraint* cons = getAsBtGeneric6DofSpring();
+        _data->apply( cons );
+    }
+    else
+        setDirty();
+}
+void AngleSpringConstraint::setAxis( const osg::Vec3& axis )
+{
+    _axis = axis;
+    setDirty();
+}
+void AngleSpringConstraint::setLimit( const osg::Vec2& limit )
+{
+    _data->_angularLowerLimits[ 0 ] = limit[ 0 ];
+    _data->_angularUpperLimits[ 0 ] = limit[ 1 ];
+    setSpringData( _data.get() );
+}
+void AngleSpringConstraint::setStiffness( float stiffness )
+{
+    _data->_stiffness[ 3 ] = btScalar( stiffness );
+    setSpringData( _data.get() );
+}
+void AngleSpringConstraint::setDamping( float damping )
+{
+    _data->_damping[ 3 ] = btScalar( damping );
+    setSpringData( _data.get() );
+}
+
 void AngleSpringConstraint::createConstraint()
 {
+    if( _constraint != NULL )
+    {
+        delete _constraint;
+        _constraint = NULL;
+    }
+
+    _constraint = LinearSpringConstraint::internalCreateSpringConstraint( this, _axis, _data.get() );
+
+    setDirty( _constraint == NULL );
 }
 
 
 
 
 LinearAngleSpringConstraint::LinearAngleSpringConstraint()
-  : Constraint()
+  : Constraint(),
+    _axis( 1., 0., 0. ),
+    _data( new InternalSpringData )
 {
+    _data->_enable[ 0 ] = _data->_enable[ 3 ] = true;
+    _data->_linearLowerLimits[ 0 ] = -1.;
+    _data->_linearUpperLimits[ 0 ] = 1.;
+    _data->_angularLowerLimits[ 0 ] = -osg::PI_2;
+    _data->_angularUpperLimits[ 0 ] = osg::PI_2;
+    _data->_stiffness[ 0 ] = _data->_stiffness[ 3 ] = 10.f;
+    _data->_damping[ 0 ] = _data->_damping[ 3 ] = .1f;
 }
 LinearAngleSpringConstraint::LinearAngleSpringConstraint( btRigidBody* rbA, btRigidBody* rbB )
-  : Constraint( rbA, rbB )
+  : Constraint( rbA, rbB ),
+    _axis( 1., 0., 0. ),
+    _data( new InternalSpringData )
 {
-}
-LinearAngleSpringConstraint::LinearAngleSpringConstraint( btRigidBody* rbA, const osg::Matrix& rbAXform )
-  : Constraint( rbA, rbAXform )
-{
+    _data->_enable[ 0 ] = _data->_enable[ 3 ] = true;
+    _data->_linearLowerLimits[ 0 ] = -1.;
+    _data->_linearUpperLimits[ 0 ] = 1.;
+    _data->_angularLowerLimits[ 0 ] = -osg::PI_2;
+    _data->_angularUpperLimits[ 0 ] = osg::PI_2;
+    _data->_stiffness[ 0 ] = _data->_stiffness[ 3 ] = 10.f;
+    _data->_damping[ 0 ] = _data->_damping[ 3 ] = .1f;
 }
 LinearAngleSpringConstraint::LinearAngleSpringConstraint( btRigidBody* rbA, const osg::Matrix& rbAXform,
         btRigidBody* rbB, const osg::Matrix& rbBXform )
-  : Constraint( rbA, rbAXform, rbB, rbBXform )
+  : Constraint( rbA, rbAXform, rbB, rbBXform ),
+    _axis( 1., 0., 0. ),
+    _data( new InternalSpringData )
 {
+    _data->_enable[ 0 ] = _data->_enable[ 3 ] = true;
+    _data->_linearLowerLimits[ 0 ] = -1.;
+    _data->_linearUpperLimits[ 0 ] = 1.;
+    _data->_angularLowerLimits[ 0 ] = -osg::PI_2;
+    _data->_angularUpperLimits[ 0 ] = osg::PI_2;
+    _data->_stiffness[ 0 ] = _data->_stiffness[ 3 ] = 10.f;
+    _data->_damping[ 0 ] = _data->_damping[ 3 ] = .1f;
 }
 LinearAngleSpringConstraint::LinearAngleSpringConstraint( const LinearAngleSpringConstraint& rhs, const osg::CopyOp& copyop )
-  : Constraint( rhs, copyop )
+  : Constraint( rhs, copyop ),
+    _axis( rhs._axis ),
+    _data( rhs._data )
 {
 }
 LinearAngleSpringConstraint::~LinearAngleSpringConstraint()
@@ -428,8 +653,68 @@ btGeneric6DofSpringConstraint* LinearAngleSpringConstraint::getAsBtGeneric6DofSp
     return( static_cast< btGeneric6DofSpringConstraint* >( getConstraint() ) );
 }
 
+void LinearAngleSpringConstraint::setSpringData( InternalSpringData* data )
+{
+    _data = data;
+
+    if( !getDirty() && ( _constraint != NULL ) )
+    {
+        // Dynamically modify the existing constraint.
+        btGeneric6DofSpringConstraint* cons = getAsBtGeneric6DofSpring();
+        _data->apply( cons );
+    }
+    else
+        setDirty();
+}
+void LinearAngleSpringConstraint::setAxis( const osg::Vec3& axis )
+{
+    _axis = axis;
+    setDirty();
+}
+void LinearAngleSpringConstraint::setLinearLimit( const osg::Vec2& limit )
+{
+    _data->_linearLowerLimits[ 0 ] = limit[ 0 ];
+    _data->_linearUpperLimits[ 0 ] = limit[ 1 ];
+    setSpringData( _data.get() );
+}
+void LinearAngleSpringConstraint::setAngleLimit( const osg::Vec2& limit )
+{
+    _data->_angularLowerLimits[ 0 ] = limit[ 0 ];
+    _data->_angularUpperLimits[ 0 ] = limit[ 1 ];
+    setSpringData( _data.get() );
+}
+void LinearAngleSpringConstraint::setLinearStiffness( float stiffness )
+{
+    _data->_stiffness[ 0 ] = btScalar( stiffness );
+    setSpringData( _data.get() );
+}
+void LinearAngleSpringConstraint::setAngleStiffness( float stiffness )
+{
+    _data->_stiffness[ 3 ] = btScalar( stiffness );
+    setSpringData( _data.get() );
+}
+void LinearAngleSpringConstraint::setLinearDamping( float damping )
+{
+    _data->_damping[ 0 ] = btScalar( damping );
+    setSpringData( _data.get() );
+}
+void LinearAngleSpringConstraint::setAngleDamping( float damping )
+{
+    _data->_damping[ 3 ] = btScalar( damping );
+    setSpringData( _data.get() );
+}
+
 void LinearAngleSpringConstraint::createConstraint()
 {
+    if( _constraint != NULL )
+    {
+        delete _constraint;
+        _constraint = NULL;
+    }
+
+    _constraint = LinearSpringConstraint::internalCreateSpringConstraint( this, _axis, _data.get() );
+
+    setDirty( _constraint == NULL );
 }
 
 
@@ -471,8 +756,11 @@ void FixedConstraint::createConstraint()
         return;
     }
 
-    if( _constraint )
+    if( _constraint != NULL )
+    {
         delete _constraint;
+        _constraint = NULL;
+    }
 
 
     btTransform rbBFrame; // OK to not initialize.
@@ -612,8 +900,11 @@ void PlanarConstraint::createConstraint()
         return;
     }
 
-    if( _constraint )
+    if( _constraint != NULL )
+    {
         delete _constraint;
+        _constraint = NULL;
+    }
 
 
     // Planar and Box share common code to compute the Bullet constraint
@@ -731,8 +1022,11 @@ void BoxConstraint::createConstraint()
         return;
     }
 
-    if( _constraint )
+    if( _constraint != NULL )
+    {
         delete _constraint;
+        _constraint = NULL;
+    }
 
 
     // Planar and Box share common code to compute the Bullet constraint
@@ -911,8 +1205,11 @@ void HingeConstraint::createConstraint()
         return;
     }
 
-    if( _constraint )
+    if( _constraint != NULL )
+    {
         delete _constraint;
+        _constraint = NULL;
+    }
 
 
     // Put pivot point and axis into A's space.
@@ -1059,8 +1356,11 @@ void CardanConstraint::createConstraint()
         return;
     }
 
-    if( _constraint )
+    if( _constraint != NULL )
+    {
         delete _constraint;
+        _constraint = NULL;
+    }
 
 
     // Transform the world coordinate _axisA into A's local coordinates.
@@ -1154,8 +1454,11 @@ void BallAndSocketConstraint::createConstraint()
         return;
     }
 
-    if( _constraint )
+    if( _constraint != NULL )
+    {
         delete _constraint;
+        _constraint = NULL;
+    }
 
 
     // Compute a matrix that transforms the world coord point into
@@ -1305,8 +1608,11 @@ void RagdollConstraint::createConstraint()
         return;
     }
 
-    if( _constraint )
+    if( _constraint != NULL )
+    {
         delete _constraint;
+        _constraint = NULL;
+    }
 
 
     // Transform the world coordinate axis into A's local coordinates.
@@ -1470,8 +1776,11 @@ void WheelSuspensionConstraint::createConstraint()
         return;
     }
 
-    if( _constraint )
+    if( _constraint != NULL )
+    {
         delete _constraint;
+        _constraint = NULL;
+    }
 
 
     // Force _axleAxis to be orthogonal to _springAxis.

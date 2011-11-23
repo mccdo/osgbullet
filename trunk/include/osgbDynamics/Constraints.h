@@ -278,6 +278,32 @@ protected:
 };
 
 
+/** \class InternalSpringData Constraints.h <osgbDynamics/Constraints.h>
+\brief For internal storage of Bullet spring constraint parameters.
+
+Must export this class for dot osg support (unless we want to embed the
+dot osg support in this library).
+*/
+struct OSGBDYNAMICS_EXPORT InternalSpringData : public osg::Object
+{
+    InternalSpringData();
+    InternalSpringData( const InternalSpringData& rhs, const osg::CopyOp& copyop=osg::CopyOp::SHALLOW_COPY );
+    META_Object(osgbDynamics,InternalSpringData);
+
+    /** \brief TBD
+    */
+    void apply( btGeneric6DofSpringConstraint* cons ) const;
+
+    osg::Vec3 _linearLowerLimits;
+    osg::Vec3 _linearUpperLimits;
+    osg::Vec3 _angularLowerLimits;
+    osg::Vec3 _angularUpperLimits;
+    bool _enable[ 6 ];
+    btScalar _stiffness[ 6 ];
+    btScalar _damping[ 6 ];
+};
+
+
 /** \class LinearSpringConstraint Constraints.h <osgbDynamics/Constraints.h>
 \brief TBD
 
@@ -288,8 +314,7 @@ class OSGBDYNAMICS_EXPORT LinearSpringConstraint : public Constraint
 {
 public:
     LinearSpringConstraint();
-    LinearSpringConstraint( btRigidBody* rbA, btRigidBody* rbB=NULL );
-    LinearSpringConstraint( btRigidBody* rbA, const osg::Matrix& rbAXform );
+    LinearSpringConstraint( btRigidBody* rbA, btRigidBody* rbB );
     LinearSpringConstraint( btRigidBody* rbA, const osg::Matrix& rbAXform,
             btRigidBody* rbB, const osg::Matrix& rbBXform );
     LinearSpringConstraint( const LinearSpringConstraint& rhs, const osg::CopyOp& copyop=osg::CopyOp::SHALLOW_COPY );
@@ -297,10 +322,54 @@ public:
 
     virtual btGeneric6DofSpringConstraint* getAsBtGeneric6DofSpring() const;
 
+    /**
+    */
+    void setSpringData( InternalSpringData* data );
+    const InternalSpringData* getSpringData() const
+    {
+        return( _data.get() );
+    }
+    /** Default is x. */
+    void setAxis( const osg::Vec3& axis );
+    osg::Vec3 getAxis() const
+    {
+        return( _axis );
+    }
+    /** Default is -1 to 1 */
+    void setLimit( const osg::Vec2& limit );
+    osg::Vec2 getLimit() const
+    {
+        return( osg::Vec2( _data->_linearLowerLimits[ 0 ], _data->_linearUpperLimits[ 0 ] ) );
+    }
+    /** Default is 10. */
+    void setStiffness( float stiffness );
+    float getStiffness() const
+    {
+        return( (float)( _data->_stiffness[ 0 ] ) );
+    }
+    /** Default is .1 */
+    void setDamping( float damping );
+    float getDamping() const
+    {
+        return( (float)( _data->_damping[ 0 ] ) );
+    }
+
 protected:
     virtual ~LinearSpringConstraint();
 
     virtual void createConstraint();
+
+    osg::Vec3 _axis;
+    osg::ref_ptr< InternalSpringData > _data;
+
+private:
+    /** \brief Shared Bullet constraint construction for Linear, Angle, and
+    LinearAngle spring constraints. Access is allowed via "friend" declarative. */
+    static btGeneric6DofSpringConstraint* internalCreateSpringConstraint(
+        Constraint* cons, const osg::Vec3& axis,
+        const InternalSpringData* isd );
+    friend class AngleSpringConstraint;
+    friend class LinearAngleSpringConstraint;
 };
 
 
@@ -314,8 +383,7 @@ class OSGBDYNAMICS_EXPORT AngleSpringConstraint : public Constraint
 {
 public:
     AngleSpringConstraint();
-    AngleSpringConstraint( btRigidBody* rbA, btRigidBody* rbB=NULL );
-    AngleSpringConstraint( btRigidBody* rbA, const osg::Matrix& rbAXform );
+    AngleSpringConstraint( btRigidBody* rbA, btRigidBody* rbB );
     AngleSpringConstraint( btRigidBody* rbA, const osg::Matrix& rbAXform,
             btRigidBody* rbB, const osg::Matrix& rbBXform );
     AngleSpringConstraint( const AngleSpringConstraint& rhs, const osg::CopyOp& copyop=osg::CopyOp::SHALLOW_COPY );
@@ -323,10 +391,45 @@ public:
 
     virtual btGeneric6DofSpringConstraint* getAsBtGeneric6DofSpring() const;
 
+    /**
+    */
+    void setSpringData( InternalSpringData* data );
+    const InternalSpringData* getSpringData() const
+    {
+        return( _data.get() );
+    }
+    /** Default is x. */
+    void setAxis( const osg::Vec3& axis );
+    osg::Vec3 getAxis() const
+    {
+        return( _axis );
+    }
+    /** In radians. Default is -PI/2 to PI/2. */
+    void setLimit( const osg::Vec2& limit );
+    osg::Vec2 getLimit() const
+    {
+        return( osg::Vec2( _data->_angularLowerLimits[ 0 ], _data->_angularUpperLimits[ 0 ] ) );
+    }
+    /** Default is 10. */
+    void setStiffness( float stiffness );
+    float getStiffness() const
+    {
+        return( (float)( _data->_stiffness[ 3 ] ) );
+    }
+    /** Default is .1 */
+    void setDamping( float damping );
+    float getDamping() const
+    {
+        return( (float)( _data->_damping[ 3 ] ) );
+    }
+
 protected:
     virtual ~AngleSpringConstraint();
 
     virtual void createConstraint();
+
+    osg::Vec3 _axis;
+    osg::ref_ptr< InternalSpringData > _data;
 };
 
 
@@ -340,8 +443,7 @@ class OSGBDYNAMICS_EXPORT LinearAngleSpringConstraint : public Constraint
 {
 public:
     LinearAngleSpringConstraint();
-    LinearAngleSpringConstraint( btRigidBody* rbA, btRigidBody* rbB=NULL );
-    LinearAngleSpringConstraint( btRigidBody* rbA, const osg::Matrix& rbAXform );
+    LinearAngleSpringConstraint( btRigidBody* rbA, btRigidBody* rbB );
     LinearAngleSpringConstraint( btRigidBody* rbA, const osg::Matrix& rbAXform,
             btRigidBody* rbB, const osg::Matrix& rbBXform );
     LinearAngleSpringConstraint( const LinearAngleSpringConstraint& rhs, const osg::CopyOp& copyop=osg::CopyOp::SHALLOW_COPY );
@@ -349,10 +451,62 @@ public:
 
     virtual btGeneric6DofSpringConstraint* getAsBtGeneric6DofSpring() const;
 
+    /**
+    */
+    void setSpringData( InternalSpringData* data );
+    const InternalSpringData* getSpringData() const
+    {
+        return( _data.get() );
+    }
+    /** Default is x. */
+    void setAxis( const osg::Vec3& axis );
+    osg::Vec3 getAxis() const
+    {
+        return( _axis );
+    }
+    /** Default is -1 to 1 */
+    void setLinearLimit( const osg::Vec2& limit );
+    osg::Vec2 getLinearLimit() const
+    {
+        return( osg::Vec2( _data->_linearLowerLimits[ 0 ], _data->_linearUpperLimits[ 0 ] ) );
+    }
+    /** Default is -PI/2 to PI/2 */
+    void setAngleLimit( const osg::Vec2& limit );
+    osg::Vec2 getAngleLimit() const
+    {
+        return( osg::Vec2( _data->_angularLowerLimits[ 0 ], _data->_angularUpperLimits[ 0 ] ) );
+    }
+    /** Default is 10. */
+    void setLinearStiffness( float stiffness );
+    float getLinearStiffness() const
+    {
+        return( (float)( _data->_stiffness[ 0 ] ) );
+    }
+    /** Default is 10. */
+    void setAngleStiffness( float stiffness );
+    float getAngleStiffness() const
+    {
+        return( (float)( _data->_stiffness[ 3 ] ) );
+    }
+    /** Default is .1 */
+    void setLinearDamping( float damping );
+    float getLinearDamping() const
+    {
+        return( (float)( _data->_damping[ 0 ] ) );
+    }
+    void setAngleDamping( float damping );
+    float getAngleDamping() const
+    {
+        return( (float)( _data->_damping[ 3 ] ) );
+    }
+
 protected:
     virtual ~LinearAngleSpringConstraint();
 
     virtual void createConstraint();
+
+    osg::Vec3 _axis;
+    osg::ref_ptr< InternalSpringData > _data;
 };
 
 

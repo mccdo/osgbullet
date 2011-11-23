@@ -158,15 +158,66 @@ int main( int argc, char** argv )
 
     if( arguments.find( "LinearSpring" ) > 0 )
     {
-        osg::notify( osg::ALWAYS ) << "Test not yet implemented." << std::endl;
+        osg::Matrix bXform = osg::Matrix::identity();
+        crB->_parentTransform = bXform;
+        crB->_mass = 0.;
+        btRigidBody* rbB = osgbDynamics::createRigidBody( crB.get() );
+        amtB->setUserData( new osgbCollision::RefRigidBody( rbB ) );
+        bulletWorld->addRigidBody( rbB );
+
+        osg::Matrix cXform = osg::Matrix::translate( 5., 0., 0. );
+        crC->_parentTransform = cXform;
+        btRigidBody* rbC = osgbDynamics::createRigidBody( crC.get() );
+        amtC->setUserData( new osgbCollision::RefRigidBody( rbC ) );
+        bulletWorld->addRigidBody( rbC );
+
+        {
+            osg::ref_ptr< osgbDynamics::LinearSpringConstraint > cons1 = new osgbDynamics::LinearSpringConstraint(
+                rbB, bXform, rbC, cXform );
+            bulletWorld->addConstraint( cons1->getConstraint() );
+        }
     }
     else if( arguments.find( "AngleSpring" ) > 0 )
     {
-        osg::notify( osg::ALWAYS ) << "Test not yet implemented." << std::endl;
+        osg::Matrix bXform = osg::Matrix::identity();
+        crB->_parentTransform = bXform;
+        crB->_mass = 0.;
+        btRigidBody* rbB = osgbDynamics::createRigidBody( crB.get() );
+        amtB->setUserData( new osgbCollision::RefRigidBody( rbB ) );
+        bulletWorld->addRigidBody( rbB );
+
+        osg::Matrix cXform = osg::Matrix::translate( 5., 0., 0. );
+        crC->_parentTransform = cXform;
+        btRigidBody* rbC = osgbDynamics::createRigidBody( crC.get() );
+        amtC->setUserData( new osgbCollision::RefRigidBody( rbC ) );
+        bulletWorld->addRigidBody( rbC );
+
+        {
+            osg::ref_ptr< osgbDynamics::AngleSpringConstraint > cons1 = new osgbDynamics::AngleSpringConstraint(
+                rbB, bXform, rbC, cXform );
+            bulletWorld->addConstraint( cons1->getConstraint() );
+        }
     }
     else if( arguments.find( "LinearAngleSpring" ) > 0 )
     {
-        osg::notify( osg::ALWAYS ) << "Test not yet implemented." << std::endl;
+        osg::Matrix bXform = osg::Matrix::identity();
+        crB->_parentTransform = bXform;
+        crB->_mass = 0.;
+        btRigidBody* rbB = osgbDynamics::createRigidBody( crB.get() );
+        amtB->setUserData( new osgbCollision::RefRigidBody( rbB ) );
+        bulletWorld->addRigidBody( rbB );
+
+        osg::Matrix cXform = osg::Matrix::translate( 5., 0., 0. );
+        crC->_parentTransform = cXform;
+        btRigidBody* rbC = osgbDynamics::createRigidBody( crC.get() );
+        amtC->setUserData( new osgbCollision::RefRigidBody( rbC ) );
+        bulletWorld->addRigidBody( rbC );
+
+        {
+            osg::ref_ptr< osgbDynamics::LinearAngleSpringConstraint > cons1 = new osgbDynamics::LinearAngleSpringConstraint(
+                rbB, bXform, rbC, cXform );
+            bulletWorld->addConstraint( cons1->getConstraint() );
+        }
     }
     else if( arguments.find( "Cardan" ) > 0 )
     {
@@ -501,7 +552,7 @@ int main( int argc, char** argv )
             bulletWorld->addConstraint( cons1->getConstraint() );
         }
     }
-    else // SliderConstraint by default.
+    else // "Slider" by default.
     {
         osg::Matrix aXform = osg::Matrix::translate( 0., 0., 3. );
         crA->_parentTransform = aXform;
