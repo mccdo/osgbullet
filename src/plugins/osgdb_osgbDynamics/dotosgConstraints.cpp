@@ -70,6 +70,19 @@ osgDB::RegisterDotOsgWrapperProxy TwistSliderConstraint_Proxy
 );
 
 
+bool InternalSpringData_readLocalData( osg::Object& obj, osgDB::Input& fr );
+bool InternalSpringData_writeLocalData( const osg::Object& obj, osgDB::Output& fw );
+
+osgDB::RegisterDotOsgWrapperProxy InternalSpringData_Proxy
+(
+    new osgbDynamics::InternalSpringData,
+    "InternalSpringData",
+    "Object InternalSpringData",
+    InternalSpringData_readLocalData,
+    InternalSpringData_writeLocalData
+);
+
+
 bool LinearSpringConstraint_readLocalData( osg::Object& obj, osgDB::Input& fr );
 bool LinearSpringConstraint_writeLocalData( const osg::Object& obj, osgDB::Output& fw );
 
@@ -305,26 +318,211 @@ bool TwistSliderConstraint_writeLocalData( const osg::Object& obj, osgDB::Output
 }
 
 
+bool InternalSpringData_readLocalData( osg::Object& obj, osgDB::Input& fr )
+{
+    osgbDynamics::InternalSpringData& data = static_cast< osgbDynamics::InternalSpringData& >( obj );
+
+    if( fr.matchSequence( "Linear lower limits %f %f %f" ) )
+    {
+        osg::Vec3 vec;
+        fr[3].getFloat( ( vec[0] ) );
+        fr[4].getFloat( ( vec[1] ) );
+        fr[5].getFloat( ( vec[2] ) );
+        data._linearLowerLimits = vec;
+        fr += 6;
+    }
+    else
+    {
+        osg::notify( osg::WARN ) << "InternalSpringData_readLocalData: Bad input data at \"Linear lower limits\"." << std::endl;
+        return( false );
+    }
+
+    if( fr.matchSequence( "Linear upper limits %f %f %f" ) )
+    {
+        osg::Vec3 vec;
+        fr[3].getFloat( ( vec[0] ) );
+        fr[4].getFloat( ( vec[1] ) );
+        fr[5].getFloat( ( vec[2] ) );
+        data._linearUpperLimits = vec;
+        fr += 6;
+    }
+    else
+    {
+        osg::notify( osg::WARN ) << "InternalSpringData_readLocalData: Bad input data at \"Linear upper limits\"." << std::endl;
+        return( false );
+    }
+
+    if( fr.matchSequence( "Angular lower limits %f %f %f" ) )
+    {
+        osg::Vec3 vec;
+        fr[3].getFloat( ( vec[0] ) );
+        fr[4].getFloat( ( vec[1] ) );
+        fr[5].getFloat( ( vec[2] ) );
+        data._angularLowerLimits = vec ;
+        fr += 6;
+    }
+    else
+    {
+        osg::notify( osg::WARN ) << "InternalSpringData_readLocalData: Bad input data at \"Angular lower limits\"." << std::endl;
+        return( false );
+    }
+
+    if( fr.matchSequence( "Angular upper limits %f %f %f" ) )
+    {
+        osg::Vec3 vec;
+        fr[3].getFloat( ( vec[0] ) );
+        fr[4].getFloat( ( vec[1] ) );
+        fr[5].getFloat( ( vec[2] ) );
+        data._angularUpperLimits = vec ;
+        fr += 6;
+    }
+    else
+    {
+        osg::notify( osg::WARN ) << "InternalSpringData_readLocalData: Bad input data at \"Angular upper limits\"." << std::endl;
+        return( false );
+    }
+
+    if( fr.matchSequence( "Enable" ) )
+    {
+        int idx, value;
+        for( idx=0; idx<6; idx++ )
+        {
+            fr[ idx + 1 ].getInt( value );
+            data._enable[ idx ] = ( value != 0 );
+        }
+        fr += 7;
+    }
+    else
+    {
+        osg::notify( osg::WARN ) << "InternalSpringData_readLocalData: Bad input data at \"Enable\"." << std::endl;
+        return( false );
+    }
+
+    if( fr.matchSequence( "Stiffness %f %f %f %f %f %f" ) )
+    {
+        int idx;
+        for( idx=0; idx<6; idx++ )
+            fr[ idx + 1 ].getFloat( data._stiffness[ idx ] );
+        fr += 7;
+    }
+    else
+    {
+        osg::notify( osg::WARN ) << "InternalSpringData_readLocalData: Bad input data at \"Stiffness\"." << std::endl;
+        return( false );
+    }
+
+    if( fr.matchSequence( "Damping %f %f %f %f %f %f" ) )
+    {
+        int idx;
+        for( idx=0; idx<6; idx++ )
+            fr[ idx + 1 ].getFloat( data._damping[ idx ] );
+        fr += 7;
+    }
+    else
+    {
+        osg::notify( osg::WARN ) << "InternalSpringData_readLocalData: Bad input data at \"Damping\"." << std::endl;
+        return( false );
+    }
+
+    return( true );
+}
+bool InternalSpringData_writeLocalData( const osg::Object& obj, osgDB::Output& fw )
+{
+    const osgbDynamics::InternalSpringData& data = static_cast< const osgbDynamics::InternalSpringData& >( obj );
+
+    fw.indent() << "Linear lower limits " << data._linearLowerLimits << std::endl;
+    fw.indent() << "Linear upper limits " << data._linearUpperLimits << std::endl;
+    fw.indent() << "Angular lower limits " << data._angularLowerLimits << std::endl;
+    fw.indent() << "Angular upper limits " << data._angularUpperLimits << std::endl;
+
+    int idx;
+    fw.indent() << "Enable ";
+    for( idx=0; idx<6; idx++ )
+        fw << ( data._enable[ idx ] ? 1 : 0 ) << " ";
+    fw << std::endl;
+
+    fw.indent() << "Stiffness ";
+    for( idx=0; idx<6; idx++ )
+        fw << data._stiffness[ idx ] << " ";
+    fw << std::endl;
+
+    fw.indent() << "Damping ";
+    for( idx=0; idx<6; idx++ )
+        fw << data._damping[ idx ] << " ";
+    fw << std::endl;
+
+    return( true );
+}
+
+
 bool LinearSpringConstraint_readLocalData( osg::Object& obj, osgDB::Input& fr )
 {
-    // TBD
+    osgbDynamics::LinearSpringConstraint& cons = static_cast< osgbDynamics::LinearSpringConstraint& >( obj );
+
+    if( fr.matchSequence( "Axis %f %f %f" ) )
+    {
+        osg::Vec3 axis;
+        fr[1].getFloat( ( axis[0] ) );
+        fr[2].getFloat( ( axis[1] ) );
+        fr[3].getFloat( ( axis[2] ) );
+        cons.setAxis( axis );
+        fr += 4;
+    }
+    else
+    {
+        osg::notify( osg::WARN ) << "LinearSpringConstraint_readLocalData: Bad input data at \"Axis\"." << std::endl;
+        return( false );
+    }
+
+    osg::ref_ptr< osgbDynamics::InternalSpringData > isd =
+        static_cast< osgbDynamics::InternalSpringData* >( fr.readObject() );
+    cons.setSpringData( isd.get() );
+
     return( true );
 }
 bool LinearSpringConstraint_writeLocalData( const osg::Object& obj, osgDB::Output& fw )
 {
-    // TBD
+    const osgbDynamics::LinearSpringConstraint& cons = static_cast< const osgbDynamics::LinearSpringConstraint& >( obj );
+
+    fw.indent() << "Axis " << cons.getAxis() << std::endl;
+    fw.writeObject( *( cons.getSpringData() ) );
+
     return( true );
 }
 
 
 bool AngleSpringConstraint_readLocalData( osg::Object& obj, osgDB::Input& fr )
 {
-    // TBD
+    osgbDynamics::AngleSpringConstraint& cons = static_cast< osgbDynamics::AngleSpringConstraint& >( obj );
+
+    if( fr.matchSequence( "Axis %f %f %f" ) )
+    {
+        osg::Vec3 axis;
+        fr[1].getFloat( ( axis[0] ) );
+        fr[2].getFloat( ( axis[1] ) );
+        fr[3].getFloat( ( axis[2] ) );
+        cons.setAxis( axis );
+        fr += 4;
+    }
+    else
+    {
+        osg::notify( osg::WARN ) << "AngleSpringConstraint_readLocalData: Bad input data at \"Axis\"." << std::endl;
+        return( false );
+    }
+
+    osg::ref_ptr< osgbDynamics::InternalSpringData > isd =
+        static_cast< osgbDynamics::InternalSpringData* >( fr.readObject() );
+    cons.setSpringData( isd.get() );
+
     return( true );
 }
 bool AngleSpringConstraint_writeLocalData( const osg::Object& obj, osgDB::Output& fw )
 {
-    // TBD
+    const osgbDynamics::AngleSpringConstraint& cons = static_cast< const osgbDynamics::AngleSpringConstraint& >( obj );
+
+    fw.indent() << "Axis " << cons.getAxis() << std::endl;
+    fw.writeObject( *( cons.getSpringData() ) );
+
     return( true );
 }
 
