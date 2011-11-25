@@ -510,6 +510,21 @@ bool AngleSpringConstraint_readLocalData( osg::Object& obj, osgDB::Input& fr )
         return( false );
     }
 
+    if( fr.matchSequence( "Pivot point %f %f %f" ) )
+    {
+        osg::Vec3 point;
+        fr[2].getFloat( ( point[0] ) );
+        fr[3].getFloat( ( point[1] ) );
+        fr[4].getFloat( ( point[2] ) );
+        cons.setPivotPoint( point );
+        fr += 5;
+    }
+    else
+    {
+        osg::notify( osg::WARN ) << "AngleSpringConstraint_readLocalData: Bad input data at \"Pivot point\"." << std::endl;
+        return( false );
+    }
+
     osg::ref_ptr< osgbDynamics::InternalSpringData > isd =
         static_cast< osgbDynamics::InternalSpringData* >( fr.readObject() );
     cons.setSpringData( isd.get() );
@@ -521,6 +536,7 @@ bool AngleSpringConstraint_writeLocalData( const osg::Object& obj, osgDB::Output
     const osgbDynamics::AngleSpringConstraint& cons = static_cast< const osgbDynamics::AngleSpringConstraint& >( obj );
 
     fw.indent() << "Axis " << cons.getAxis() << std::endl;
+    fw.indent() << "Pivot point " << cons.getPivotPoint() << std::endl;
     fw.writeObject( *( cons.getSpringData() ) );
 
     return( true );
@@ -546,6 +562,21 @@ bool LinearAngleSpringConstraint_readLocalData( osg::Object& obj, osgDB::Input& 
         return( false );
     }
 
+    if( fr.matchSequence( "Pivot point %f %f %f" ) )
+    {
+        osg::Vec3 point;
+        fr[2].getFloat( ( point[0] ) );
+        fr[3].getFloat( ( point[1] ) );
+        fr[4].getFloat( ( point[2] ) );
+        cons.setPivotPoint( point );
+        fr += 5;
+    }
+    else
+    {
+        osg::notify( osg::WARN ) << "LinearAngleSpringConstraint_readLocalData: Bad input data at \"Pivot point\"." << std::endl;
+        return( false );
+    }
+
     osg::ref_ptr< osgbDynamics::InternalSpringData > isd =
         static_cast< osgbDynamics::InternalSpringData* >( fr.readObject() );
     cons.setSpringData( isd.get() );
@@ -557,6 +588,7 @@ bool LinearAngleSpringConstraint_writeLocalData( const osg::Object& obj, osgDB::
     const osgbDynamics::LinearAngleSpringConstraint& cons = static_cast< const osgbDynamics::LinearAngleSpringConstraint& >( obj );
 
     fw.indent() << "Axis " << cons.getAxis() << std::endl;
+    fw.indent() << "Pivot point " << cons.getPivotPoint() << std::endl;
     fw.writeObject( *( cons.getSpringData() ) );
 
     return( true );
