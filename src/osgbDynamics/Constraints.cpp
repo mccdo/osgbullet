@@ -415,9 +415,9 @@ LinearSpringConstraint::LinearSpringConstraint( btRigidBody* rbA, btRigidBody* r
     _data->_damping[ 0 ] = .1f;
 }
 LinearSpringConstraint::LinearSpringConstraint( btRigidBody* rbA, const osg::Matrix& rbAXform,
-        btRigidBody* rbB, const osg::Matrix& rbBXform )
+        btRigidBody* rbB, const osg::Matrix& rbBXform, const osg::Vec3& axis )
   : Constraint( rbA, rbAXform, rbB, rbBXform ),
-    _axis( 1., 0., 0. ),
+    _axis( axis ),
     _data( new InternalSpringData )
 {
     _data->_enable[ 0 ] = true;
@@ -538,6 +538,7 @@ btGeneric6DofSpringConstraint* LinearSpringConstraint::internalCreateSpringConst
 AngleSpringConstraint::AngleSpringConstraint()
   : Constraint(),
     _axis( 1., 0., 0. ),
+    _pivotPoint( 0., 0., 0. ),
     _data( new InternalSpringData )
 {
     _data->_enable[ 3 ] = true;
@@ -549,6 +550,7 @@ AngleSpringConstraint::AngleSpringConstraint()
 AngleSpringConstraint::AngleSpringConstraint( btRigidBody* rbA, btRigidBody* rbB )
   : Constraint( rbA, rbB ),
     _axis( 1., 0., 0. ),
+    _pivotPoint( 0., 0., 0. ),
     _data( new InternalSpringData )
 {
     _data->_enable[ 3 ] = true;
@@ -558,9 +560,11 @@ AngleSpringConstraint::AngleSpringConstraint( btRigidBody* rbA, btRigidBody* rbB
     _data->_damping[ 3 ] = .1f;
 }
 AngleSpringConstraint::AngleSpringConstraint( btRigidBody* rbA, const osg::Matrix& rbAXform,
-        btRigidBody* rbB, const osg::Matrix& rbBXform )
+        btRigidBody* rbB, const osg::Matrix& rbBXform,
+        const osg::Vec3& axis, const osg::Vec3& point )
   : Constraint( rbA, rbAXform, rbB, rbBXform ),
-    _axis( 1., 0., 0. ),
+    _axis( axis ),
+    _pivotPoint( point ),
     _data( new InternalSpringData )
 {
     _data->_enable[ 3 ] = true;
@@ -572,6 +576,7 @@ AngleSpringConstraint::AngleSpringConstraint( btRigidBody* rbA, const osg::Matri
 AngleSpringConstraint::AngleSpringConstraint( const AngleSpringConstraint& rhs, const osg::CopyOp& copyop )
   : Constraint( rhs, copyop ),
     _axis( rhs._axis ),
+    _pivotPoint( rhs._pivotPoint ),
     _data( rhs._data )
 {
 }
@@ -600,6 +605,11 @@ void AngleSpringConstraint::setSpringData( InternalSpringData* data )
 void AngleSpringConstraint::setAxis( const osg::Vec3& axis )
 {
     _axis = axis;
+    setDirty();
+}
+void AngleSpringConstraint::setPivotPoint( const osg::Vec3& wcPoint )
+{
+    _pivotPoint = wcPoint;
     setDirty();
 }
 void AngleSpringConstraint::setLimit( const osg::Vec2& limit )
@@ -651,6 +661,7 @@ void AngleSpringConstraint::createConstraint()
 LinearAngleSpringConstraint::LinearAngleSpringConstraint()
   : Constraint(),
     _axis( 1., 0., 0. ),
+    _pivotPoint( 0., 0., 0. ),
     _data( new InternalSpringData )
 {
     _data->_enable[ 0 ] = _data->_enable[ 3 ] = true;
@@ -664,6 +675,7 @@ LinearAngleSpringConstraint::LinearAngleSpringConstraint()
 LinearAngleSpringConstraint::LinearAngleSpringConstraint( btRigidBody* rbA, btRigidBody* rbB )
   : Constraint( rbA, rbB ),
     _axis( 1., 0., 0. ),
+    _pivotPoint( 0., 0., 0. ),
     _data( new InternalSpringData )
 {
     _data->_enable[ 0 ] = _data->_enable[ 3 ] = true;
@@ -675,9 +687,11 @@ LinearAngleSpringConstraint::LinearAngleSpringConstraint( btRigidBody* rbA, btRi
     _data->_damping[ 0 ] = _data->_damping[ 3 ] = .1f;
 }
 LinearAngleSpringConstraint::LinearAngleSpringConstraint( btRigidBody* rbA, const osg::Matrix& rbAXform,
-        btRigidBody* rbB, const osg::Matrix& rbBXform )
+        btRigidBody* rbB, const osg::Matrix& rbBXform,
+        const osg::Vec3& axis, const osg::Vec3& point )
   : Constraint( rbA, rbAXform, rbB, rbBXform ),
-    _axis( 1., 0., 0. ),
+    _axis( axis ),
+    _pivotPoint( point ),
     _data( new InternalSpringData )
 {
     _data->_enable[ 0 ] = _data->_enable[ 3 ] = true;
@@ -691,6 +705,7 @@ LinearAngleSpringConstraint::LinearAngleSpringConstraint( btRigidBody* rbA, cons
 LinearAngleSpringConstraint::LinearAngleSpringConstraint( const LinearAngleSpringConstraint& rhs, const osg::CopyOp& copyop )
   : Constraint( rhs, copyop ),
     _axis( rhs._axis ),
+    _pivotPoint( rhs._pivotPoint ),
     _data( rhs._data )
 {
 }
@@ -719,6 +734,11 @@ void LinearAngleSpringConstraint::setSpringData( InternalSpringData* data )
 void LinearAngleSpringConstraint::setAxis( const osg::Vec3& axis )
 {
     _axis = axis;
+    setDirty();
+}
+void LinearAngleSpringConstraint::setPivotPoint( const osg::Vec3& wcPoint )
+{
+    _pivotPoint = wcPoint;
     setDirty();
 }
 void LinearAngleSpringConstraint::setLinearLimit( const osg::Vec2& limit )
