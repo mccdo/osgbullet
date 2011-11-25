@@ -277,8 +277,7 @@ int runCTest( const std::string& testName )
     if( testName == std::string( "LinearSpring" ) )
     {
         osg::ref_ptr< osgbDynamics::LinearSpringConstraint > cons = new osgbDynamics::LinearSpringConstraint(
-            rbA, aXform, rbB, bXform );
-        cons->setAxis( osg::Vec3( 2., 1., 0. ) );
+            rbA, aXform, rbB, bXform, osg::Vec3( 2., 1., 0. ) );
         cons->setLimit( osg::Vec2( -2., 3. ) );
         cons->setStiffness( 40.f );
         cons->setDamping( .5f );
@@ -311,8 +310,7 @@ int runCTest( const std::string& testName )
     if( testName == std::string( "AngleSpring" ) )
     {
         osg::ref_ptr< osgbDynamics::AngleSpringConstraint > cons = new osgbDynamics::AngleSpringConstraint(
-            rbA, aXform, rbB, bXform );
-        cons->setAxis( osg::Vec3( 2., 1., 0. ) );
+            rbA, aXform, rbB, bXform, osg::Vec3( 2., 1., 0. ), osg::Vec3( 5., 6., -7. ) );
         cons->setLimit( osg::Vec2( -2., 1. ) );
         cons->setStiffness( 50.f );
         cons->setDamping( 0.f );
@@ -345,8 +343,7 @@ int runCTest( const std::string& testName )
     if( testName == std::string( "LinearAngleSpring" ) )
     {
         osg::ref_ptr< osgbDynamics::LinearAngleSpringConstraint > cons = new osgbDynamics::LinearAngleSpringConstraint(
-            rbA, aXform, rbB, bXform );
-        cons->setAxis( osg::Vec3( 2., 1., 0. ) );
+            rbA, aXform, rbB, bXform, osg::Vec3( 2., 1., 0. ), osg::Vec3( 5., 6., -7. ) );
         cons->setLinearLimit( osg::Vec2( -2., 2. ) );
         cons->setAngleLimit( osg::Vec2( -3., 3. ) );
         cons->setLinearStiffness( 41.f );
