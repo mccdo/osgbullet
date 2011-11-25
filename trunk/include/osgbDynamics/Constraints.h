@@ -323,7 +323,8 @@ public:
     LinearSpringConstraint();
     LinearSpringConstraint( btRigidBody* rbA, btRigidBody* rbB );
     LinearSpringConstraint( btRigidBody* rbA, const osg::Matrix& rbAXform,
-            btRigidBody* rbB, const osg::Matrix& rbBXform );
+            btRigidBody* rbB, const osg::Matrix& rbBXform,
+            const osg::Vec3& axis=osg::Vec3(1., 0., 0.) );
     LinearSpringConstraint( const LinearSpringConstraint& rhs, const osg::CopyOp& copyop=osg::CopyOp::SHALLOW_COPY );
     META_Object(osgbDynamics,LinearSpringConstraint);
 
@@ -399,7 +400,8 @@ public:
     AngleSpringConstraint();
     AngleSpringConstraint( btRigidBody* rbA, btRigidBody* rbB );
     AngleSpringConstraint( btRigidBody* rbA, const osg::Matrix& rbAXform,
-            btRigidBody* rbB, const osg::Matrix& rbBXform );
+            btRigidBody* rbB, const osg::Matrix& rbBXform,
+            const osg::Vec3& axis=osg::Vec3( 1., 0., 0. ), const osg::Vec3& point=osg::Vec3( 0., 0., 0. ) );
     AngleSpringConstraint( const AngleSpringConstraint& rhs, const osg::CopyOp& copyop=osg::CopyOp::SHALLOW_COPY );
     META_Object(osgbDynamics,AngleSpringConstraint);
 
@@ -417,6 +419,13 @@ public:
     osg::Vec3 getAxis() const
     {
         return( _axis );
+    }
+    /** \brief Specify the world coordinate point that the axis passes through.
+    Default is (0., 0., 0.). */
+    void setPivotPoint( const osg::Vec3& wcPoint );
+    osg::Vec3 getPivotPoint() const
+    {
+        return( _pivotPoint );
     }
     /** In radians. Default is -PI/2 to PI/2. */
     void setLimit( const osg::Vec2& limit );
@@ -450,6 +459,7 @@ protected:
     virtual void createConstraint();
 
     osg::Vec3 _axis;
+    osg::Vec3 _pivotPoint;
     osg::ref_ptr< InternalSpringData > _data;
 };
 
@@ -466,7 +476,8 @@ public:
     LinearAngleSpringConstraint();
     LinearAngleSpringConstraint( btRigidBody* rbA, btRigidBody* rbB );
     LinearAngleSpringConstraint( btRigidBody* rbA, const osg::Matrix& rbAXform,
-            btRigidBody* rbB, const osg::Matrix& rbBXform );
+            btRigidBody* rbB, const osg::Matrix& rbBXform,
+            const osg::Vec3& axis=osg::Vec3( 1., 0., 0. ), const osg::Vec3& point=osg::Vec3( 0., 0., 0. ) );
     LinearAngleSpringConstraint( const LinearAngleSpringConstraint& rhs, const osg::CopyOp& copyop=osg::CopyOp::SHALLOW_COPY );
     META_Object(osgbDynamics,LinearAngleSpringConstraint);
 
@@ -484,6 +495,13 @@ public:
     osg::Vec3 getAxis() const
     {
         return( _axis );
+    }
+    /** \brief Specify the world coordinate point that the axis passes through.
+    Default is (0., 0., 0.). */
+    void setPivotPoint( const osg::Vec3& wcPoint );
+    osg::Vec3 getPivotPoint() const
+    {
+        return( _pivotPoint );
     }
     /** Default is -1 to 1 */
     void setLinearLimit( const osg::Vec2& limit );
@@ -534,6 +552,7 @@ protected:
     virtual void createConstraint();
 
     osg::Vec3 _axis;
+    osg::Vec3 _pivotPoint;
     osg::ref_ptr< InternalSpringData > _data;
 };
 
