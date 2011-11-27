@@ -1466,8 +1466,9 @@ void CardanConstraint::createConstraint()
     localAxisB.normalize();
 
 
+    const btVector3 btPt( osgbCollision::asBtVector3( _point ) );
     btUniversalConstraint* cons = new btUniversalConstraint( *_rbA, *_rbB,
-        osgbCollision::asBtVector3( _point ), localAxisA, localAxisB );
+        btPt, localAxisA, localAxisB );
 
     _constraint = cons;
 
