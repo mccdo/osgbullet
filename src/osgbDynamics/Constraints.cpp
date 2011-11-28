@@ -497,35 +497,80 @@ void LinearSpringConstraint::createConstraint()
         _constraint = NULL;
     }
 
-    _constraint = internalCreateSpringConstraint( this, _axis, _data.get() );
+    // The internal construction/config code for Bullet spring constraints
+    // is identical for our three rpring types, except that LinearSpringConstraint
+    // does not have a pivot point.
+    _constraint = internalCreateSpringConstraint( this, _data.get(), _axis );
 
     setDirty( _constraint == NULL );
 }
 
 btGeneric6DofSpringConstraint* LinearSpringConstraint::internalCreateSpringConstraint(
-    Constraint* cons, const osg::Vec3& axis,
-    const InternalSpringData* isd )
+    Constraint* cons, const InternalSpringData* isd,
+    const osg::Vec3& axis, const osg::Vec3& point )
 {
     btRigidBody* rbA, * rbB;
     cons->getRigidBodies( rbA, rbB );
 
     if( ( rbA == NULL ) || ( rbB == NULL ) )
     {
-        osg::notify( osg::INFO ) << "createConstraint: _rbA == NULL or _rbB == NULL." << std::endl;
+        osg::notify( osg::INFO ) << "InternalSpringCreate: _rbA == NULL or _rbB == NULL." << std::endl;
         return( NULL );
     }
-
 
     const osg::Matrix aXform = cons->getAXform();
     const osg::Matrix bXform = cons->getBXform();
 
-    // TBD correct computation of reference frames.
-    btTransform rbAFrame, rbBFrame;
-    rbAFrame.setIdentity();
-    rbBFrame = osgbCollision::asBtTransform( osg::Matrix::inverse( bXform ) );
+
+    // Orientation matrix for the spring x-axis / point.
+    osg::Vec3 localAxis( axis );
+    localAxis.normalize();
+    const osg::Matrix orientation =
+        osg::Matrix::rotate( osg::Vec3( 1., 0., 0. ), localAxis ) *
+        osg::Matrix::translate( point );
 
 
-    btGeneric6DofSpringConstraint* springCons = new btGeneric6DofSpringConstraint( *rbA, *rbB, rbAFrame, rbBFrame, false );
+    // Create a matrix that puts A in B's coordinate space, accounting
+    // for orientation of the constraint axes.
+    //
+    //   1. Inverse A center of mass offset.
+    osgbDynamics::MotionState* motion = dynamic_cast< osgbDynamics::MotionState* >( rbA->getMotionState() );
+    if( motion == NULL )
+    {
+        osg::notify( osg::WARN ) << "InternalCreateSpring: Invalid MotionState." << std::endl;
+        return( NULL );
+    }
+    const osg::Matrix invACOM( osg::Matrix::translate( -( motion->getCenterOfMass() ) ) );
+    //
+    //   2. Transform A back to the origin.
+    const osg::Matrix invAXform( osg::Matrix::inverse( aXform ) );
+    //
+    //   3. The final rbA frame matrix.
+    btTransform rbAFrame = osgbCollision::asBtTransform( 
+        orientation * invAXform * invACOM );
+
+
+    // Create a matrix that orients the spring axis/point in B's coordinate space.
+    //
+    //   1. Inverse B center of mass offset.
+    motion = dynamic_cast< osgbDynamics::MotionState* >( rbB->getMotionState() );
+    if( motion == NULL )
+    {
+        osg::notify( osg::WARN ) << "InternalCreateSpring: Invalid MotionState." << std::endl;
+        return( NULL );
+    }
+    const osg::Matrix invBCOM( osg::Matrix::translate( -( motion->getCenterOfMass() ) ) );
+    //
+    //   2. Transform B back to the origin.
+    const osg::Matrix invBXform( osg::Matrix::inverse( bXform ) );
+    //
+    //   3. The final rbB frame matrix.
+    btTransform rbBFrame = osgbCollision::asBtTransform( 
+        orientation * invBXform * invBCOM );
+
+
+    btGeneric6DofSpringConstraint* springCons = new btGeneric6DofSpringConstraint(
+        *rbA, *rbB, rbAFrame, rbBFrame, false );
     isd->apply( springCons );
     springCons->setEquilibriumPoint();
 
@@ -650,7 +695,8 @@ void AngleSpringConstraint::createConstraint()
         _constraint = NULL;
     }
 
-    _constraint = LinearSpringConstraint::internalCreateSpringConstraint( this, _axis, _data.get() );
+    _constraint = LinearSpringConstraint::internalCreateSpringConstraint(
+        this, _data.get(), _axis, _pivotPoint );
 
     setDirty( _constraint == NULL );
 }
@@ -795,7 +841,8 @@ void LinearAngleSpringConstraint::createConstraint()
         _constraint = NULL;
     }
 
-    _constraint = LinearSpringConstraint::internalCreateSpringConstraint( this, _axis, _data.get() );
+    _constraint = LinearSpringConstraint::internalCreateSpringConstraint(
+        this, _data.get(), _axis, _pivotPoint );
 
     setDirty( _constraint == NULL );
 }
@@ -1154,7 +1201,7 @@ void BoxConstraint::internalPlanarBoxFrameComputation(
         osgbDynamics::MotionState* motion = dynamic_cast< osgbDynamics::MotionState* >( rbB->getMotionState() );
         if( motion == NULL )
         {
-            osg::notify( osg::WARN ) << "SliderConstraint: Invalid MotionState." << std::endl;
+            osg::notify( osg::WARN ) << "Planar or BoxConstraint: Invalid MotionState." << std::endl;
             return;
         }
         const osg::Matrix invBCOM( osg::Matrix::translate( -( motion->getCenterOfMass() ) ) );
@@ -1172,7 +1219,7 @@ void BoxConstraint::internalPlanarBoxFrameComputation(
     osgbDynamics::MotionState* motion = dynamic_cast< osgbDynamics::MotionState* >( rbA->getMotionState() );
     if( motion == NULL )
     {
-        osg::notify( osg::WARN ) << "SliderConstraint: Invalid MotionState." << std::endl;
+        osg::notify( osg::WARN ) << "Planar or BoxConstraint: Invalid MotionState." << std::endl;
         return;
     }
     const osg::Matrix invACOM( osg::Matrix::translate( -( motion->getCenterOfMass() ) ) );

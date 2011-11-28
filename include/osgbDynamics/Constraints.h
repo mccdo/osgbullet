@@ -379,10 +379,17 @@ protected:
 
 private:
     /** \brief Shared Bullet constraint construction for Linear, Angle, and
-    LinearAngle spring constraints. Access is allowed via "friend" declarative. */
+    LinearAngle spring constraints. Access is allowed via "friend" declarative.
+    
+    Angle and LinearAngle pass the pivot point (rotation requires a point and
+    an axis that passes through it). The Linear spring doesn't need a point (linear
+    spring acts only on an axis and behaves the same regardless of the spatial
+    location of the axis). The default value of the \c point parameter supports
+    the Linear spring usage. */
     static btGeneric6DofSpringConstraint* internalCreateSpringConstraint(
-        Constraint* cons, const osg::Vec3& axis,
-        const InternalSpringData* isd );
+        Constraint* cons, const InternalSpringData* isd,
+        const osg::Vec3& axis, const osg::Vec3& point=osg::Vec3(0.,0.,0.) );
+
     friend class AngleSpringConstraint;
     friend class LinearAngleSpringConstraint;
 };
