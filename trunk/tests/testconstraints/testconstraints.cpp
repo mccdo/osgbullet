@@ -172,8 +172,10 @@ int main( int argc, char** argv )
         bulletWorld->addRigidBody( rbC );
 
         {
+            osg::Vec3 axis( .707, .707, 0. );
+
             osg::ref_ptr< osgbDynamics::LinearSpringConstraint > cons1 = new osgbDynamics::LinearSpringConstraint(
-                rbB, bXform, rbC, cXform );
+                rbB, bXform, rbC, cXform, axis );
             bulletWorld->addConstraint( cons1->getConstraint() );
         }
     }
@@ -193,8 +195,11 @@ int main( int argc, char** argv )
         bulletWorld->addRigidBody( rbC );
 
         {
+            osg::Vec3 axis( 0., 1., 0. );
+            osg::Vec3 point( 5., -1.6, 0. );
+
             osg::ref_ptr< osgbDynamics::AngleSpringConstraint > cons1 = new osgbDynamics::AngleSpringConstraint(
-                rbB, bXform, rbC, cXform );
+                rbB, bXform, rbC, cXform, axis, point );
             bulletWorld->addConstraint( cons1->getConstraint() );
         }
     }
@@ -214,8 +219,12 @@ int main( int argc, char** argv )
         bulletWorld->addRigidBody( rbC );
 
         {
+            osg::Vec3 axis( 0.3, 1., 0. );
+            osg::Vec3 point( 5., 0., 0.95 );
+
             osg::ref_ptr< osgbDynamics::LinearAngleSpringConstraint > cons1 = new osgbDynamics::LinearAngleSpringConstraint(
-                rbB, bXform, rbC, cXform );
+                rbB, bXform, rbC, cXform, axis, point );
+            cons1->setLinearLimit( osg::Vec2( -3., 6. ) );
             bulletWorld->addConstraint( cons1->getConstraint() );
         }
     }
