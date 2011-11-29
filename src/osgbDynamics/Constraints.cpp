@@ -1253,6 +1253,50 @@ void BoxConstraint::internalPlanarBoxFrameComputation(
     btRigidBody* rbA, * rbB;
     cons->getRigidBodies( rbA, rbB );
 
+
+    // Create a matrix that puts A in B's coordinate space, accounting
+    // for orientation of the constraint axes.
+    //
+    //   1. Inverse A center of mass offset.
+    osgbDynamics::MotionState* motion = dynamic_cast< osgbDynamics::MotionState* >( rbA->getMotionState() );
+    if( motion == NULL )
+    {
+        osg::notify( osg::WARN ) << "InternalCreateSpring: Invalid MotionState." << std::endl;
+        return;
+    }
+    const osg::Matrix invACOM( osg::Matrix::translate( -( motion->getCenterOfMass() ) ) );
+    //
+    //   2. Transform A back to the origin.
+    const osg::Matrix invAXform( osg::Matrix::inverse( cons->getAXform() ) );
+    //
+    //   3. The final rbA frame matrix.
+    aFrame = osgbCollision::asBtTransform( 
+        orientation * invAXform * invACOM );
+
+
+    if( rbB != NULL )
+    {
+        // Create a matrix that orients the spring axis/point in B's coordinate space.
+        //
+        //   1. Inverse B center of mass offset.
+        motion = dynamic_cast< osgbDynamics::MotionState* >( rbB->getMotionState() );
+        if( motion == NULL )
+        {
+            osg::notify( osg::WARN ) << "InternalCreateSpring: Invalid MotionState." << std::endl;
+            return;
+        }
+        const osg::Matrix invBCOM( osg::Matrix::translate( -( motion->getCenterOfMass() ) ) );
+        //
+        //   2. Transform B back to the origin.
+        const osg::Matrix invBXform( osg::Matrix::inverse( cons->getBXform() ) );
+        //
+        //   3. The final rbB frame matrix.
+        bFrame = osgbCollision::asBtTransform( 
+            orientation * invBXform * invBCOM );
+    }
+
+
+#if 0
     if( rbB != NULL )
     {
         // Create a matrix that orients the axes in B's coordinate space.
@@ -1285,13 +1329,12 @@ void BoxConstraint::internalPlanarBoxFrameComputation(
     const osg::Matrix invACOM( osg::Matrix::translate( -( motion->getCenterOfMass() ) ) );
     //
     //   2. Transform from A's origin to B's origin.
-    osg::Matrix rbAXform = cons->getAXform();
-    osg::Matrix rbBXform = cons->getBXform();
     const osg::Matrix rbAToRbB( osg::Matrix::inverse( rbAXform ) * rbBXform );
     //
     //   3. The final rbA frame matrix.
     aFrame = osgbCollision::asBtTransform( 
         orientation * rbAToRbB * invACOM );
+#endif
 }
 
 
