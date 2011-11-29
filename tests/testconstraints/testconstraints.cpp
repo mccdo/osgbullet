@@ -453,6 +453,12 @@ int main( int argc, char** argv )
     }
     else if( arguments.find( "Hinge" ) > 0 )
     {
+        osg::Matrix aXform = osg::Matrix::translate( 0., 10., 0. );
+        crA->_parentTransform = aXform;
+        btRigidBody* rbA = osgbDynamics::createRigidBody( crA.get() );
+        amtA->setUserData( new osgbCollision::RefRigidBody( rbA ) );
+        bulletWorld->addRigidBody( rbA );
+
         osg::Matrix cXform = osg::Matrix::rotate( osg::PI_4, 0., 0., 1. ) *
             osg::Matrix::translate( 0., 8., 2. );
         crC->_parentTransform = cXform;
@@ -485,25 +491,17 @@ int main( int argc, char** argv )
             point.set( 3., 0., 1.5 );
             limit.set( -osg::PI_2, osg::PI );
             osg::ref_ptr< osgbDynamics::HingeConstraint > cons2 = new osgbDynamics::HingeConstraint(
-                rbB, bXform, rbE, eXform, axis, point, limit );
+                rbE, eXform, rbB, bXform, axis, point, limit );
             bulletWorld->addConstraint( cons2->getConstraint() );
         }
     }
     else if( arguments.find( "Planar" ) > 0 )
     {
-        /*
-        osg::Matrix aXform = osg::Matrix::translate( 0., 0., 3. );
+        osg::Matrix aXform = osg::Matrix::translate( 0., 10., 3. );
         crA->_parentTransform = aXform;
         btRigidBody* rbA = osgbDynamics::createRigidBody( crA.get() );
         amtA->setUserData( new osgbCollision::RefRigidBody( rbA ) );
         bulletWorld->addRigidBody( rbA );
-        */
-
-        osg::Matrix bXform = osg::Matrix::identity();
-        crB->_parentTransform = bXform;
-        btRigidBody* rbB = osgbDynamics::createRigidBody( crB.get() );
-        amtB->setUserData( new osgbCollision::RefRigidBody( rbB ) );
-        bulletWorld->addRigidBody( rbB );
 
         osg::Matrix cXform = osg::Matrix::rotate( osg::PI_4, 0., 0., 1. ) *
             osg::Matrix::translate( 0., 8., 2. );
@@ -511,6 +509,12 @@ int main( int argc, char** argv )
         btRigidBody* rbC = osgbDynamics::createRigidBody( crC.get() );
         amtC->setUserData( new osgbCollision::RefRigidBody( rbC ) );
         bulletWorld->addRigidBody( rbC );
+
+        osg::Matrix bXform = osg::Matrix::identity();
+        crB->_parentTransform = bXform;
+        btRigidBody* rbB = osgbDynamics::createRigidBody( crB.get() );
+        amtB->setUserData( new osgbCollision::RefRigidBody( rbB ) );
+        bulletWorld->addRigidBody( rbB );
 
         osg::Matrix eXform = osg::Matrix::rotate( osg::PI_4, 0., 0., 1. ) *
             osg::Matrix::translate( -2., -2., 1. );
@@ -528,8 +532,9 @@ int main( int argc, char** argv )
                 rbC, cXform, loLimit, hiLimit, orient );
             bulletWorld->addConstraint( cons1->getConstraint() );
 
+            orient = osg::Matrix::rotate( .1, 0., 1., 0. );
             osg::ref_ptr< osgbDynamics::PlanarConstraint > cons2 = new osgbDynamics::PlanarConstraint(
-                rbE, eXform, rbB, bXform, loLimit, hiLimit, orient );
+                rbB, bXform, rbE, eXform, loLimit, hiLimit, orient );
             bulletWorld->addConstraint( cons2->getConstraint() );
         }
     }
