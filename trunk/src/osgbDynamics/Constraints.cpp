@@ -1723,48 +1723,50 @@ void BallAndSocketConstraint::createConstraint()
     }
 
 
-    // Compute a matrix that transforms the world coord point into
-    // A's collision shape local coordinates.
+    // Create a matrix that returns A to the origin.
     //
-    //   1. Handle A's center of mass offset.
-    osg::Vec3 aCom;
+    //   1. Inverse A center of mass offset.
     osgbDynamics::MotionState* motion = dynamic_cast< osgbDynamics::MotionState* >( _rbA->getMotionState() );
     if( motion == NULL )
     {
-        osg::notify( osg::WARN ) << "BallAndSocketConstraint: Invalid MotionState." << std::endl;
+        osg::notify( osg::WARN ) << "InternalCreateSpring: Invalid MotionState." << std::endl;
         return;
     }
-    aCom = motion->getCenterOfMass();
+    const osg::Matrix invACOM( osg::Matrix::translate( -( motion->getCenterOfMass() ) ) );
     //
-    //   2. The final transform matrix.
-    osg::Matrix rbAMatrix = osg::Matrix::inverse( osg::Matrix::translate( aCom ) * _rbAXform );
+    //   2. Transform A back to the origin.
+    const osg::Matrix invAXform( osg::Matrix::inverse( _rbAXform ) );
+    //
+    //   3. The final rbA frame matrix.
+    const osg::Matrix aXform( invAXform * invACOM );
 
     // And now compute the WC point in rbA space:
-    const btVector3 aPt = osgbCollision::asBtVector3( _point * rbAMatrix );
+    const btVector3 aPt = osgbCollision::asBtVector3( _point * aXform );
 
 
-    // Compute a matrix that transforms the world coord point into
-    // B's collision shape local coordinates.
-    osg::Matrix rbBMatrix;
+    btVector3 bPt;
     if( _rbB != NULL )
     {
+        // Create a matrix that returns B to the origin.
         //
-        //   1. Handle B's center of mass offset.
-        osg::Vec3 bCom;
+        //   1. Inverse B center of mass offset.
         motion = dynamic_cast< osgbDynamics::MotionState* >( _rbB->getMotionState() );
         if( motion == NULL )
         {
-            osg::notify( osg::WARN ) << "BallAndSocketConstraint: Invalid MotionState." << std::endl;
+            osg::notify( osg::WARN ) << "InternalCreateSpring: Invalid MotionState." << std::endl;
             return;
         }
-        bCom = motion->getCenterOfMass();
+        const osg::Matrix invBCOM( osg::Matrix::translate( -( motion->getCenterOfMass() ) ) );
         //
-        //   2. The final transform matrix.
-        rbBMatrix = osg::Matrix::inverse( osg::Matrix::translate( bCom ) * _rbBXform );
-    }
+        //   2. Transform B back to the origin.
+        const osg::Matrix invBXform( osg::Matrix::inverse( _rbBXform ) );
+        //
+        //   3. The final rbB frame matrix.
+        const osg::Matrix bXform = invBXform * invBCOM;
 
-    // And now compute the WC point in rbB space:
-    const btVector3 bPt = osgbCollision::asBtVector3( _point * rbBMatrix );
+        // And now compute the WC point in rbB space:
+        bPt = osgbCollision::asBtVector3( _point * bXform );
+    }
 
 
     btPoint2PointConstraint* cons;
