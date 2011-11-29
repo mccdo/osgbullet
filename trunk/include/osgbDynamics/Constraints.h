@@ -47,11 +47,14 @@ namespace osgbDynamics
 These objects are designed to make it easier for OSG developers to work with
 Bullet constraints. The primary features are:
 
-\li Each class is an osg::Object with dot OSG file format support.
+\li Each class is an osg::Object with dot OSG file format support. An instance of
+the constraint can be attached as UserData to a Node in your scene graph, and saved
+and restored from a .osg file.
 \li Initial rigid body transforms are osg::Matrix objects representing the initial
-transform of the object in OSG coordinate space.
+transform of the object (the "local to world" transform, as obtained from the Node's
+NodePath).
 \li The classes provide full support for collision shapes with non-origin center of
-mass and non-unit scaling.
+mass.
 
 Note that the calling code is responsible for deleting the Bullet constraing.
 See Constraint::~Constraint().
@@ -61,8 +64,8 @@ See Constraint::~Constraint().
 /**@{*/
 
 /** \class Constraint Constraints.h <osgbDynamics/Constraints.h>
-\brief Base Constraint class with support for rigid bodies and transforms, lazy
-Bullet constraint creation, constraint access, and typecasting.
+Base Constraint class with support for rigid bodies and transforms, lazy
+Bullet constraint creation, constraint access, typecasting, and comparison.
 */
 class OSGBDYNAMICS_EXPORT Constraint : public osg::Object
 {
@@ -176,7 +179,7 @@ protected:
     the \c _dirty flag indicates that the parameters have changed.
 
     Note: Use of META_Object inhibits making this function pure virtual.
-    Constraint::getConstraing() is a no-op, and all derived classes must override this function
+    Constraint::getConstraing() is a no-op, and all derived classes override this function
     to implement Bullet constraint creation. */
     virtual void createConstraint() {}
 
@@ -193,6 +196,10 @@ typedef std::list< osg::ref_ptr< Constraint > > ConstraintList;
 
 /** \class SliderConstraint Constraints.h <osgbDynamics/Constraints.h>
 \brief Creates a constraint from an axis and movement limits on that axis.
+
+The axis is in world coordinates. The limit units are in world coordinates.
+Position 0.0 along the axis refers to the initial transform of the constrained
+bodies.
 
 This class uses btSliderConstraint internally. Access the Bullet constraint
 directly with getAsBtSlider().
@@ -256,7 +263,11 @@ protected:
 
 
 /** \class TwistSliderConstraint Constraints.h <osgbDynamics/Constraints.h>
-\brief A SliderConstraint that allows rotation around the slide axis.
+\brief A SliderConstraint that allows free rotation around the slide axis.
+
+The axis is in world coordinates. The limit units are in world coordinates.
+Position 0.0 along the axis refers to the initial transform of the constrained
+bodies.
 
 Because this class derives from SliderConstraint, it uses btSliderConstraint
 internally. Access the Bullet constraint directly with
@@ -285,17 +296,21 @@ protected:
 /** \class InternalSpringData Constraints.h <osgbDynamics/Constraints.h>
 \brief For internal storage of Bullet spring constraint parameters.
 
-Must export this class for dot osg support (unless we want to embed the
-dot osg support in this library).
-*/
+All three osgBullet spring-type constraints (LinearSpringConstraint,
+AngleSpringConstraint, and LinearAngleSpringConstraint) use the Bullet
+btGeneric6DofSpringConstraint internally, but each configures the
+Bullet constraint differently. InternalSpringData stores the parameters
+for btGeneric6DofSpringConstraint, and each of the osgBullet spring
+constraints sets different parameter values to configure the Bullet
+constraint accordingly. */
 struct OSGBDYNAMICS_EXPORT InternalSpringData : public osg::Object
 {
     InternalSpringData();
     InternalSpringData( const InternalSpringData& rhs, const osg::CopyOp& copyop=osg::CopyOp::SHALLOW_COPY );
     META_Object(osgbDynamics,InternalSpringData);
 
-    /** \brief TBD
-    */
+    /** Configure the Bullet constraint \c cons with this
+    struct's stored parameter values. */
     void apply( btGeneric6DofSpringConstraint* cons ) const;
 
     /** Return true if all member variables are equal to their equivalent
@@ -316,11 +331,24 @@ struct OSGBDYNAMICS_EXPORT InternalSpringData : public osg::Object
 
 
 /** \class LinearSpringConstraint Constraints.h <osgbDynamics/Constraints.h>
-\brief TBD
+\brief An axis-constrained spring.
+
+The axis is in world coordinates. The limit units are in world coordinates.
+Position 0.0 along the axis refers to the initial transform of the constrained
+bodies.
 
 This class uses btGeneric6DofSpringConstraint internally. Access the Bullet constraint
 directly with getAsBtGeneric6DofSpring().
-*/
+
+The btGeneric6DofSpringConstraint parameters are stored in an InternalSpringData struct.
+All osgBullet spring-like constraints share a common function for configuring the
+Bullet btGeneric6DofSpringConstraint,
+LinearSpringConstraint::internalCreateSpringConstraint(). This is declared private,
+but access to other spring constraints is allowed using the friend declarative.
+
+As with all btGeneric6DofSpringConstraint constraints, and unlike most other
+Bullet constraints, calling code must specify two rigid bodies. Constraining
+one rigid body to a sping is not supported by Bullet. */
 class OSGBDYNAMICS_EXPORT LinearSpringConstraint : public Constraint
 {
 public:
@@ -336,8 +364,9 @@ public:
 
     /** \brief Storage of spring constraint parameters.
 
-    This is essentially for internal use by the three spring-type constraints.
-    */
+    This is essentially for internal use by the three spring-type constraints,
+    primarily for dot OSG support. The InternalSpringData struct is not intended
+    to be shared by multiple instances of spring constraints. */
     void setSpringData( InternalSpringData* data );
     const InternalSpringData* getSpringData() const
     {
@@ -414,11 +443,25 @@ private:
 
 
 /** \class AngleSpringConstraint Constraints.h <osgbDynamics/Constraints.h>
-\brief TBD
+\brief An angle spring for rotating around an axis.
+
+The axis is in world coordinates. Calling code must also specify a point in
+space that the axis passes through; this point is also in world coordinates.
+The limit units are in radians. Radian value 0.0 refers to the initial transform
+of the constrained bodies.
 
 This class uses btGeneric6DofSpringConstraint internally. Access the Bullet constraint
 directly with getAsBtGeneric6DofSpring().
-*/
+
+The btGeneric6DofSpringConstraint parameters are stored in an InternalSpringData struct.
+All osgBullet spring-like constraints share a common function for configuring the
+Bullet btGeneric6DofSpringConstraint,
+LinearSpringConstraint::internalCreateSpringConstraint(). This is declared private,
+but access to other spring constraints is allowed using the friend declarative.
+
+As with all btGeneric6DofSpringConstraint constraints, and unlike most other
+Bullet constraints, calling code must specify two rigid bodies. Constraining
+one rigid body to a sping is not supported by Bullet. */
 class OSGBDYNAMICS_EXPORT AngleSpringConstraint : public Constraint
 {
 public:
@@ -434,8 +477,9 @@ public:
 
     /** \brief Storage of spring constraint parameters.
 
-    This is essentially for internal use by the three spring-type constraints.
-    */
+    This is essentially for internal use by the three spring-type constraints,
+    primarily for dot OSG support. The InternalSpringData struct is not intended
+    to be shared by multiple instances of spring constraints. */
     void setSpringData( InternalSpringData* data );
     const InternalSpringData* getSpringData() const
     {
@@ -509,9 +553,27 @@ protected:
 /** \class LinearAngleSpringConstraint Constraints.h <osgbDynamics/Constraints.h>
 \brief TBD
 
+The axis is in world coordinates. Calling code must also specify a point in
+space that the axis passes through; this point is also in world coordinates.
+
+There are two pairs of limit values:
+\li The linear limit units are in world coordinates. Position 0.0 along the
+axis refers to the initial transform of the constrained bodies.
+\li The angle limit units are in radians. Radian value 0.0 refers to the initial
+transform of the constrained bodies.
+
 This class uses btGeneric6DofSpringConstraint internally. Access the Bullet constraint
 directly with getAsBtGeneric6DofSpring().
-*/
+
+The btGeneric6DofSpringConstraint parameters are stored in an InternalSpringData struct.
+All osgBullet spring-like constraints share a common function for configuring the
+Bullet btGeneric6DofSpringConstraint,
+LinearSpringConstraint::internalCreateSpringConstraint(). This is declared private,
+but access to other spring constraints is allowed using the friend declarative.
+
+As with all btGeneric6DofSpringConstraint constraints, and unlike most other
+Bullet constraints, calling code must specify two rigid bodies. Constraining
+one rigid body to a sping is not supported by Bullet. */
 class OSGBDYNAMICS_EXPORT LinearAngleSpringConstraint : public Constraint
 {
 public:
@@ -527,8 +589,9 @@ public:
 
     /** \brief Storage of spring constraint parameters.
 
-    This is essentially for internal use by the three spring-type constraints.
-    */
+    This is essentially for internal use by the three spring-type constraints,
+    primarily for dot OSG support. The InternalSpringData struct is not intended
+    to be shared by multiple instances of spring constraints. */
     void setSpringData( InternalSpringData* data );
     const InternalSpringData* getSpringData() const
     {
@@ -626,7 +689,7 @@ protected:
 
 
 /** \class FixedConstraint Constraints.h <osgbDynamics/Constraints.h>
-\brief TBD
+\brief A constraint that prohibits all relative transformation.
 
 This class uses btGeneric6DofConstraint internally. Access the Bullet constraint
 directly with getAsBtGeneric6Dof().
@@ -653,12 +716,12 @@ protected:
 /** \class PlanarConstraint Constraints.h <osgbDynamics/Constraints.h>
 \brief Allows bodies to move relative to each other in a plane.
 
-The user can specify the orientation (\c _orient) of the plane using setOrient(). \c _orient
+The user can specify the orientation (\c _orient) of the plane using setOrient(). The \c _orient
 matrix determines the plane orientation based on the following pseudocode:
 
 \code
   if _orient is identity
-    the plane is in B'a coord space.
+    the plane is in B's coord space.
     if B is NULL
       the plane is in the world coord space.
   else
@@ -672,7 +735,11 @@ on the initial local-to-world transform(s).
 
 This class uses btGeneric6DofConstraint internally. Access the Bullet constraint
 directly with getAsBtGeneric6Dof().
-*/
+
+Configuration of the internal btGeneric6DofConstraint is nearly identical between
+PlanarConstraint and BoxConstraint, so the two classes use a common function,
+BoxConstraint::internalPlanarBoxFrameComputation(). Access to PlanarConstraint
+is allowed via the friend declarative. */
 class OSGBDYNAMICS_EXPORT PlanarConstraint : public Constraint
 {
 public:
@@ -745,11 +812,21 @@ protected:
 
 
 /** \class BoxConstraint Constraints.h <osgbDynamics/Constraints.h>
-\brief TBD
+\brief Allows translation along three axes, but doesn't allow any rotation.
+
+Translation is allowed withing a "box" defined by setLowLimit() and
+setHighLimit().
+
+Orient the box axes using setOrient(). The resulting orientation is described
+in the documentation for PlanarConstraint.
 
 This class uses btGeneric6DofConstraint internally. Access the Bullet constraint
 directly with getAsBtGeneric6Dof().
-*/
+
+Configuration of the internal btGeneric6DofConstraint is nearly identical between
+PlanarConstraint and BoxConstraint, so the two classes use a common function,
+BoxConstraint::internalPlanarBoxFrameComputation(). Access to PlanarConstraint
+is allowed via the friend declarative. */
 class OSGBDYNAMICS_EXPORT BoxConstraint : public Constraint
 {
 public:
@@ -829,7 +906,12 @@ private:
 
 
 /** \class HingeConstraint Constraints.h <osgbDynamics/Constraints.h>
-\brief TBD
+\brief Limits rotation around a single axis. Allows no other rotation, and
+no translation.
+
+The axis and pivot points are in world coordinates. The hinge limits
+are in radians, with rotation limit 0.0 corresponding to the initial transform
+of the constrained body or bodies.
 
 This class uses btHingeConstraint internally. Access the Bullet constraint
 directly with getAsBtHinge().
@@ -909,12 +991,17 @@ protected:
 
 
 /** \class CardanConstraint Constraints.h <osgbDynamics/Constraints.h>
-\brief Implements a universal or Cardan constraint.
+\brief Implements a universal or Cardan constraint, useful for transferring torque
+from one body to another.
 
-This constraint requires two rigid bodies. The axes and anchor point are in
-world coordinates. \c _axisA is the rotational axis for \c _rbA, and \c
-_axisB is the rotational axis for \c _rbB. The anchor point (\c _point) is the
-world coordinate point common to both axes.
+Like the spring constraints, and unlike most Bullet constraints,
+CardanConstraint requires two rigid bodies. This is a requirement imposed
+by Bullet.
+
+The axes and anchor point are in world coordinates. \c _axisA is the
+rotational axis for \c _rbA, and \c _axisB is the rotational axis for
+\c _rbB. The anchor point (\c _point) is the world coordinate point common
+to both axes.
 
 This class uses btUniversalConstraint internally. Access the Bullet constraint
 directly with getAsBtUniversal().
@@ -936,8 +1023,7 @@ public:
 
     /** \brief Specify rigid body A's rotational axis in world coords.
 
-    Default is ( 0., 1., 0. ).
-    */
+    Default is ( 0., 1., 0. ), the y axis. */
     void setAxisA( const osg::Vec3& axisA );
     /** \overload */
     void setAxisA( const double x, const double y, const double z );
@@ -947,8 +1033,7 @@ public:
     }
     /** \brief Specify rigid body B's rotational axis in world coords.
 
-    Default is ( 1., 0., 0. ).
-    */
+    Default is ( 1., 0., 0. ), the x axis. */
     void setAxisB( const osg::Vec3& axisB );
     /** \overload */
     void setAxisB( const double x, const double y, const double z );
@@ -958,8 +1043,7 @@ public:
     }
     /** \brief Specify the world coordinate anchor point.
 
-    Default is ( 0., 0., 0. ).
-    */
+    Default is ( 0., 0., 0. ), the origin. */
     void setAnchorPoint( const osg::Vec3& wcPoint );
     /** \overload */
     void setAnchorPoint( const double x, const double y, const double z );
@@ -1009,9 +1093,8 @@ public:
 
     /** \brief Specify the common point in world coordinates.
 
-    The rbA and rbB transforms are used to convert this point into local coordinates,
-    which are then passed into the btPoint2PointConstraint constructor.
-    */
+    The rbA and rbB transforms are used to convert this point into each body's local
+    coordinates, which are then passed into the btPoint2PointConstraint constructor. */
     void setPoint( const osg::Vec3& wcPoint );
     /** \overload */
     void setPoint( const double x, const double y, const double z );
@@ -1037,7 +1120,13 @@ protected:
 
 
 /** \class RagdollConstraint Constraints.h <osgbDynamics/Constraints.h>
-\brief TBD
+\brief Like BallAndSocketConstraint, but limits movement to within a cone around
+a specified axis.
+
+Like BallAndSocketConstraint, RagdollConstraint takes a world coordinate point
+that is common between the two constrained bodies. Use RagdollConstraint::setAngle()
+to specify the spread angle of the cone in radians. RagdollConstraint::setAxis()
+specifies the center of the cone.
 
 This class uses btConeTwistConstraint internally. Access the Bullet constraint
 directly with getAsBtConeTwist().

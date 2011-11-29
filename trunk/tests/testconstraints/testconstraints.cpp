@@ -68,7 +68,20 @@ int main( int argc, char** argv )
 
     int ctestPos = arguments.find( "--ctest" );
     if( ctestPos > 0 )
-        return( runCTest( arguments[ ctestPos+1 ] ) );
+    {
+        if( argc <= ( ctestPos+1 ) )
+        {
+            osg::notify( osg::FATAL ) << "Usage: testconstraint [--debug] [--ctest] <testname>" << std::endl;
+            osg::notify( osg::FATAL ) << "\tIf \"--ctest\" is present, <testname> must be present." << std::endl;
+            osg::notify( osg::FATAL ) << "\tIf \"--ctest\" is not present, <testname> is optional and defaults to \"Slider\"." << std::endl;
+            return( 1 );
+        }
+
+        const int returnValue( runCTest( arguments[ ctestPos+1 ] ) );
+        if( returnValue == 0 )
+            osg::notify( osg::ALWAYS ) << "Test \"" << arguments[ ctestPos+1 ] << "\" passed." << std::endl;
+        return( returnValue );
+    }
 
     const bool debugDisplay( arguments.find( "--debug" ) > 0 );
 
@@ -158,18 +171,36 @@ int main( int argc, char** argv )
 
     if( arguments.find( "LinearSpring" ) > 0 )
     {
-        osg::Matrix bXform = osg::Matrix::identity();
+        osg::Matrix bXform = osg::Matrix::rotate( osg::PI_4, 0., 0., 1. ) *
+            osg::Matrix::translate( -3., 1., 0. );
         crB->_parentTransform = bXform;
-        crB->_mass = 0.;
         btRigidBody* rbB = osgbDynamics::createRigidBody( crB.get() );
         amtB->setUserData( new osgbCollision::RefRigidBody( rbB ) );
         bulletWorld->addRigidBody( rbB );
 
-        osg::Matrix cXform = osg::Matrix::translate( 5., 0., 0. );
+        osg::Matrix cXform = osg::Matrix::translate( 5., 0., 0. ) *
+            osg::Matrix::rotate( osg::PI_4, 0., 0., 1. ) *
+            osg::Matrix::translate( -3., 1., 0. );
         crC->_parentTransform = cXform;
         btRigidBody* rbC = osgbDynamics::createRigidBody( crC.get() );
         amtC->setUserData( new osgbCollision::RefRigidBody( rbC ) );
         bulletWorld->addRigidBody( rbC );
+
+        osg::Matrix aXform = osg::Matrix::rotate( -osg::PI_4, 0., 0., 1. ) *
+            osg::Matrix::translate( 4., 3., 0. );
+        crA->_parentTransform = aXform;
+        crA->_mass = 0.;
+        btRigidBody* rbA = osgbDynamics::createRigidBody( crA.get() );
+        amtA->setUserData( new osgbCollision::RefRigidBody( rbA ) );
+        bulletWorld->addRigidBody( rbA );
+
+        osg::Matrix eXform = osg::Matrix::translate( 0.05, 0., -1.95 ) *
+            osg::Matrix::rotate( -osg::PI_4, 0., 0., 1. ) *
+            osg::Matrix::translate( 4., 3., 0. );
+        crE->_parentTransform = eXform;
+        btRigidBody* rbE = osgbDynamics::createRigidBody( crE.get() );
+        amtE->setUserData( new osgbCollision::RefRigidBody( rbE ) );
+        bulletWorld->addRigidBody( rbE );
 
         {
             osg::Vec3 axis( .707, .707, 0. );
@@ -177,55 +208,115 @@ int main( int argc, char** argv )
             osg::ref_ptr< osgbDynamics::LinearSpringConstraint > cons1 = new osgbDynamics::LinearSpringConstraint(
                 rbB, bXform, rbC, cXform, axis );
             bulletWorld->addConstraint( cons1->getConstraint() );
+
+            axis.set( -.707, 0., 1. );
+            osg::ref_ptr< osgbDynamics::LinearSpringConstraint > cons2 = new osgbDynamics::LinearSpringConstraint(
+                rbA, aXform, rbE, eXform, axis );
+            cons2->setStiffness( 50. );
+            cons2->setLimit( -1., 2. );
+            bulletWorld->addConstraint( cons2->getConstraint() );
         }
     }
     else if( arguments.find( "AngleSpring" ) > 0 )
     {
-        osg::Matrix bXform = osg::Matrix::identity();
+        osg::Matrix bXform = osg::Matrix::rotate( osg::PI_4, 0., 0., 1. ) *
+            osg::Matrix::translate( -3., 1., 0. );
         crB->_parentTransform = bXform;
-        crB->_mass = 0.;
         btRigidBody* rbB = osgbDynamics::createRigidBody( crB.get() );
         amtB->setUserData( new osgbCollision::RefRigidBody( rbB ) );
         bulletWorld->addRigidBody( rbB );
 
-        osg::Matrix cXform = osg::Matrix::translate( 5., 0., 0. );
+        osg::Matrix cXform = osg::Matrix::translate( 5., 0., 0. ) *
+            osg::Matrix::rotate( osg::PI_4, 0., 0., 1. ) *
+            osg::Matrix::translate( -3., 1., 0. );
         crC->_parentTransform = cXform;
         btRigidBody* rbC = osgbDynamics::createRigidBody( crC.get() );
         amtC->setUserData( new osgbCollision::RefRigidBody( rbC ) );
         bulletWorld->addRigidBody( rbC );
 
+        osg::Matrix aXform = osg::Matrix::rotate( -osg::PI_4, 0., 0., 1. ) *
+            osg::Matrix::translate( 4., 3., 0. );
+        crA->_parentTransform = aXform;
+        crA->_mass = 0.;
+        btRigidBody* rbA = osgbDynamics::createRigidBody( crA.get() );
+        amtA->setUserData( new osgbCollision::RefRigidBody( rbA ) );
+        bulletWorld->addRigidBody( rbA );
+
+        osg::Matrix eXform = osg::Matrix::translate( 0.05, 0., -1.95 ) *
+            osg::Matrix::rotate( -osg::PI_4, 0., 0., 1. ) *
+            osg::Matrix::translate( 4., 3., 0. );
+        crE->_parentTransform = eXform;
+        btRigidBody* rbE = osgbDynamics::createRigidBody( crE.get() );
+        amtE->setUserData( new osgbCollision::RefRigidBody( rbE ) );
+        bulletWorld->addRigidBody( rbE );
+
         {
-            osg::Vec3 axis( 0., 1., 0. );
-            osg::Vec3 point( 5., -1.6, 0. );
+            osg::Vec3 axis( .707, .707, 0. );
+            osg::Vec3 point = osg::Vec3( 0., 0., 0.05 ) * bXform;
 
             osg::ref_ptr< osgbDynamics::AngleSpringConstraint > cons1 = new osgbDynamics::AngleSpringConstraint(
                 rbB, bXform, rbC, cXform, axis, point );
             bulletWorld->addConstraint( cons1->getConstraint() );
+
+            axis.set( -.707, 0., 1. );
+            point.set( osg::Vec3( 1.05, 1.05, -1. ) * aXform );
+            osg::ref_ptr< osgbDynamics::AngleSpringConstraint > cons2 = new osgbDynamics::AngleSpringConstraint(
+                rbA, aXform, rbE, eXform, axis, point );
+            cons2->setStiffness( 20. );
+            cons2->setLimit( -.7, .7 );
+            bulletWorld->addConstraint( cons2->getConstraint() );
         }
     }
     else if( arguments.find( "LinearAngleSpring" ) > 0 )
     {
-        osg::Matrix bXform = osg::Matrix::identity();
+        osg::Matrix bXform = osg::Matrix::rotate( osg::PI_4, 0., 0., 1. ) *
+            osg::Matrix::translate( -3., 1., 0. );
         crB->_parentTransform = bXform;
-        crB->_mass = 0.;
         btRigidBody* rbB = osgbDynamics::createRigidBody( crB.get() );
         amtB->setUserData( new osgbCollision::RefRigidBody( rbB ) );
         bulletWorld->addRigidBody( rbB );
 
-        osg::Matrix cXform = osg::Matrix::translate( 5., 0., 0. );
+        osg::Matrix cXform = osg::Matrix::translate( 5., 0., 0. ) *
+            osg::Matrix::rotate( osg::PI_4, 0., 0., 1. ) *
+            osg::Matrix::translate( -3., 1., 0. );
         crC->_parentTransform = cXform;
         btRigidBody* rbC = osgbDynamics::createRigidBody( crC.get() );
         amtC->setUserData( new osgbCollision::RefRigidBody( rbC ) );
         bulletWorld->addRigidBody( rbC );
 
+        osg::Matrix aXform = osg::Matrix::rotate( -osg::PI_4, 0., 0., 1. ) *
+            osg::Matrix::translate( 4., 3., 0. );
+        crA->_parentTransform = aXform;
+        crA->_mass = 0.;
+        btRigidBody* rbA = osgbDynamics::createRigidBody( crA.get() );
+        amtA->setUserData( new osgbCollision::RefRigidBody( rbA ) );
+        bulletWorld->addRigidBody( rbA );
+
+        osg::Matrix eXform = osg::Matrix::translate( 0.05, 0., -1.95 ) *
+            osg::Matrix::rotate( -osg::PI_4, 0., 0., 1. ) *
+            osg::Matrix::translate( 4., 3., 0. );
+        crE->_parentTransform = eXform;
+        btRigidBody* rbE = osgbDynamics::createRigidBody( crE.get() );
+        amtE->setUserData( new osgbCollision::RefRigidBody( rbE ) );
+        bulletWorld->addRigidBody( rbE );
+
         {
-            osg::Vec3 axis( 0.3, 1., 0. );
-            osg::Vec3 point( 5., 0., 0.95 );
+            osg::Vec3 axis( .707, .707, 0. );
+            osg::Vec3 point = osg::Vec3( 0., 0., 0.05 ) * bXform;
 
             osg::ref_ptr< osgbDynamics::LinearAngleSpringConstraint > cons1 = new osgbDynamics::LinearAngleSpringConstraint(
                 rbB, bXform, rbC, cXform, axis, point );
-            cons1->setLinearLimit( osg::Vec2( -3., 6. ) );
+            cons1->setLinearLimit( -1.5, 3. );
             bulletWorld->addConstraint( cons1->getConstraint() );
+
+            axis.set( -.707, 0., 1. );
+            point.set( osg::Vec3( 1.05, 1.05, -1. ) * aXform );
+            osg::ref_ptr< osgbDynamics::LinearAngleSpringConstraint > cons2 = new osgbDynamics::LinearAngleSpringConstraint(
+                rbA, aXform, rbE, eXform, axis, point );
+            cons2->setLinearStiffness( 30. );
+            cons2->setAngleStiffness( 60. );
+            cons2->setAngleLimit( -.7, .7 );
+            bulletWorld->addConstraint( cons2->getConstraint() );
         }
     }
     else if( arguments.find( "Cardan" ) > 0 )
@@ -237,7 +328,9 @@ int main( int argc, char** argv )
         amtC->setUserData( new osgbCollision::RefRigidBody( rbC ) );
         bulletWorld->addRigidBody( rbC );
 
-        osg::Matrix eXform = osg::Matrix::translate( -2.2, -2., 3. );
+        osg::Vec3 anchor1 = osg::Vec3( 0., 0., -1.5 ) * cXform;
+
+        osg::Matrix eXform = osg::Matrix::translate( anchor1[0]-2., -2., 3. );
         crE->_parentTransform = eXform;
         btRigidBody* rbE = osgbDynamics::createRigidBody( crE.get() );
         amtE->setUserData( new osgbCollision::RefRigidBody( rbE ) );
@@ -247,13 +340,12 @@ int main( int argc, char** argv )
             // Use Cardan to constraint C and E together.
             osg::Vec3 axisA( 0., 1., 0. );
             osg::Vec3 axisB( -1., 0., 0. );
-            osg::Vec3 anchor( -.2, 0., 7. );
 
             osg::ref_ptr< osgbDynamics::CardanConstraint > cons1 = new osgbDynamics::CardanConstraint(
-                rbC, cXform, rbE, eXform, axisA, axisB, anchor );
+                rbC, cXform, rbE, eXform, axisA, axisB, anchor1 );
             bulletWorld->addConstraint( cons1->getConstraint() );
 
-            // Further constraint C in space to that E hangs off it,
+            // Further constraint C in space so that E hangs off it,
             // and allows user to rotate C. Torque should transfer to E.
             osg::Vec3 eAxis = osg::Vec3( 0., 0., 1. ) * osg::Matrix::rotate( .5, 0., 1., 0. );
             osg::Vec2 limits( 0., 0. );
@@ -264,26 +356,59 @@ int main( int argc, char** argv )
     }
     else if( arguments.find( "Ragdoll" ) > 0 )
     {
-        osg::Matrix cXform = osg::Matrix::translate( 6.75, 6.75, 0. );
+        osg::Matrix cXform = osg::Matrix::translate( 3., 4., 0. );
         crC->_parentTransform = cXform;
         btRigidBody* rbC = osgbDynamics::createRigidBody( crC.get() );
         amtC->setUserData( new osgbCollision::RefRigidBody( rbC ) );
         bulletWorld->addRigidBody( rbC );
 
-        osg::Matrix eXform = osg::Matrix::translate( 2., 2.75, -2. );
+        osg::Matrix eXform = osg::Matrix::translate( 4., 2., -2. );
         crE->_parentTransform = eXform;
         btRigidBody* rbE = osgbDynamics::createRigidBody( crE.get() );
         amtE->setUserData( new osgbCollision::RefRigidBody( rbE ) );
         bulletWorld->addRigidBody( rbE );
 
+        osg::Matrix bXform = osg::Matrix::translate( -3., 1., 1. );
+        crB->_parentTransform = bXform;
+        btRigidBody* rbB = osgbDynamics::createRigidBody( crB.get() );
+        amtB->setUserData( new osgbCollision::RefRigidBody( rbB ) );
+        bulletWorld->addRigidBody( rbB );
+
+        osg::Matrix aXform = osg::Matrix::translate( 0., 0., 5. );
+        crA->_parentTransform = aXform;
+        btRigidBody* rbA = osgbDynamics::createRigidBody( crA.get() );
+        amtA->setUserData( new osgbCollision::RefRigidBody( rbA ) );
+        bulletWorld->addRigidBody( rbA );
+
         {
-            osg::Vec3 point( 5.5, 5.5, 0. );
-            osg::Vec3 axis( 1., 1., 0. );
+            osg::Vec3 point( 4.5, 4., 0. );
+            osg::Vec3 axis( -1., 0., 0. );
             double angle( .75 );
 
             osg::ref_ptr< osgbDynamics::RagdollConstraint > cons1 = new osgbDynamics::RagdollConstraint(
                 rbC, cXform, rbE, eXform, point, axis, angle );
             bulletWorld->addConstraint( cons1->getConstraint() );
+
+
+            // TBD There seems to be an issue with specifying only one rigid body
+            // when using btConeTwistConstraint. Could be an osgBullet issue, or
+            // could be a Bullet issue. Need to investigate.
+
+            point.set( -3., 1., 2.5 );
+            axis.set( 0., 0., -1. );
+            angle = osg::PI_2;
+
+            osg::ref_ptr< osgbDynamics::RagdollConstraint > cons2 = new osgbDynamics::RagdollConstraint(
+                rbB, bXform, point, axis, angle );
+            bulletWorld->addConstraint( cons2->getConstraint() );
+
+            point.set( -1., 0., 5. );
+            axis.set( 1., 0., 0. );
+            angle = osg::PI_2;
+
+            osg::ref_ptr< osgbDynamics::RagdollConstraint > cons3 = new osgbDynamics::RagdollConstraint(
+                rbA, aXform, point, axis, angle );
+            bulletWorld->addConstraint( cons3->getConstraint() );
         }
     }
     else if( arguments.find( "WheelSuspension" ) > 0 )
