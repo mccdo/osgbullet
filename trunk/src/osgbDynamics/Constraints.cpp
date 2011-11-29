@@ -1919,17 +1919,20 @@ WheelSuspensionConstraint::WheelSuspensionConstraint()
   : Constraint(),
     _springAxis( 0., 0., 1. ),
     _axleAxis( 0., 1., 0. ),
-    _limit( -osg::PI_4, osg::PI_4 ),
+    _linearLimit( -1., 1. ),
+    _angleLimit( -osg::PI_4, osg::PI_4 ),
     _point( 0., 0., 0. )
 {
 }
 WheelSuspensionConstraint::WheelSuspensionConstraint( btRigidBody* rbA, btRigidBody* rbB,
-        const osg::Vec3& springAxis, const osg::Vec3& axleAxis, const osg::Vec2& limit,
+        const osg::Vec3& springAxis, const osg::Vec3& axleAxis,
+        const osg::Vec2& linearLimit, const osg::Vec2& angleLimit,
         const osg::Vec3& point )
   : Constraint( rbA, rbB ),
     _springAxis( springAxis ),
     _axleAxis( axleAxis ),
-    _limit( limit ),
+    _linearLimit( linearLimit ),
+    _angleLimit( angleLimit ),
     _point( point )
 {
 }
@@ -1937,7 +1940,8 @@ WheelSuspensionConstraint::WheelSuspensionConstraint( const WheelSuspensionConst
   : Constraint( rhs, copyop ),
     _springAxis( rhs._springAxis ),
     _axleAxis( rhs._axleAxis ),
-    _limit( rhs._limit ),
+    _linearLimit( rhs._linearLimit ),
+    _angleLimit( rhs._angleLimit ),
     _point( rhs._point )
 {
 }
@@ -1968,23 +1972,41 @@ void WheelSuspensionConstraint::setAxleAxis( const double x, const double y, con
 {
     setAxleAxis( osg::Vec3( x, y, z ) );
 }
-void WheelSuspensionConstraint::setLimit( const osg::Vec2& limit )
+void WheelSuspensionConstraint::setLinearLimit( const osg::Vec2& linearLimit )
 {
-    _limit = limit;
+    _linearLimit = linearLimit;
 
     if( !getDirty() && ( _constraint != NULL ) )
     {
         // Dynamically modify the existing constraint.
         btHinge2Constraint* cons = getAsBtHinge2();
-        cons->setUpperLimit( _limit[ 1 ] );
-        cons->setLowerLimit( _limit[ 1 ] );
+        cons->setLinearLowerLimit( btVector3( 0., 0., _linearLimit[ 0 ] ) );
+        cons->setLinearUpperLimit( btVector3( 0., 0., _linearLimit[ 1 ] ) );
     }
     else
         setDirty();
 }
-void WheelSuspensionConstraint::setLimit( const double lo, const double hi )
+void WheelSuspensionConstraint::setLinearLimit( const double lo, const double hi )
 {
-    setLimit( osg::Vec2( lo, hi ) );
+    setLinearLimit( osg::Vec2( lo, hi ) );
+}
+void WheelSuspensionConstraint::setAngleLimit( const osg::Vec2& limitRadians )
+{
+    _angleLimit = limitRadians;
+
+    if( !getDirty() && ( _constraint != NULL ) )
+    {
+        // Dynamically modify the existing constraint.
+        btHinge2Constraint* cons = getAsBtHinge2();
+        cons->setLowerLimit( _angleLimit[ 0 ] );
+        cons->setUpperLimit( _angleLimit[ 1 ] );
+    }
+    else
+        setDirty();
+}
+void WheelSuspensionConstraint::setAngleLimit( const double lo, const double hi )
+{
+    setAngleLimit( osg::Vec2( lo, hi ) );
 }
 void WheelSuspensionConstraint::setAnchorPoint( const osg::Vec3& wcPoint )
 {
@@ -2005,7 +2027,8 @@ bool WheelSuspensionConstraint::operator!=( const WheelSuspensionConstraint& rhs
     return(
         ( _springAxis != rhs._springAxis ) ||
         ( _axleAxis != rhs._axleAxis ) ||
-        ( _limit != rhs._limit ) ||
+        ( _linearLimit != rhs._linearLimit ) ||
+        ( _angleLimit != rhs._angleLimit ) ||
         ( _point != rhs._point ) ||
         ( Constraint::operator!=( static_cast< const Constraint& >( rhs ) ) )
     );
@@ -2036,8 +2059,11 @@ void WheelSuspensionConstraint::createConstraint()
     // Everything is in world coords, just create the constraint.
     btHinge2Constraint* cons = new btHinge2Constraint( *_rbA, *_rbB, anchor, spring, axle );
 
-    cons->setLowerLimit( _limit[ 0 ] );
-    cons->setUpperLimit( _limit[ 1 ] );
+    cons->setLinearLowerLimit( btVector3( 0., 0., _linearLimit[ 0 ] ) );
+    cons->setLinearUpperLimit( btVector3( 0., 0., _linearLimit[ 1 ] ) );
+    cons->setLowerLimit( _angleLimit[ 0 ] );
+    cons->setUpperLimit( _angleLimit[ 1 ] );
+    cons->setEquilibriumPoint();
 
     _constraint = cons;
 

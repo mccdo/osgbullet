@@ -969,17 +969,31 @@ bool WheelSuspensionConstraint_readLocalData( osg::Object& obj, osgDB::Input& fr
         return( false );
     }
 
-    if( fr.matchSequence( "Limit %f %f" ) )
+    if( fr.matchSequence( "Linear limit %f %f" ) )
     {
         osg::Vec2 limit;
-        fr[1].getFloat( ( limit[0] ) );
-        fr[2].getFloat( ( limit[1] ) );
-        cons.setLimit( limit );
-        fr += 3;
+        fr[2].getFloat( ( limit[0] ) );
+        fr[3].getFloat( ( limit[1] ) );
+        cons.setLinearLimit( limit );
+        fr += 4;
     }
     else
     {
-        osg::notify( osg::WARN ) << "WheelSuspensionConstraint_readLocalData: Bad input data at \"Limit\"." << std::endl;
+        osg::notify( osg::WARN ) << "WheelSuspensionConstraint_readLocalData: Bad input data at \"Linear limit\"." << std::endl;
+        return( false );
+    }
+
+    if( fr.matchSequence( "Angle limit %f %f" ) )
+    {
+        osg::Vec2 limit;
+        fr[2].getFloat( ( limit[0] ) );
+        fr[3].getFloat( ( limit[1] ) );
+        cons.setAngleLimit( limit );
+        fr += 4;
+    }
+    else
+    {
+        osg::notify( osg::WARN ) << "WheelSuspensionConstraint_readLocalData: Bad input data at \"Angle limit\"." << std::endl;
         return( false );
     }
 
@@ -1006,7 +1020,8 @@ bool WheelSuspensionConstraint_writeLocalData( const osg::Object& obj, osgDB::Ou
 
     fw.indent() << "Spring axis " << cons.getSpringAxis() << std::endl;
     fw.indent() << "Axle axis " << cons.getAxleAxis() << std::endl;
-    fw.indent() << "Limit " << cons.getLimit() << std::endl;
+    fw.indent() << "Linear limit " << cons.getLinearLimit() << std::endl;
+    fw.indent() << "Angle limit " << cons.getAngleLimit() << std::endl;
     fw.indent() << "Anchor point " << cons.getAnchorPoint() << std::endl;
 
     return( true );

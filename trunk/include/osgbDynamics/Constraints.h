@@ -1130,7 +1130,10 @@ specifies the center of the cone.
 
 This class uses btConeTwistConstraint internally. Access the Bullet constraint
 directly with getAsBtConeTwist().
-*/
+
+NOTE: Currently there appears to be an issue if only one rigid body is specified.
+This could be an osgBullet issue, or an issue with Bullet btConeTwistConstraint.
+Need to investigate. */
 class OSGBDYNAMICS_EXPORT RagdollConstraint : public Constraint
 {
 public:
@@ -1218,7 +1221,8 @@ public:
     WheelSuspensionConstraint( btRigidBody* rbA, btRigidBody* rbB,
             const osg::Vec3& springAxis=osg::Vec3(0.,1.,0),
             const osg::Vec3& axleAxis=osg::Vec3(1.,0.,0),
-            const osg::Vec2& limit=osg::Vec2( -osg::PI_4, osg::PI_4 ),
+            const osg::Vec2& linearLimit=osg::Vec2( -1., 1. ),
+            const osg::Vec2& angleLimit=osg::Vec2( -osg::PI_4, osg::PI_4 ),
             const osg::Vec3& point=osg::Vec3(0.,0.,0) );
     WheelSuspensionConstraint( const WheelSuspensionConstraint& rhs, const osg::CopyOp& copyop=osg::CopyOp::SHALLOW_COPY );
     META_Object(osgbDynamics,WheelSuspensionConstraint);
@@ -1256,19 +1260,31 @@ public:
     {
         return( _axleAxis );
     }
-    /** \brief Set the \c _springAxis rotation limits.
+    /** \brief Set the \c _springAxis linear spring limits.
 
-    In the typical use case of modeling a vehicle wheel, \c limit indicates
-    the maximum extent the wheel can be turned to the right or left. Limit
-    angle extents are in radians around \c _springAxis. Default is the
-    range -pi/4 to pi/4.
-    */
-    void setLimit( const osg::Vec2& limit );
+    The spring along the \c _springAxis acts like a LinearSpringConstraint.
+    Use setLinearLimit() to specify the allowable translation along this axis.
+    Default is -1.0 to 1.0 in world units, with limit position 0.0 corresponding
+    to the initial transformation of the rigid bodies. */
+    void setLinearLimit( const osg::Vec2& linearLimit );
     /** \overload */
-    void setLimit( const double lo, const double hi );
-    osg::Vec2 getLimit() const
+    void setLinearLimit( const double lo, const double hi );
+    osg::Vec2 getLinearLimit() const
     {
-        return( _limit );
+        return( _linearLimit );
+    }
+    /** \brief Set the \c _springAxis rotation limits in radians.
+
+    In the typical use case of modeling a vehicle wheel, \c limitRadians indicates
+    the maximum extent the wheel can be turned to the right or left. Limit angle
+    extents are in radians around \c _springAxis. Default is the range -pi/4 to pi/4.
+    */
+    void setAngleLimit( const osg::Vec2& limitRadians );
+    /** \overload */
+    void setAngleLimit( const double lo, const double hi );
+    osg::Vec2 getAngleLimit() const
+    {
+        return( _angleLimit );
     }
     /** \brief Set the center of rotation, which both axes pass through.
 
@@ -1295,7 +1311,8 @@ protected:
 
     osg::Vec3 _springAxis;
     osg::Vec3 _axleAxis;
-    osg::Vec2 _limit;
+    osg::Vec2 _linearLimit;
+    osg::Vec2 _angleLimit;
     osg::Vec3 _point;
 };
 

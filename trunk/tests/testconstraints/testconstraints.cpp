@@ -413,6 +413,18 @@ int main( int argc, char** argv )
     }
     else if( arguments.find( "WheelSuspension" ) > 0 )
     {
+        osg::Matrix aXform = osg::Matrix::translate( 0., 10., 0. );
+        crA->_parentTransform = aXform;
+        btRigidBody* rbA = osgbDynamics::createRigidBody( crA.get() );
+        amtA->setUserData( new osgbCollision::RefRigidBody( rbA ) );
+        bulletWorld->addRigidBody( rbA );
+
+        osg::Matrix eXform = osg::Matrix::translate( 4., 10., 0. );
+        crE->_parentTransform = eXform;
+        btRigidBody* rbE = osgbDynamics::createRigidBody( crE.get() );
+        amtE->setUserData( new osgbCollision::RefRigidBody( rbE ) );
+        bulletWorld->addRigidBody( rbE );
+
         osg::Matrix cXform = osg::Matrix::translate( 0., -3., 1. );
         crC->_parentTransform = cXform;
         btRigidBody* rbC = osgbDynamics::createRigidBody( crC.get() );
@@ -430,11 +442,12 @@ int main( int argc, char** argv )
         {
             osg::Vec3 springAxis( 0., 0., 1. );
             osg::Vec3 axleAxis( 0., 1., 0. );
-            osg::Vec2 limit( -.2, .2 );
+            osg::Vec2 linLimit( -3., 3. );
+            osg::Vec2 angleLimit( -.2, .2 );
             osg::Vec3 anchor( 0., -3., 1. );
 
             osg::ref_ptr< osgbDynamics::WheelSuspensionConstraint > cons1 = new osgbDynamics::WheelSuspensionConstraint(
-                rbB, rbC, springAxis, axleAxis, limit, anchor );
+                rbB, rbC, springAxis, axleAxis, linLimit, angleLimit, anchor );
             bulletWorld->addConstraint( cons1->getConstraint() );
         }
     }
