@@ -516,8 +516,8 @@ int main( int argc, char** argv )
         amtB->setUserData( new osgbCollision::RefRigidBody( rbB ) );
         bulletWorld->addRigidBody( rbB );
 
-        osg::Matrix eXform = osg::Matrix::rotate( osg::PI_4, 0., 0., 1. ) *
-            osg::Matrix::translate( -2., -2., 1. );
+        osg::Matrix eXform = osg::Matrix::translate( -2., -2., 1. ) *
+            osg::Matrix::rotate( osg::PI_4, 0., 0., 1. );
         crE->_parentTransform = eXform;
         btRigidBody* rbE = osgbDynamics::createRigidBody( crE.get() );
         amtE->setUserData( new osgbCollision::RefRigidBody( rbE ) );
@@ -540,19 +540,11 @@ int main( int argc, char** argv )
     }
     else if( arguments.find( "Box" ) > 0 )
     {
-        /*
-        osg::Matrix aXform = osg::Matrix::translate( 0., 0., 3. );
+        osg::Matrix aXform = osg::Matrix::translate( 0., 10., 3. );
         crA->_parentTransform = aXform;
         btRigidBody* rbA = osgbDynamics::createRigidBody( crA.get() );
         amtA->setUserData( new osgbCollision::RefRigidBody( rbA ) );
         bulletWorld->addRigidBody( rbA );
-        */
-
-        osg::Matrix bXform = osg::Matrix::identity();
-        crB->_parentTransform = bXform;
-        btRigidBody* rbB = osgbDynamics::createRigidBody( crB.get() );
-        amtB->setUserData( new osgbCollision::RefRigidBody( rbB ) );
-        bulletWorld->addRigidBody( rbB );
 
         osg::Matrix cXform = osg::Matrix::rotate( osg::PI_4, 0., 0., 1. ) *
             osg::Matrix::translate( 0., 8., 2. );
@@ -561,8 +553,14 @@ int main( int argc, char** argv )
         amtC->setUserData( new osgbCollision::RefRigidBody( rbC ) );
         bulletWorld->addRigidBody( rbC );
 
-        osg::Matrix eXform = osg::Matrix::rotate( osg::PI_4, 0., 0., 1. ) *
-            osg::Matrix::translate( -2., -2., 1. );
+        osg::Matrix bXform = osg::Matrix::identity();
+        crB->_parentTransform = bXform;
+        btRigidBody* rbB = osgbDynamics::createRigidBody( crB.get() );
+        amtB->setUserData( new osgbCollision::RefRigidBody( rbB ) );
+        bulletWorld->addRigidBody( rbB );
+
+        osg::Matrix eXform = osg::Matrix::translate( -2., -2., 1. ) *
+            osg::Matrix::rotate( osg::PI_4, 0., 0., 1. );
         crE->_parentTransform = eXform;
         btRigidBody* rbE = osgbDynamics::createRigidBody( crE.get() );
         amtE->setUserData( new osgbCollision::RefRigidBody( rbE ) );
@@ -577,6 +575,7 @@ int main( int argc, char** argv )
                 rbC, cXform, loLimit, hiLimit, orient );
             bulletWorld->addConstraint( cons1->getConstraint() );
 
+            orient = osg::Matrix::rotate( .1, 0., 1., 0. );
             osg::ref_ptr< osgbDynamics::BoxConstraint > cons2 = new osgbDynamics::BoxConstraint(
                 rbE, eXform, rbB, bXform, loLimit, hiLimit, orient );
             bulletWorld->addConstraint( cons2->getConstraint() );
