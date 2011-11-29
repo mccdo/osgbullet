@@ -610,7 +610,7 @@ int main( int argc, char** argv )
 
         {
             osg::ref_ptr< osgbDynamics::FixedConstraint > cons0 = new osgbDynamics::FixedConstraint(
-                rbA, aXform, rbB, bXform );
+                rbB, bXform, rbA, aXform );
             bulletWorld->addConstraint( cons0->getConstraint() );
 
             osg::ref_ptr< osgbDynamics::FixedConstraint > cons1 = new osgbDynamics::FixedConstraint(
@@ -618,7 +618,7 @@ int main( int argc, char** argv )
             bulletWorld->addConstraint( cons1->getConstraint() );
 
             osg::ref_ptr< osgbDynamics::FixedConstraint > cons2 = new osgbDynamics::FixedConstraint(
-                rbB, bXform, rbE, eXform );
+                rbE, eXform, rbB, bXform );
             bulletWorld->addConstraint( cons2->getConstraint() );
         }
     }
@@ -653,18 +653,18 @@ int main( int argc, char** argv )
         {
             osg::Vec3 point( 0., 0., 1.5 );
             osg::ref_ptr< osgbDynamics::BallAndSocketConstraint > cons0 = new osgbDynamics::BallAndSocketConstraint(
-                rbA, aXform, rbB, bXform, point );
+                rbB, bXform, rbA, aXform, point );
             bulletWorld->addConstraint( cons0->getConstraint() );
 
             point.set( 2., 12., 5. );
             osg::ref_ptr< osgbDynamics::BallAndSocketConstraint > cons1 = new osgbDynamics::BallAndSocketConstraint(
-                rbC, cXform, NULL, osg::Matrix::identity(), point );
+                rbC, cXform, point );
             bulletWorld->addConstraint( cons1->getConstraint() );
 
             // Make point correspond roughly to (1., 0., 1.) in local coords)
             point = osg::Vec3( 1., 0., 1. ) * dXform;
             osg::ref_ptr< osgbDynamics::BallAndSocketConstraint > cons2 = new osgbDynamics::BallAndSocketConstraint(
-                rbD, dXform, NULL, osg::Matrix::identity(), point );
+                rbD, dXform, point );
             bulletWorld->addConstraint( cons2->getConstraint() );
         }
     }
