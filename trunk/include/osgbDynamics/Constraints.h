@@ -219,6 +219,8 @@ public:
     the other rigid body moves along this axis. If \c _rbB is NULL, \c _rbA
     moves along this axis. */
     void setAxis( const osg::Vec3& axis );
+    /** \overload */
+    void setAxis( const double x, const double y, const double z );
     osg::Vec3 getAxis() const
     {
         return( _axis );
@@ -229,6 +231,8 @@ public:
     The limit values are in world coordinates and relative to the initial transforms
     \c _rbAXform and \c _rbBXform. */
     void setLimit( const osg::Vec2& limit );
+    /** \overload */
+    void setLimit( const double lo, const double hi );
     osg::Vec2 getLimit() const
     {
         return( _slideLimit );
@@ -330,32 +334,46 @@ public:
 
     virtual btGeneric6DofSpringConstraint* getAsBtGeneric6DofSpring() const;
 
-    /**
+    /** \brief Storage of spring constraint parameters.
+
+    This is essentially for internal use by the three spring-type constraints.
     */
     void setSpringData( InternalSpringData* data );
     const InternalSpringData* getSpringData() const
     {
         return( _data.get() );
     }
-    /** Default is x. */
+    /** \vrief Specifies the spring's linear axis.
+    
+    The axis is in world coordinates. The default is (1,0,0), the x axis. */
     void setAxis( const osg::Vec3& axis );
+    /** \overload */
+    void setAxis( const double x, const double y, const double z );
     osg::Vec3 getAxis() const
     {
         return( _axis );
     }
-    /** Default is -1 to 1 */
+    /** \brief Specify limits along the spring's axis.
+    
+    The default limits are -1 to 1. */
     void setLimit( const osg::Vec2& limit );
+    /** \overload */
+    void setLimit( const double lo, const double hi );
     osg::Vec2 getLimit() const
     {
         return( osg::Vec2( _data->_linearLowerLimits[ 0 ], _data->_linearUpperLimits[ 0 ] ) );
     }
-    /** Default is 10. */
+    /** \brief Specify the spring stiffness.
+    
+    Larger values result in a stiffer spring. Default is 10. */
     void setStiffness( float stiffness );
     float getStiffness() const
     {
         return( (float)( _data->_stiffness[ 0 ] ) );
     }
-    /** Default is .1 */
+    /** \brief Specify the spring damping.
+    
+    Larger values result in less damping. Default is .1 */
     void setDamping( float damping );
     float getDamping() const
     {
@@ -414,39 +432,56 @@ public:
 
     virtual btGeneric6DofSpringConstraint* getAsBtGeneric6DofSpring() const;
 
-    /**
+    /** \brief Storage of spring constraint parameters.
+
+    This is essentially for internal use by the three spring-type constraints.
     */
     void setSpringData( InternalSpringData* data );
     const InternalSpringData* getSpringData() const
     {
         return( _data.get() );
     }
-    /** Default is x. */
+    /** \brief Specify the angle spring rotational axis.
+
+    The axis is in world coordinates. The default is (1,0,0), the x axis. */
     void setAxis( const osg::Vec3& axis );
+    /** \overload */
+    void setAxis( const double x, const double y, const double z );
     osg::Vec3 getAxis() const
     {
         return( _axis );
     }
     /** \brief Specify the world coordinate point that the axis passes through.
-    Default is (0., 0., 0.). */
+
+    Default is (0., 0., 0.), the origin. */
     void setPivotPoint( const osg::Vec3& wcPoint );
+    /** \overload */
+    void setPivotPoint( const double x, const double y, const double z );
     osg::Vec3 getPivotPoint() const
     {
         return( _pivotPoint );
     }
-    /** In radians. Default is -PI/2 to PI/2. */
+    /** \brief Specify the angle spring's limits In radians.
+    
+    The default is -PI/2 to PI/2 (180 degrees). */
     void setLimit( const osg::Vec2& limit );
+    /** \overload */
+    void setLimit( const double lo, const double hi );
     osg::Vec2 getLimit() const
     {
         return( osg::Vec2( _data->_angularLowerLimits[ 0 ], _data->_angularUpperLimits[ 0 ] ) );
     }
-    /** Default is 10. */
+    /** \brief Specify the spring stiffness.
+    
+    Larger values result in a stiffer spring. Default is 10. */
     void setStiffness( float stiffness );
     float getStiffness() const
     {
         return( (float)( _data->_stiffness[ 3 ] ) );
     }
-    /** Default is .1 */
+    /** \brief Specify the spring damping.
+    
+    Larger values result in less damping. Default is .1 */
     void setDamping( float damping );
     float getDamping() const
     {
@@ -490,56 +525,82 @@ public:
 
     virtual btGeneric6DofSpringConstraint* getAsBtGeneric6DofSpring() const;
 
-    /**
+    /** \brief Storage of spring constraint parameters.
+
+    This is essentially for internal use by the three spring-type constraints.
     */
     void setSpringData( InternalSpringData* data );
     const InternalSpringData* getSpringData() const
     {
         return( _data.get() );
     }
-    /** Default is x. */
+    /** \brief Specify the axis for both the linear and angle components.
+
+    The axis is in world coordinates. The default is (1,0,0), the x axis. */
     void setAxis( const osg::Vec3& axis );
+    /** \overload */
+    void setAxis( const double x, const double y, const double z );
     osg::Vec3 getAxis() const
     {
         return( _axis );
     }
     /** \brief Specify the world coordinate point that the axis passes through.
-    Default is (0., 0., 0.). */
+
+    Default is (0., 0., 0.), the origin. */
     void setPivotPoint( const osg::Vec3& wcPoint );
+    /** \overload */
+    void setPivotPoint( const double x, const double y, const double z );
     osg::Vec3 getPivotPoint() const
     {
         return( _pivotPoint );
     }
-    /** Default is -1 to 1 */
+    /** \brief Specify linear limits along the spring's axis.
+    
+    The default limits are -1 to 1. */
     void setLinearLimit( const osg::Vec2& limit );
+    /** \overload */
+    void setLinearLimit( const double lo, const double hi );
     osg::Vec2 getLinearLimit() const
     {
         return( osg::Vec2( _data->_linearLowerLimits[ 0 ], _data->_linearUpperLimits[ 0 ] ) );
     }
-    /** Default is -PI/2 to PI/2 */
+    /** \brief Specify rotational limits around the axis.
+    
+    The default is -PI/2 to PI/2 (180 degrees). */
     void setAngleLimit( const osg::Vec2& limit );
+    /** \overload */
+    void setAngleLimit( const double lo, const double hi );
     osg::Vec2 getAngleLimit() const
     {
         return( osg::Vec2( _data->_angularLowerLimits[ 0 ], _data->_angularUpperLimits[ 0 ] ) );
     }
-    /** Default is 10. */
+    /** \brief Specify the stiffness of the linear spring component.
+    
+    Larger values result in a stiffer spring. Default is 10. */
     void setLinearStiffness( float stiffness );
     float getLinearStiffness() const
     {
         return( (float)( _data->_stiffness[ 0 ] ) );
     }
-    /** Default is 10. */
+    /** \brief Specify the stiffness of the angle spring component.
+    
+    Larger values result in a stiffer spring. Default is 10. */
     void setAngleStiffness( float stiffness );
     float getAngleStiffness() const
     {
         return( (float)( _data->_stiffness[ 3 ] ) );
     }
-    /** Default is .1 */
+    /** \brief Specify the damping of the linear spring component.
+
+    Larger values result in less damping. Default is .1 */
     void setLinearDamping( float damping );
     float getLinearDamping() const
     {
         return( (float)( _data->_damping[ 0 ] ) );
     }
+    /** \brief Specify the damping of the angle spring component.
+
+    Larger values result in less damping. Default is .1 */
     void setAngleDamping( float damping );
     float getAngleDamping() const
     {
@@ -634,12 +695,23 @@ public:
 
     virtual btGeneric6DofConstraint* getAsBtGeneric6Dof() const;
 
+    /** \brief Specify the lower limits for the plane constraint.
+
+    Default is 0 in x and 0 in y. */
     void setLowLimit( const osg::Vec2& loLimit );
-    void setHighLimit( const osg::Vec2& hiLimit );
+    /** \overload */
+    void setLowLimit( const double x, const double y );
     osg::Vec2 getLowLimit() const
     {
         return( _loLimit );
     }
+
+    /** \brief Specify the upper limits for the plane constraint.
+
+    Default is 0 in x and 0 in y. */
+    void setHighLimit( const osg::Vec2& hiLimit );
+    /** \overload */
+    void setHighLimit( const double x, const double y );
     osg::Vec2 getHighLimit() const
     {
         return( _hiLimit );
@@ -675,8 +747,6 @@ protected:
 /** \class BoxConstraint Constraints.h <osgbDynamics/Constraints.h>
 \brief TBD
 
-WARNING Not yet fully functional. See PlanarConstraint.
-
 This class uses btGeneric6DofConstraint internally. Access the Bullet constraint
 directly with getAsBtGeneric6Dof().
 */
@@ -702,17 +772,31 @@ public:
 
     virtual btGeneric6DofConstraint* getAsBtGeneric6Dof() const;
 
+    /** \brief Specify the lower limits for the box constraint.
+
+    Default is 0 in x, y, and z. */
     void setLowLimit( const osg::Vec3& loLimit );
-    void setHighLimit( const osg::Vec3& hiLimit );
+    /** \overload */
+    void setLowLimit( const double x, const double y, const double z );
     osg::Vec3 getLowLimit() const
     {
         return( _loLimit );
     }
+    /** \brief Specify the upper limits for the box constraint.
+
+    Default is 0 in x, y, and z. */
+    void setHighLimit( const osg::Vec3& hiLimit );
+    /** \overload */
+    void setHighLimit( const double x, const double y, const double z );
     osg::Vec3 getHighLimit() const
     {
         return( _hiLimit );
     }
 
+    /** \brief Specify the orienation of the constrained axes.
+
+    Note that this class ignores any translation component in \c orient.
+    */
     void setOrientation( const osg::Matrix& orient );
     osg::Matrix getOrientation() const
     {
@@ -772,25 +856,35 @@ public:
 
     virtual btHingeConstraint* getAsBtHinge() const;
 
-    /** \brief Hinge axis in world coordinates. */
+    /** \brief Hinge axis in world coordinates.
+    
+    The default axis is (0,0,1), the z axis. */
     void setAxis( const osg::Vec3& axis );
+    /** \overload */
+    void setAxis( const double x, const double y, const double z );
     osg::Vec3 getAxis() const
     {
         return( _axis );
     }
 
-    /** brief Hinge pivot point in world coordinates. */
+    /** \brief Hinge pivot point in world coordinates.
+
+    The default pivot point is (0,0,0), the origin. */
     void setPivotPoint( const osg::Vec3& wcPoint );
+    /** \overload */
+    void setPivotPoint( const double x, const double y, const double z );
     osg::Vec3 getPivotPoint() const
     {
         return( _pivotPoint );
     }
 
-    /** \brief Hinge rotation limits, with 0. corresponding to the
+    /** \brief Hinge rotation limits, with 0.0 corresponding to the
     initial position of the constrained body/bodies.
 
     Pass (-osg::PI_2, osg::PI_2) to allow free rotation. */
     void setLimit( const osg::Vec2& limit );
+    /** \overload */
+    void setLimit( const double lo, const double hi );
     osg::Vec2 getLimit() const
     {
         return( _limit );
@@ -845,6 +939,8 @@ public:
     Default is ( 0., 1., 0. ).
     */
     void setAxisA( const osg::Vec3& axisA );
+    /** \overload */
+    void setAxisA( const double x, const double y, const double z );
     osg::Vec3 getAxisA() const
     {
         return( _axisA );
@@ -854,6 +950,8 @@ public:
     Default is ( 1., 0., 0. ).
     */
     void setAxisB( const osg::Vec3& axisB );
+    /** \overload */
+    void setAxisB( const double x, const double y, const double z );
     osg::Vec3 getAxisB() const
     {
         return( _axisB );
@@ -863,6 +961,8 @@ public:
     Default is ( 0., 0., 0. ).
     */
     void setAnchorPoint( const osg::Vec3& wcPoint );
+    /** \overload */
+    void setAnchorPoint( const double x, const double y, const double z );
     osg::Vec3 getAnchorPoint() const
     {
         return( _point );
@@ -913,6 +1013,8 @@ public:
     which are then passed into the btPoint2PointConstraint constructor.
     */
     void setPoint( const osg::Vec3& wcPoint );
+    /** \overload */
+    void setPoint( const double x, const double y, const double z );
     osg::Vec3 getPoint() const
     {
         return( _point );
@@ -960,21 +1062,28 @@ public:
     virtual btConeTwistConstraint* getAsBtConeTwist() const;
 
     /** \brief Specify the common point in world coordinates.
-    */
+
+    The default is (0,0,0), the origin. */
     void setPoint( const osg::Vec3& wcPoint );
+    /** \overload */
+    void setPoint( const double x, const double y, const double z );
     osg::Vec3 getPoint() const
     {
         return( _point );
     }
     /** \brief Specify an axis corresponding to the center of the cone.
-    */
+
+    The default is (1,0,0), the x axis. */
     void setAxis( const osg::Vec3& wcAxis );
+    /** \overload */
+    void setAxis( const double x, const double y, const double z );
     osg::Vec3 getAxis() const
     {
         return( _axis );
     }
     /** \brief Specify the cone spread angle in radians.
-    */
+
+    The default is PI/2 (90 degrees). */
     void setAngle( const double angleRadians );
     double getAngle() const
     {
@@ -1037,6 +1146,8 @@ public:
     (in createConstraing()).
     */
     void setSpringAxis( const osg::Vec3& springAxis );
+    /** \overload */
+    void setSpringAxis( const double x, const double y, const double z );
     osg::Vec3 getSpringAxis() const
     {
         return( _springAxis );
@@ -1050,6 +1161,8 @@ public:
     (in createConstraing()).
     */
     void setAxleAxis( const osg::Vec3& axleAxis );
+    /** \overload */
+    void setAxleAxis( const double x, const double y, const double z );
     osg::Vec3 getAxleAxis() const
     {
         return( _axleAxis );
@@ -1062,13 +1175,18 @@ public:
     range -pi/4 to pi/4.
     */
     void setLimit( const osg::Vec2& limit );
+    /** \overload */
+    void setLimit( const double lo, const double hi );
     osg::Vec2 getLimit() const
     {
         return( _limit );
     }
     /** \brief Set the center of rotation, which both axes pass through.
-    */
+
+    The default is (0,0,0), the origin. */
     void setAnchorPoint( const osg::Vec3& wcPoint );
+    /** \overload */
+    void setAnchorPoint( const double x, const double y, const double z );
     osg::Vec3 getAnchorPoint() const
     {
         return( _point );

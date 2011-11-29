@@ -167,6 +167,10 @@ void SliderConstraint::setAxis( const osg::Vec3& axis )
     _axis = axis;
     setDirty();
 }
+void SliderConstraint::setAxis( const double x, const double y, const double z )
+{
+    setAxis( osg::Vec3( x, y, z ) );
+}
 void SliderConstraint::setLimit( const osg::Vec2& limit )
 {
     _slideLimit = limit;
@@ -180,6 +184,10 @@ void SliderConstraint::setLimit( const osg::Vec2& limit )
     }
     else
         setDirty();
+}
+void SliderConstraint::setLimit( const double lo, const double hi )
+{
+    setLimit( osg::Vec2( lo, hi ) );
 }
 
 bool SliderConstraint::operator==( const SliderConstraint& rhs ) const
@@ -459,11 +467,19 @@ void LinearSpringConstraint::setAxis( const osg::Vec3& axis )
     _axis = axis;
     setDirty();
 }
+void LinearSpringConstraint::setAxis( const double x, const double y, const double z )
+{
+    setAxis( osg::Vec3( x, y, z ) );
+}
 void LinearSpringConstraint::setLimit( const osg::Vec2& limit )
 {
     _data->_linearLowerLimits[ 0 ] = limit[ 0 ];
     _data->_linearUpperLimits[ 0 ] = limit[ 1 ];
     setSpringData( _data.get() );
+}
+void LinearSpringConstraint::setLimit( const double lo, const double hi )
+{
+    LinearSpringConstraint::setLimit( osg::Vec2( lo, hi ) );
 }
 void LinearSpringConstraint::setStiffness( float stiffness )
 {
@@ -652,16 +668,28 @@ void AngleSpringConstraint::setAxis( const osg::Vec3& axis )
     _axis = axis;
     setDirty();
 }
+void AngleSpringConstraint::setAxis( const double x, const double y, const double z )
+{
+    setAxis( osg::Vec3( x, y, z ) );
+}
 void AngleSpringConstraint::setPivotPoint( const osg::Vec3& wcPoint )
 {
     _pivotPoint = wcPoint;
     setDirty();
+}
+void AngleSpringConstraint::setPivotPoint( const double x, const double y, const double z )
+{
+    setPivotPoint( osg::Vec3( x, y, z ) );
 }
 void AngleSpringConstraint::setLimit( const osg::Vec2& limit )
 {
     _data->_angularLowerLimits[ 0 ] = limit[ 0 ];
     _data->_angularUpperLimits[ 0 ] = limit[ 1 ];
     setSpringData( _data.get() );
+}
+void AngleSpringConstraint::setLimit( const double lo, const double hi )
+{
+    setLimit( osg::Vec2( lo, hi ) );
 }
 void AngleSpringConstraint::setStiffness( float stiffness )
 {
@@ -782,10 +810,18 @@ void LinearAngleSpringConstraint::setAxis( const osg::Vec3& axis )
     _axis = axis;
     setDirty();
 }
+void LinearAngleSpringConstraint::setAxis( const double x, const double y, const double z )
+{
+    setAxis( osg::Vec3d( 2, y, z ) );
+}
 void LinearAngleSpringConstraint::setPivotPoint( const osg::Vec3& wcPoint )
 {
     _pivotPoint = wcPoint;
     setDirty();
+}
+void LinearAngleSpringConstraint::setPivotPoint( const double x, const double y, const double z )
+{
+    setPivotPoint( osg::Vec3( x, y, z ) );
 }
 void LinearAngleSpringConstraint::setLinearLimit( const osg::Vec2& limit )
 {
@@ -793,11 +829,19 @@ void LinearAngleSpringConstraint::setLinearLimit( const osg::Vec2& limit )
     _data->_linearUpperLimits[ 0 ] = limit[ 1 ];
     setSpringData( _data.get() );
 }
+void LinearAngleSpringConstraint::setLinearLimit( const double lo, const double hi )
+{
+    setLinearLimit( osg::Vec2( lo, hi ) );
+}
 void LinearAngleSpringConstraint::setAngleLimit( const osg::Vec2& limit )
 {
     _data->_angularLowerLimits[ 0 ] = limit[ 0 ];
     _data->_angularUpperLimits[ 0 ] = limit[ 1 ];
     setSpringData( _data.get() );
+}
+void LinearAngleSpringConstraint::setAngleLimit( const double lo, const double hi )
+{
+    setAngleLimit( osg::Vec2( lo, hi ) );
 }
 void LinearAngleSpringConstraint::setLinearStiffness( float stiffness )
 {
@@ -997,10 +1041,18 @@ void PlanarConstraint::setLowLimit( const osg::Vec2& loLimit )
     _loLimit = loLimit;
     setDirty( true );
 }
+void PlanarConstraint::setLowLimit( const double x, const double y )
+{
+    setLowLimit( osg::Vec2( x, y ) );
+}
 void PlanarConstraint::setHighLimit( const osg::Vec2& hiLimit )
 {
     _hiLimit = hiLimit;
     setDirty( true );
+}
+void PlanarConstraint::setHighLimit( const double x, const double y )
+{
+    setHighLimit( osg::Vec2( x, y ) );
 }
 void PlanarConstraint::setOrientation( const osg::Matrix& orient )
 {
@@ -1119,10 +1171,18 @@ void BoxConstraint::setLowLimit( const osg::Vec3& loLimit )
     _loLimit = loLimit;
     setDirty( true );
 }
+void BoxConstraint::setLowLimit( const double x, const double y, const double z )
+{
+    setLowLimit( osg::Vec3( x, y, z ) );
+}
 void BoxConstraint::setHighLimit( const osg::Vec3& hiLimit )
 {
     _hiLimit = hiLimit;
     setDirty( true );
+}
+void BoxConstraint::setHighLimit( const double x, const double y, const double z )
+{
+    setHighLimit( osg::Vec3( x, y, z ) );
 }
 void BoxConstraint::setOrientation( const osg::Matrix& orient )
 {
@@ -1293,10 +1353,18 @@ void HingeConstraint::setAxis( const osg::Vec3& axis )
     _axis = axis;
     setDirty( true );
 }
+void HingeConstraint::setAxis( const double x, const double y, const double z )
+{
+    setAxis( osg::Vec3( x, y, z ) );
+}
 void HingeConstraint::setPivotPoint( const osg::Vec3& wcPoint )
 {
     _pivotPoint = wcPoint;
     setDirty( true );
+}
+void HingeConstraint::setPivotPoint( const double x, const double y, const double z )
+{
+    setPivotPoint( osg::Vec3( x, y, z ) );
 }
 void HingeConstraint::setLimit( const osg::Vec2& limit )
 {
@@ -1310,6 +1378,10 @@ void HingeConstraint::setLimit( const osg::Vec2& limit )
     }
     else
         setDirty();
+}
+void HingeConstraint::setLimit( const double lo, const double hi )
+{
+    setLimit( osg::Vec2( lo, hi ) );
 }
 
 bool HingeConstraint::operator==( const HingeConstraint& rhs ) const
@@ -1453,15 +1525,27 @@ void CardanConstraint::setAxisA( const osg::Vec3& axisA )
     _axisA = axisA;
     setDirty( true );
 }
+void CardanConstraint::setAxisA( const double x, const double y, const double z )
+{
+    setAxisA( osg::Vec3( x, y, z ) );
+}
 void CardanConstraint::setAxisB( const osg::Vec3& axisB )
 {
     _axisB = axisB;
     setDirty( true );
 }
+void CardanConstraint::setAxisB( const double x, const double y, const double z )
+{
+    setAxisB( osg::Vec3( x, y, z ) );
+}
 void CardanConstraint::setAnchorPoint( const osg::Vec3& wcPoint )
 {
     _point = wcPoint;
     setDirty( true );
+}
+void CardanConstraint::setAnchorPoint( const double x, const double y, const double z )
+{
+    setAnchorPoint( osg::Vec3( x, y, z ) );
 }
 
 bool CardanConstraint::operator==( const CardanConstraint& rhs ) const
@@ -1564,6 +1648,10 @@ void BallAndSocketConstraint::setPoint( const osg::Vec3& wcPoint )
     _point = wcPoint;
     setDirty();
 }
+void BallAndSocketConstraint::setPoint( const double x, const double y, const double z )
+{
+    setPoint( osg::Vec3( x, y, z ) );
+}
 
 bool BallAndSocketConstraint::operator==( const BallAndSocketConstraint& rhs ) const
 {
@@ -1651,11 +1739,13 @@ void BallAndSocketConstraint::createConstraint()
 
 RagdollConstraint::RagdollConstraint()
   : Constraint(),
+    _axis( 1., 0., 0. ),
     _angle( osg::PI_2 )
 {
 }
 RagdollConstraint::RagdollConstraint( btRigidBody* rbA, btRigidBody* rbB )
   : Constraint( rbA, rbB ),
+    _axis( 1., 0., 0. ),
     _angle( osg::PI_2 )
 {
 }
@@ -1697,10 +1787,18 @@ void RagdollConstraint::setPoint( const osg::Vec3& wcPoint )
     _point = wcPoint;
     setDirty( true );
 }
+void RagdollConstraint::setPoint( const double x, const double y, const double z )
+{
+    setPoint( osg::Vec3( x, y, z ) );
+}
 void RagdollConstraint::setAxis( const osg::Vec3& wcAxis )
 {
     _axis = wcAxis;
     setDirty( true );
+}
+void RagdollConstraint::setAxis( const double x, const double y, const double z )
+{
+    setAxis( osg::Vec3( x, y, z ) );
 }
 void RagdollConstraint::setAngle( const double angleRadians )
 {
@@ -1859,10 +1957,18 @@ void WheelSuspensionConstraint::setSpringAxis( const osg::Vec3& springAxis )
     _springAxis = springAxis;
     setDirty( true );
 }
+void WheelSuspensionConstraint::setSpringAxis( const double x, const double y, const double z )
+{
+    setSpringAxis( osg::Vec3( x, y, z ) );
+}
 void WheelSuspensionConstraint::setAxleAxis( const osg::Vec3& axleAxis )
 {
     _axleAxis = axleAxis;
     setDirty( true );
+}
+void WheelSuspensionConstraint::setAxleAxis( const double x, const double y, const double z )
+{
+    setAxleAxis( osg::Vec3( x, y, z ) );
 }
 void WheelSuspensionConstraint::setLimit( const osg::Vec2& limit )
 {
@@ -1878,10 +1984,18 @@ void WheelSuspensionConstraint::setLimit( const osg::Vec2& limit )
     else
         setDirty();
 }
+void WheelSuspensionConstraint::setLimit( const double lo, const double hi )
+{
+    setLimit( osg::Vec2( lo, hi ) );
+}
 void WheelSuspensionConstraint::setAnchorPoint( const osg::Vec3& wcPoint )
 {
     _point = wcPoint;
     setDirty( true );
+}
+void WheelSuspensionConstraint::setAnchorPoint( const double x, const double y, const double z )
+{
+    setAnchorPoint( osg::Vec3( x, y, z ) );
 }
 
 bool WheelSuspensionConstraint::operator==( const WheelSuspensionConstraint& rhs ) const
