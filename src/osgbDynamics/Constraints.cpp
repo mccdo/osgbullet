@@ -1831,9 +1831,9 @@ bool RagdollConstraint::operator!=( const RagdollConstraint& rhs ) const
 
 void RagdollConstraint::createConstraint()
 {
-    if( ( _rbA == NULL ) || ( _rbB == NULL ) )
+    if( _rbA == NULL )
     {
-        osg::notify( osg::INFO ) << "createConstraint: _rbA == NULL or _rbB == NULL." << std::endl;
+        osg::notify( osg::INFO ) << "createConstraint: _rbA == NULL." << std::endl;
         return;
     }
 
@@ -1844,56 +1844,54 @@ void RagdollConstraint::createConstraint()
     }
 
 
-    // Transform the world coordinate axis into A's local coordinates.
-    osg::Matrix aOrient = _rbAXform;
-    aOrient.setTrans( 0., 0., 0. );
-    osg::Vec3 axisInA = _axis * osg::Matrix::inverse( aOrient );
-    axisInA.normalize();
+    // Orientation matrix for the ragdoll x-axis / point.
+    osg::Vec3 localAxis( _axis );
+    localAxis.normalize();
+    const osg::Matrix orientation =
+        osg::Matrix::rotate( osg::Vec3( 1., 0., 0. ), localAxis ) *
+        osg::Matrix::translate( _point );
 
-    // Compute a matrix to align the Bullet cone-twise x axis with A's Ragdoll axis.
-    const osg::Vec3 bulletRagdollAxis( 1., 0., 0. );
-    const osg::Matrix axisRotate( osg::Matrix::rotate( bulletRagdollAxis, axisInA ) );
 
-    // Transform pivot point into A's space.
+    // Create a matrix that puts A in B's coordinate space, accounting
+    // for orientation of the constraint axes.
+    //
+    //   1. Inverse A center of mass offset.
     osgbDynamics::MotionState* motion = dynamic_cast< osgbDynamics::MotionState* >( _rbA->getMotionState() );
     if( motion == NULL )
     {
-        osg::notify( osg::WARN ) << "RagdollConstraint: Invalid MotionState." << std::endl;
+        osg::notify( osg::WARN ) << "InternalCreateSpring: Invalid MotionState." << std::endl;
         return;
     }
-    const osg::Matrix invAXform = osg::Matrix::inverse( _rbAXform );
-    const osg::Vec3 pointInA = _point * invAXform + motion->getCenterOfMass();
-
-    // Final A reference frame:
-    btTransform rbAFrame = osgbCollision::asBtTransform(
-        axisRotate * osg::Matrix::translate( pointInA ) );
+    const osg::Matrix invACOM( osg::Matrix::translate( -( motion->getCenterOfMass() ) ) );
+    //
+    //   2. Transform A back to the origin.
+    const osg::Matrix invAXform( osg::Matrix::inverse( _rbAXform ) );
+    //
+    //   3. The final rbA frame matrix.
+    btTransform rbAFrame = osgbCollision::asBtTransform( 
+        orientation * invAXform * invACOM );
 
 
     btTransform rbBFrame;
     if( _rbB != NULL )
     {
-        // Transform the world coordinate axis into B's local coordinates.
-        osg::Matrix bOrient = _rbBXform;
-        bOrient.setTrans( 0., 0., 0. );
-        osg::Vec3 axisInB = _axis * osg::Matrix::inverse( bOrient );
-        axisInB.normalize();
-
-        // Compute a matrix to align the Bullet cone-twise x axis with B's Ragdoll axis.
-        const osg::Matrix axisRotate( osg::Matrix::rotate( bulletRagdollAxis, axisInB ) );
-
-        // Transform pivot point into B's space.
-        osgbDynamics::MotionState* motion = dynamic_cast< osgbDynamics::MotionState* >( _rbB->getMotionState() );
+        // Create a matrix that orients the spring axis/point in B's coordinate space.
+        //
+        //   1. Inverse B center of mass offset.
+        motion = dynamic_cast< osgbDynamics::MotionState* >( _rbB->getMotionState() );
         if( motion == NULL )
         {
-            osg::notify( osg::WARN ) << "RagdollConstraint: Invalid MotionState." << std::endl;
+            osg::notify( osg::WARN ) << "InternalCreateSpring: Invalid MotionState." << std::endl;
             return;
         }
-        const osg::Matrix invBXform = osg::Matrix::inverse( _rbBXform );
-        const osg::Vec3 pointInB = _point * invBXform - motion->getCenterOfMass();
-
-        // Final B reference frame:
-        rbBFrame = osgbCollision::asBtTransform(
-            axisRotate * osg::Matrix::translate( pointInB ) );
+        const osg::Matrix invBCOM( osg::Matrix::translate( -( motion->getCenterOfMass() ) ) );
+        //
+        //   2. Transform B back to the origin.
+        const osg::Matrix invBXform( osg::Matrix::inverse( _rbBXform ) );
+        //
+        //   3. The final rbB frame matrix.
+        rbBFrame = osgbCollision::asBtTransform( 
+            orientation * invBXform * invBCOM );
     }
 
 
