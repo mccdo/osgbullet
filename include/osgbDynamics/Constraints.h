@@ -202,18 +202,19 @@ Position 0.0 along the axis refers to the initial transform of the constrained
 bodies.
 
 This class uses btSliderConstraint internally. Access the Bullet constraint
-directly with getAsBtSlider().
-*/
+directly with getAsBtSlider(). */
 class OSGBDYNAMICS_EXPORT SliderConstraint : public Constraint
 {
 public:
     SliderConstraint();
     SliderConstraint( btRigidBody* rbA, btRigidBody* rbB=NULL );
     SliderConstraint( btRigidBody* rbA, const osg::Matrix& rbAXform,
-            const osg::Vec3& slideAxisInA, const osg::Vec2& slideLimit );
+            const osg::Vec3& axis=osg::Vec3( 1., 0., 0. ),
+            const osg::Vec2& slideLimit=osg::Vec2( -1., 1. ) );
     SliderConstraint( btRigidBody* rbA, const osg::Matrix& rbAXform,
             btRigidBody* rbB, const osg::Matrix& rbBXform,
-            const osg::Vec3& slideAxisInA, const osg::Vec2& slideLimit );
+            const osg::Vec3& axis=osg::Vec3( 1., 0., 0. ),
+            const osg::Vec2& slideLimit=osg::Vec2( -1., 1. ) );
     SliderConstraint( const SliderConstraint& rhs, const osg::CopyOp& copyop=osg::CopyOp::SHALLOW_COPY );
     META_Object(osgbDynamics,SliderConstraint);
 
@@ -224,7 +225,9 @@ public:
     This is the axis along which the two constrained bodies are allowed to move
     relative to each other. In the common scenario where one rigid body is fixed,
     the other rigid body moves along this axis. If \c _rbB is NULL, \c _rbA
-    moves along this axis. */
+    moves along this axis.
+    
+    The default axis is (1, 0, 0), the x axis. */
     void setAxis( const osg::Vec3& axis );
     /** \overload */
     void setAxis( const double x, const double y, const double z );
@@ -233,10 +236,12 @@ public:
         return( _axis );
     }
 
-    /** \brief Specify movement limits along \c _sliderAxisInA.
+    /** \brief Specify movement limits along \c _axis.
 
     The limit values are in world coordinates and relative to the initial transforms
-    \c _rbAXform and \c _rbBXform. */
+    \c _rbAXform and \c _rbBXform.
+    
+    The default limits are -1.0 to 1.0. */
     void setLimit( const osg::Vec2& limit );
     /** \overload */
     void setLimit( const double lo, const double hi );
@@ -263,33 +268,112 @@ protected:
 
 
 /** \class TwistSliderConstraint Constraints.h <osgbDynamics/Constraints.h>
-\brief A SliderConstraint that allows free rotation around the slide axis.
+\brief Like SliderConstraint, but allows rotation around the axis.
 
-The axis is in world coordinates. The limit units are in world coordinates.
-Position 0.0 along the axis refers to the initial transform of the constrained
-bodies.
+The axis is in world coordinates. Calling code should also specify a world
+coordinate point that the axis passes through.
 
-Because this class derives from SliderConstraint, it uses btSliderConstraint
-internally. Access the Bullet constraint directly with
-SliderConstraint::getAsBtSlider().
-*/
-class OSGBDYNAMICS_EXPORT TwistSliderConstraint : public SliderConstraint
+There are two pairs of limit values:
+\li The linear limit units are in world coordinates. Position 0.0 along the
+axis refers to the initial transform of the constrained bodies.
+\li The angle limit units are in radians. Radian value 0.0 refers to the initial
+transform of the constrained bodies.
+
+This class uses btSliderConstraint internally. Access the Bullet constraint
+directly with getAsBtSlider(). */
+class OSGBDYNAMICS_EXPORT TwistSliderConstraint : public Constraint
 {
 public:
     TwistSliderConstraint();
     TwistSliderConstraint( btRigidBody* rbA, btRigidBody* rbB=NULL );
     TwistSliderConstraint( btRigidBody* rbA, const osg::Matrix& rbAXform,
-            const osg::Vec3& slideAxisInA, const osg::Vec2& slideLimit );
+            const osg::Vec3& axis=osg::Vec3( 1., 0., 0. ),
+            const osg::Vec3& wcPoint=osg::Vec3( 0., 0., 0. ),
+            const osg::Vec2& slideLimit=osg::Vec2( -1., 1. ),
+            const osg::Vec2& twistLimit=osg::Vec2( -osg::PI_2, osg::PI_2 ) );
     TwistSliderConstraint( btRigidBody* rbA, const osg::Matrix& rbAXform,
             btRigidBody* rbB, const osg::Matrix& rbBXform,
-            const osg::Vec3& slideAxisInA, const osg::Vec2& slideLimit );
+            const osg::Vec3& axis=osg::Vec3( 1., 0., 0. ),
+            const osg::Vec3& wcPoint=osg::Vec3( 0., 0., 0. ),
+            const osg::Vec2& slideLimit=osg::Vec2( -1., 1. ),
+            const osg::Vec2& twistLimit=osg::Vec2( -osg::PI_2, osg::PI_2 ) );
     TwistSliderConstraint( const TwistSliderConstraint& rhs, const osg::CopyOp& copyop=osg::CopyOp::SHALLOW_COPY );
     META_Object(osgbDynamics,TwistSliderConstraint);
+
+    virtual btSliderConstraint* getAsBtSlider() const;
+
+    /** \brief Specify the slider axis in the world coordinate space.
+
+    This is the axis along which the two constrained bodies are allowed to move
+    relative to each other. In the common scenario where one rigid body is fixed,
+    the other rigid body moves along this axis. If \c _rbB is NULL, \c _rbA
+    moves along this axis.
+    
+    The default axis is (1, 0, 0), the x axis. */
+    void setAxis( const osg::Vec3& axis );
+    /** \overload */
+    void setAxis( const double x, const double y, const double z );
+    osg::Vec3 getAxis() const
+    {
+        return( _axis );
+    }
+    /** \brief Specify a world coordinate point on the _axis.
+
+    Together, \c _axis and \c wcPoint define the axis in world coordinates that
+    the constraint uses for rotation of the constrained bodies.
+    
+    The default point is (0, 0, 0), the origin. */
+    void setPoint( const osg::Vec3& wcPoint );
+    /** \overload */
+    void setPoint( const double x, const double y, const double z );
+    osg::Vec3 getPoint() const
+    {
+        return( _point );
+    }
+
+    /** \brief Specify sliding limits along \c _axis.
+
+    The limit values are in world coordinates and relative to the initial transforms
+    \c _rbAXform and \c _rbBXform.
+    
+    The default slide limits are -1.0 to 1.0. */
+    void setSlideLimit( const osg::Vec2& limit );
+    /** \overload */
+    void setSlideLimit( const double lo, const double hi );
+    osg::Vec2 getSlideLimit() const
+    {
+        return( _slideLimit );
+    }
+    /** \brief Specify rotational limits around \c _axis.
+
+    The limit values are in radians and relative to the initial transforms
+    \c _rbAXform and \c _rbBXform.
+    
+    The default twist limits are -PI/2 to PI/2. */
+    void setTwistLimit( const osg::Vec2& limitRadians );
+    /** \overload */
+    void setTwistLimit( const double lo, const double hi );
+    osg::Vec2 getTwistLimit() const
+    {
+        return( _twistLimit );
+    }
+
+    /** Return true if the axis, point, limits, and base class, are
+    equal to the right-hand-side axis, point, limits, and base class. */
+    virtual bool operator==( const TwistSliderConstraint& rhs ) const;
+    /** Return true if the axis, point, limits, or base class, differ
+    from the right-hand-side axis, point, limits, or base class. */
+    virtual bool operator!=( const TwistSliderConstraint& rhs ) const;
 
 protected:
     virtual ~TwistSliderConstraint();
 
     virtual void createConstraint();
+
+    osg::Vec3 _axis;
+    osg::Vec3 _point;
+    osg::Vec2 _slideLimit;
+    osg::Vec2 _twistLimit;
 };
 
 

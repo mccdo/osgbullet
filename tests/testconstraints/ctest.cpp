@@ -118,9 +118,11 @@ int runCTest( const std::string& testName )
     if( testName == std::string( "TwistSlider" ) )
     {
         osg::Vec3 axis( 0., 0., 1. );
-        osg::Vec2 limits( -4., 4. );
+        osg::Vec3 point( 1., 2., 3. );
+        osg::Vec2 linLimits( -4., 4. );
+        osg::Vec2 angLimits( -1., 2. );
         osg::ref_ptr< osgbDynamics::TwistSliderConstraint > cons = new osgbDynamics::TwistSliderConstraint(
-            rbA, aXform, rbB, bXform, axis, limits );
+            rbA, aXform, rbB, bXform, axis, point, linLimits, angLimits );
 
         if( cons->getAsBtSlider() == NULL )
             ERROR(testName,"won't typecast as btSliderConstraint.");
@@ -132,8 +134,8 @@ int runCTest( const std::string& testName )
         if( obj == NULL )
             ERROR(testName,"readObjectFile returned NULL.");
 
-        osg::ref_ptr< osgbDynamics::SliderConstraint > cons2 = dynamic_cast<
-            osgbDynamics::SliderConstraint* >( obj );
+        osg::ref_ptr< osgbDynamics::TwistSliderConstraint > cons2 = dynamic_cast<
+            osgbDynamics::TwistSliderConstraint* >( obj );
         if( !( cons2.valid() ) )
             ERROR(testName,"dynamic_cast after readObjectFile failed.");
 
