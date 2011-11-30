@@ -121,27 +121,31 @@ bool Constraint::operator!=( const Constraint& rhs ) const
 
 
 SliderConstraint::SliderConstraint()
-  : Constraint()
+  : Constraint(),
+    _axis( 1., 0., 0. ),
+    _slideLimit( -1., 1. )
 {
 }
 SliderConstraint::SliderConstraint( btRigidBody* rbA, btRigidBody* rbB )
-  : Constraint( rbA, rbB )
+  : Constraint( rbA, rbB ),
+    _axis( 1., 0., 0. ),
+    _slideLimit( -1., 1. )
 {
     setDirty();
 }
 SliderConstraint::SliderConstraint( btRigidBody* rbA, const osg::Matrix& rbAXform,
-        const osg::Vec3& slideAxisInA, const osg::Vec2& slideLimit )
+        const osg::Vec3& axis, const osg::Vec2& slideLimit )
   : Constraint( rbA, rbAXform ),
-    _axis( slideAxisInA ),
+    _axis( axis ),
     _slideLimit( slideLimit )
 {
     setDirty();
 }
 SliderConstraint::SliderConstraint( btRigidBody* rbA, const osg::Matrix& rbAXform,
         btRigidBody* rbB, const osg::Matrix& rbBXform,
-        const osg::Vec3& slideAxisInA, const osg::Vec2& slideLimit )
+        const osg::Vec3& axis, const osg::Vec2& slideLimit )
   : Constraint( rbA, rbAXform, rbB, rbBXform ),
-    _axis( slideAxisInA ),
+    _axis( axis ),
     _slideLimit( slideLimit )
 {
     setDirty();
@@ -219,56 +223,52 @@ void SliderConstraint::createConstraint()
     }
 
 
-    // Transform the world coordinate axis into A's local coordinates.
-    osg::Matrix aOrient = _rbAXform;
-    aOrient.setTrans( 0., 0., 0. );
-    osg::Vec3 axisInA = _axis * osg::Matrix::inverse( aOrient );
-    axisInA.normalize();
-
-    // Compute a matrix to align the slider constraint axis with A's slide axis.
-    const osg::Vec3 bulletSliderAxis( 1., 0., 0. );
-    const osg::Matrix axisRotate( osg::Matrix::rotate( bulletSliderAxis, axisInA ) );
+    // Orientation matrix for the slider x-axis.
+    osg::Vec3 localAxis( _axis );
+    localAxis.normalize();
+    const osg::Matrix orientation = osg::Matrix::rotate( osg::Vec3( 1., 0., 0. ), localAxis );
 
 
-    btTransform rbBFrame; // OK to not initialize.
-    if( _rbB != NULL )
-    {
-        // Compute a matrix that transforms B's collision shape origin and x axis
-        // to A's origin and slide axis.
-        //
-        //   1. Inverse B center of mass offset.
-        osgbDynamics::MotionState* motion = dynamic_cast< osgbDynamics::MotionState* >( _rbB->getMotionState() );
-        if( motion == NULL )
-        {
-            osg::notify( osg::WARN ) << "SliderConstraint: Invalid MotionState." << std::endl;
-            return;
-        }
-        const osg::Vec3 bCom = motion->getCenterOfMass();
-        const osg::Matrix invBCOM( osg::Matrix::translate( -( bCom ) ) );
-        //
-        //   2. Transform from B's origin to A's origin.
-        const osg::Matrix rbBToRbA( osg::Matrix::inverse( _rbBXform ) * _rbAXform );
-        //
-        //   3. The final rbB frame matrix.
-        rbBFrame = osgbCollision::asBtTransform(
-            axisRotate * invBCOM * rbBToRbA );
-    }
-
-
-    // Compute a matrix that transforms A's collision shape origin and x axis
-    // to A's origin and drawerAxis.
-    //   1. A's center of mass offset.
+    // Create a matrix that returns A to the origin.
+    //
+    //   1. Inverse A center of mass offset.
     osgbDynamics::MotionState* motion = dynamic_cast< osgbDynamics::MotionState* >( _rbA->getMotionState() );
     if( motion == NULL )
     {
-        osg::notify( osg::WARN ) << "SliderConstraint: Invalid MotionState." << std::endl;
+        osg::notify( osg::WARN ) << "createConstraint: Invalid MotionState." << std::endl;
         return;
     }
     const osg::Matrix invACOM( osg::Matrix::translate( -( motion->getCenterOfMass() ) ) );
     //
-    //   2. The final rbA frame matrix.
-    btTransform rbAFrame = osgbCollision::asBtTransform(
-        axisRotate * invACOM );
+    //   2. Transform A back to the origin.
+    const osg::Matrix invAXform( osg::Matrix::inverse( _rbAXform ) );
+    //
+    //   3. The final rbA frame matrix.
+    btTransform rbAFrame = osgbCollision::asBtTransform( 
+        orientation * invAXform * invACOM );
+
+
+    btTransform rbBFrame;
+    if( _rbB != NULL )
+    {
+        // Create a matrix that orients the spring axis/point in B's coordinate space.
+        //
+        //   1. Inverse B center of mass offset.
+        motion = dynamic_cast< osgbDynamics::MotionState* >( _rbB->getMotionState() );
+        if( motion == NULL )
+        {
+            osg::notify( osg::WARN ) << "InternalCreateSpring: Invalid MotionState." << std::endl;
+            return;
+        }
+        const osg::Matrix invBCOM( osg::Matrix::translate( -( motion->getCenterOfMass() ) ) );
+        //
+        //   2. Transform B back to the origin.
+        const osg::Matrix invBXform( osg::Matrix::inverse( _rbBXform ) );
+        //
+        //   3. The final rbB frame matrix.
+        rbBFrame = osgbCollision::asBtTransform( 
+            orientation * invBXform * invBCOM );
+    }
 
 
     btSliderConstraint* cons;
@@ -276,10 +276,10 @@ void SliderConstraint::createConstraint()
         cons = new btSliderConstraint( *_rbA, *_rbB, rbAFrame, rbBFrame, false );
     else
         cons = new btSliderConstraint( *_rbA, rbAFrame, true );
-    const btScalar loLimit = _slideLimit[ 0 ];
-    const btScalar hiLimit = _slideLimit[ 1 ];
-    cons->setLowerLinLimit( loLimit );
-    cons->setUpperLinLimit( hiLimit );
+
+    cons->setLowerLinLimit( btScalar( _slideLimit[ 0 ] ) );
+    cons->setUpperLinLimit( btScalar( _slideLimit[ 1 ] ) );
+
     _constraint = cons;
 
     setDirty( false );
@@ -289,45 +289,207 @@ void SliderConstraint::createConstraint()
 
 
 TwistSliderConstraint::TwistSliderConstraint()
-  : SliderConstraint()
+  : Constraint(),
+    _axis( 1., 0., 0. ),
+    _point( 0., 0., 0. ),
+    _slideLimit( -1., 1. ),
+    _twistLimit( -osg::PI_2, osg::PI_2 )
 {
 }
 TwistSliderConstraint::TwistSliderConstraint( btRigidBody* rbA, btRigidBody* rbB )
-  : SliderConstraint( rbA, rbB )
+  : Constraint( rbA, rbB ),
+    _axis( 1., 0., 0. ),
+    _point( 0., 0., 0. ),
+    _slideLimit( -1., 1. ),
+    _twistLimit( -osg::PI_2, osg::PI_2 )
 {
 }
 TwistSliderConstraint::TwistSliderConstraint( btRigidBody* rbA, const osg::Matrix& rbAXform,
             btRigidBody* rbB, const osg::Matrix& rbBXform,
-            const osg::Vec3& slideAxisInA, const osg::Vec2& slideLimit )
-  : SliderConstraint( rbA, rbAXform, rbB, rbBXform, slideAxisInA, slideLimit )
+            const osg::Vec3& axis, const osg::Vec3& wcPoint,
+            const osg::Vec2& slideLimit, const osg::Vec2& twistLimit )
+  : Constraint( rbA, rbAXform, rbB, rbBXform ),
+    _axis( axis ),
+    _point( wcPoint ),
+    _slideLimit( slideLimit ),
+    _twistLimit( twistLimit )
 {
 }
 TwistSliderConstraint::TwistSliderConstraint( btRigidBody* rbA, const osg::Matrix& rbAXform,
-            const osg::Vec3& slideAxisInA, const osg::Vec2& slideLimit )
-  : SliderConstraint( rbA, rbAXform, slideAxisInA, slideLimit )
+            const osg::Vec3& axis, const osg::Vec3& wcPoint,
+            const osg::Vec2& slideLimit, const osg::Vec2& twistLimit )
+  : Constraint( rbA, rbAXform ),
+    _axis( axis ),
+    _point( wcPoint ),
+    _slideLimit( slideLimit ),
+    _twistLimit( twistLimit )
 {
 }
 TwistSliderConstraint::TwistSliderConstraint( const TwistSliderConstraint& rhs, const osg::CopyOp& copyop )
-  : SliderConstraint( rhs, copyop )
+  : Constraint( rhs, copyop ),
+    _axis( rhs._axis ),
+    _point( rhs._point ),
+    _slideLimit( rhs._slideLimit ),
+    _twistLimit( rhs._twistLimit )
 {
 }
 TwistSliderConstraint::~TwistSliderConstraint()
 {
 }
 
+btSliderConstraint* TwistSliderConstraint::getAsBtSlider() const
+{
+    return( static_cast< btSliderConstraint* >( getConstraint() ) );
+}
+
+void TwistSliderConstraint::setAxis( const osg::Vec3& axis )
+{
+    _axis = axis;
+    setDirty();
+}
+void TwistSliderConstraint::setAxis( const double x, const double y, const double z )
+{
+    setAxis( osg::Vec3( x, y, z ) );
+}
+void TwistSliderConstraint::setPoint( const osg::Vec3& wcPoint )
+{
+    _point = wcPoint;
+    setDirty();
+}
+void TwistSliderConstraint::setPoint( const double x, const double y, const double z )
+{
+    setPoint( osg::Vec3( x, y, z ) );
+}
+void TwistSliderConstraint::setSlideLimit( const osg::Vec2& limit )
+{
+    _slideLimit = limit;
+
+    if( !getDirty() && ( _constraint != NULL ) )
+    {
+        // Dynamically modify the existing constraint.
+        btSliderConstraint* cons = getAsBtSlider();
+        cons->setLowerLinLimit( _slideLimit[ 0 ] );
+        cons->setUpperLinLimit( _slideLimit[ 1 ] );
+    }
+    else
+        setDirty();
+}
+void TwistSliderConstraint::setSlideLimit( const double lo, const double hi )
+{
+    setSlideLimit( osg::Vec2( lo, hi ) );
+}
+void TwistSliderConstraint::setTwistLimit( const osg::Vec2& limitRadians )
+{
+    _twistLimit = limitRadians;
+
+    if( !getDirty() && ( _constraint != NULL ) )
+    {
+        // Dynamically modify the existing constraint.
+        btSliderConstraint* cons = getAsBtSlider();
+        cons->setLowerAngLimit( _twistLimit[ 0 ] );
+        cons->setUpperAngLimit( _twistLimit[ 1 ] );
+    }
+    else
+        setDirty();
+}
+void TwistSliderConstraint::setTwistLimit( const double lo, const double hi )
+{
+    setTwistLimit( osg::Vec2( lo, hi ) );
+}
+
+bool TwistSliderConstraint::operator==( const TwistSliderConstraint& rhs ) const
+{
+    return( !( operator!=( rhs ) ) );
+}
+bool TwistSliderConstraint::operator!=( const TwistSliderConstraint& rhs ) const
+{
+    return(
+        ( _axis != rhs._axis ) ||
+        ( _point != rhs._point ) ||
+        ( _slideLimit != rhs._slideLimit ) ||
+        ( _twistLimit != rhs._twistLimit ) ||
+        ( Constraint::operator!=( static_cast< const Constraint& >( rhs ) ) )
+    );
+}
+
+
 void TwistSliderConstraint::createConstraint()
 {
-    // Create the constraint using the base class.
-    SliderConstraint::createConstraint();
-    if( _constraint == NULL )
+    if( _rbA == NULL )
+    {
+        osg::notify( osg::INFO ) << "createConstraint: _rbA == NULL." << std::endl;
         return;
+    }
 
-    // Base class produces a btSliderConstraint.
-    btSliderConstraint* cons = getAsBtSlider();
-    // All we need to do is disable the angular constraint that exists in
-    // the btSliderConstraint by default.
-    cons->setLowerAngLimit( -osg::PI );
-    cons->setUpperAngLimit( osg::PI );
+    if( _constraint != NULL )
+    {
+        delete _constraint;
+        _constraint = NULL;
+    }
+
+
+    // Orientation matrix for the slider x-axis / point.
+    osg::Vec3 localAxis( _axis );
+    localAxis.normalize();
+    const osg::Matrix orientation =
+        osg::Matrix::rotate( osg::Vec3( 1., 0., 0. ), localAxis ) *
+        osg::Matrix::translate( _point );
+
+
+    // Create a matrix that returns A to the origin.
+    //
+    //   1. Inverse A center of mass offset.
+    osgbDynamics::MotionState* motion = dynamic_cast< osgbDynamics::MotionState* >( _rbA->getMotionState() );
+    if( motion == NULL )
+    {
+        osg::notify( osg::WARN ) << "createConstraint: Invalid MotionState." << std::endl;
+        return;
+    }
+    const osg::Matrix invACOM( osg::Matrix::translate( -( motion->getCenterOfMass() ) ) );
+    //
+    //   2. Transform A back to the origin.
+    const osg::Matrix invAXform( osg::Matrix::inverse( _rbAXform ) );
+    //
+    //   3. The final rbA frame matrix.
+    btTransform rbAFrame = osgbCollision::asBtTransform( 
+        orientation * invAXform * invACOM );
+
+
+    btTransform rbBFrame;
+    if( _rbB != NULL )
+    {
+        // Create a matrix that orients the spring axis/point in B's coordinate space.
+        //
+        //   1. Inverse B center of mass offset.
+        motion = dynamic_cast< osgbDynamics::MotionState* >( _rbB->getMotionState() );
+        if( motion == NULL )
+        {
+            osg::notify( osg::WARN ) << "InternalCreateSpring: Invalid MotionState." << std::endl;
+            return;
+        }
+        const osg::Matrix invBCOM( osg::Matrix::translate( -( motion->getCenterOfMass() ) ) );
+        //
+        //   2. Transform B back to the origin.
+        const osg::Matrix invBXform( osg::Matrix::inverse( _rbBXform ) );
+        //
+        //   3. The final rbB frame matrix.
+        rbBFrame = osgbCollision::asBtTransform( 
+            orientation * invBXform * invBCOM );
+    }
+
+
+    btSliderConstraint* cons;
+    if( _rbB != NULL )
+        cons = new btSliderConstraint( *_rbA, *_rbB, rbAFrame, rbBFrame, false );
+    else
+        cons = new btSliderConstraint( *_rbA, rbAFrame, true );
+
+    cons->setLowerLinLimit( btScalar( _slideLimit[ 0 ] ) );
+    cons->setUpperLinLimit( btScalar( _slideLimit[ 1 ] ) );
+    cons->setLowerAngLimit( _twistLimit[ 0 ] );
+    cons->setUpperAngLimit( _twistLimit[ 1 ] );
+
+    _constraint = cons;
 
     setDirty( false );
 }

@@ -308,12 +308,77 @@ bool SliderConstraint_writeLocalData( const osg::Object& obj, osgDB::Output& fw 
 
 bool TwistSliderConstraint_readLocalData( osg::Object& obj, osgDB::Input& fr )
 {
-    // No-op, but this function must exist to supprt the TwistSliderConstraint object.
+    osgbDynamics::TwistSliderConstraint& cons = static_cast< osgbDynamics::TwistSliderConstraint& >( obj );
+
+    if( fr.matchSequence( "Axis %f %f %f" ) )
+    {
+        osg::Vec3 axis;
+        fr[1].getFloat( axis[0] );
+        fr[2].getFloat( axis[1] );
+        fr[3].getFloat( axis[2] );
+        cons.setAxis( axis );
+        fr += 4;
+    }
+    else
+    {
+        osg::notify( osg::WARN ) << "TwistSliderConstraint_readLocalData: Bad input data at \"Axis\"." << std::endl;
+        return( false );
+    }
+
+    if( fr.matchSequence( "Point %f %f %f" ) )
+    {
+        osg::Vec3 point;
+        fr[1].getFloat( point[0] );
+        fr[2].getFloat( point[1] );
+        fr[3].getFloat( point[2] );
+        cons.setPoint( point );
+        fr += 4;
+    }
+    else
+    {
+        osg::notify( osg::WARN ) << "TwistSliderConstraint_readLocalData: Bad input data at \"Point\"." << std::endl;
+        return( false );
+    }
+
+    if( fr.matchSequence( "Slide limit %f %f" ) )
+    {
+        osg::Vec2 limit;
+        fr[2].getFloat( ( limit[0] ) );
+        fr[3].getFloat( ( limit[1] ) );
+        cons.setSlideLimit( limit );
+        fr += 4;
+    }
+    else
+    {
+        osg::notify( osg::WARN ) << "TwistSliderConstraint_readLocalData: Bad input data at \"Slide limit\"." << std::endl;
+        return( false );
+    }
+
+    if( fr.matchSequence( "Twist limit %f %f" ) )
+    {
+        osg::Vec2 limit;
+        fr[2].getFloat( ( limit[0] ) );
+        fr[3].getFloat( ( limit[1] ) );
+        cons.setTwistLimit( limit );
+        fr += 4;
+    }
+    else
+    {
+        osg::notify( osg::WARN ) << "TwistSliderConstraint_readLocalData: Bad input data at \"Twist limit\"." << std::endl;
+        return( false );
+    }
+
     return( true );
 }
 bool TwistSliderConstraint_writeLocalData( const osg::Object& obj, osgDB::Output& fw )
 {
-    // No-op, but this function must exist to supprt the TwistSliderConstraint object.
+    const osgbDynamics::TwistSliderConstraint& cons = static_cast< const osgbDynamics::TwistSliderConstraint& >( obj );
+
+    fw.indent() << "Axis " << cons.getAxis() << std::endl;
+    fw.indent() << "Point " << cons.getPoint() << std::endl;
+    fw.indent() << "Slide limit " << cons.getSlideLimit() << std::endl;
+    fw.indent() << "Twist limit " << cons.getTwistLimit() << std::endl;
+
     return( true );
 }
 
