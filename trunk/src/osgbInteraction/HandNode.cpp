@@ -454,7 +454,7 @@ protected:
 
 
 // Statics
-float HandNode::_defaultLength( 18.f );
+float HandNode::_defaultLength( 16.2f );
 
 
 HandNode::HandNode()
@@ -1018,7 +1018,7 @@ void HandNode::init()
 
         btDiscreteDynamicsWorld* ddw = dynamic_cast< btDiscreteDynamicsWorld* >( _bulletWorld );
         if( ddw != NULL )
-            ddw->addRigidBody( _body, btBroadphaseProxy::KinematicFilter, btBroadphaseProxy::DefaultFilter );
+            ddw->addRigidBody( _body, btBroadphaseProxy::KinematicFilter, btBroadphaseProxy::AllFilter );
         else
             _bulletWorld->addRigidBody( _body );
 
@@ -1651,8 +1651,8 @@ void HandNode::ArticulationInfo::setBulletTransform()
 void HandNode::dump() const
 {
     // Create OSG files of any child nodes and the hand subgraph.
-    osgDB::writeNodeFile( *( (Transform*)(this) ), "children.osg" );
-    osgDB::writeNodeFile( *_hand, "hand.osg" );
+    osgDB::writeNodeFile( *( (Transform*)(this) ), "debug-children.osg" );
+    osgDB::writeNodeFile( *_hand, "debug-hand.osg" );
 
     // Display the Transform matrix.
     osg::Matrix m;
