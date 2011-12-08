@@ -1,0 +1,16 @@
+# See osgBullet/data/concave.txt for config file documentation.
+#
+
+
+GroundPlane: 0 0 1 0
+HandNode: 0 1 .6 0 0 0 1 2 1
+Model: NightStand.flt
+
+Shape: 0
+Node: DOF_Drawer
+Overall: 1
+Body:
+
+Constraint: constraint.osg DOF_Drawer
+
+WirePlane: 0 0 0 2 0 0 0 0 2 2 2

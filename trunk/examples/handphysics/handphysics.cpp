@@ -550,15 +550,23 @@ public:
                     continue;
                 }
 
+                btTransform wt;
+
                 btRigidBody* rbA = lookupRigidBody( nodeA );
                 if( rbA == NULL )
                     continue;
+                rbA->getMotionState()->getWorldTransform( wt );
+                cons->setAXform( osgbCollision::asOsgMatrix( wt ) );
+
                 btRigidBody* rbB( NULL );
                 if( !( nodeB.empty() ) )
                 {
+                    osg::Matrix xfB;
                     rbB = lookupRigidBody( nodeB );
                     if( rbB == NULL )
                         continue;
+                    rbB->getMotionState()->getWorldTransform( wt );
+                    cons->setBXform( osgbCollision::asOsgMatrix( wt ) );
                 }
                 cons->setRigidBodies( rbA, rbB );
                 _dw->addConstraint( cons->getConstraint() );
