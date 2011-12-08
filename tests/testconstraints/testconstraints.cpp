@@ -26,7 +26,6 @@
 #include <osgViewer/Viewer>
 #include <osgGA/TrackballManipulator>
 
-#include <osgbDynamics/MotionState.h>
 #include <osgbDynamics/Constraints.h>
 #include <osgbCollision/RefBulletObject.h>
 #include <osgbDynamics/RigidBody.h>
