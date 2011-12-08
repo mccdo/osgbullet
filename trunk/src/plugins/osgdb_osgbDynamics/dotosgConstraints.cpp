@@ -64,7 +64,7 @@ osgDB::RegisterDotOsgWrapperProxy TwistSliderConstraint_Proxy
 (
     new osgbDynamics::TwistSliderConstraint,
     "TwistSliderConstraint",
-    "Object Constraint SliderConstraint TwistSliderConstraint",
+    "Object Constraint TwistSliderConstraint",
     TwistSliderConstraint_readLocalData,
     TwistSliderConstraint_writeLocalData
 );

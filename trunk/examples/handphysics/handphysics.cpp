@@ -38,12 +38,14 @@
 #include <osgwTools/FindNamedNode.h>
 #include <osgwTools/InsertRemove.h>
 #include <osgwTools/ReadFile.h>
+#include <osgwTools/Shapes.h>
 #include <osgwTools/Version.h>
 
 #include <osgbCollision/RefBulletObject.h>
 #include <osgbDynamics/GroundPlane.h>
 #include <osgbDynamics/RigidBody.h>
 #include <osgbDynamics/MotionState.h>
+#include <osgbDynamics/Constraints.h>
 #include <osgbCollision/CollisionShapes.h>
 #include <osgbCollision/GLDebugDrawer.h>
 
@@ -209,6 +211,8 @@ public:
         std::string nodeName;
         bool matchAllNodes( false );
 
+        float translateUp( 0. );
+
         const int bufSize( 1024 );
         char bufCh[ bufSize ];
         in.getline( bufCh, bufSize );
@@ -238,6 +242,10 @@ public:
             {
                 istr >> _up;
                 _dw->setGravity( osgbCollision::asBtVector3( _up * -9.8 ) );
+            }
+            else if( key == std::string( "TranslateUp:" ) )
+            {
+                istr >> translateUp;
             }
             else if( key == std::string( "GroundPlane:" ) )
             {
@@ -272,13 +280,15 @@ public:
                 osg::ref_ptr< osg::Node > model = osgDB::readNodeFile( modelName );
                 if( !model.valid() )
                     osg::notify( osg::WARN ) << "  Warning: Can't find model " << modelName << std::endl;
-                else
+                else if( translateUp != 0.f )
                 {
                     osg::ref_ptr< osg::MatrixTransform > orient = new osg::MatrixTransform(
-                        osg::Matrix::translate( _up * 7. ) );
+                        osg::Matrix::translate( _up * translateUp ) );
                     orient->addChild( model.get() );
                     _root->addChild( orient.get() );
                 }
+                else
+                    _root->addChild( model.get() );
             }
             else if( key == std::string( "Node:" ) )
             {
@@ -396,45 +406,18 @@ public:
                 osg::Vec3 axisA, axisB;
                 istr >> nodeA >> nodeB >> pivotA >> pivotB >> axisA >> axisB;
 
-                osgwTools::FindNamedNode fnnA( nodeA );
-                _root->accept( fnnA );
-                osgwTools::FindNamedNode fnnB( nodeB );
-                _root->accept( fnnB );
-
-                osgwTools::FindNamedNode::NodeAndPath& napA( fnnA._napl[ 0 ] );
-                osgwTools::AbsoluteModelTransform* amtA = dynamic_cast< osgwTools::AbsoluteModelTransform* >( napA.first->getParent( 0 ) );
-                if( amtA == NULL )
-                {
-                    osg::notify( osg::FATAL ) << "Hinge node (" << nodeA << ") parent is not AMT." << std::endl;
+                btRigidBody* rbA = lookupRigidBody( nodeA );
+                btRigidBody* rbB = lookupRigidBody( nodeB );
+                if( ( rbA == NULL ) || ( rbB == NULL ) )
                     continue;
-                }
-                osgbCollision::RefRigidBody* rbA = dynamic_cast< osgbCollision::RefRigidBody* >( amtA->getUserData() );
-                if( rbA == NULL )
-                {
-                    osg::notify( osg::FATAL ) << "AMT for " << nodeA << " has invalid user data." << std::endl;
-                    continue;
-                }
-
-                osgwTools::FindNamedNode::NodeAndPath& napB( fnnB._napl[ 0 ] );
-                osgwTools::AbsoluteModelTransform* amtB = dynamic_cast< osgwTools::AbsoluteModelTransform* >( napB.first->getParent( 0 ) );
-                if( amtB == NULL )
-                {
-                    osg::notify( osg::FATAL ) << "Hinge node (" << nodeB << ") parent is not AMT." << std::endl;
-                    continue;
-                }
-                osgbCollision::RefRigidBody* rbB = dynamic_cast< osgbCollision::RefRigidBody* >( amtB->getUserData() );
-                if( rbB == NULL )
-                {
-                    osg::notify( osg::FATAL ) << "AMT for " << nodeB << " has invalid user data." << std::endl;
-                    continue;
-                }
 
                 const btVector3 btPivotA( osgbCollision::asBtVector3( pivotA ) );
                 const btVector3 btPivotB( osgbCollision::asBtVector3( pivotB ) );
                 btVector3 btAxisA( osgbCollision::asBtVector3( axisA ) );
                 btVector3 btAxisB( osgbCollision::asBtVector3( axisB ) );
-                btHingeConstraint* hinge = new btHingeConstraint( *( rbA->get() ), *( rbB->get() ),
+                btHingeConstraint* hinge = new btHingeConstraint( *rbA, *rbB,
                     btPivotA, btPivotB, btAxisA, btAxisB );
+
                 hinge->setLimit( -3.f, -.3f );
                 //hinge->setAngularOnly( true );
                 _dw->addConstraint( hinge, true );
@@ -550,6 +533,52 @@ public:
                     _dw->addConstraint( slider, true );
                 }
             }
+            else if( key == std::string( "Constraint:" ) )
+            {
+                std::string fileName, nodeA, nodeB;
+                istr >> fileName >> nodeA;
+                istr >> nodeB;
+                if( istr.fail() )
+                    nodeB.clear();
+                osg::notify( osg::INFO ) << fileName << "  nodeA " << nodeA << " nodeB " << nodeB << std::endl;
+
+                osg::ref_ptr< osgbDynamics::Constraint > cons = static_cast< osgbDynamics::Constraint* >(
+                    osgDB::readObjectFile( fileName ) );
+                if( cons == NULL )
+                {
+                    osg::notify( osg::WARN ) << "Unable to load constraint file \"" << fileName << "\"." << std::endl;
+                    continue;
+                }
+
+                btRigidBody* rbA = lookupRigidBody( nodeA );
+                if( rbA == NULL )
+                    continue;
+                btRigidBody* rbB( NULL );
+                if( !( nodeB.empty() ) )
+                {
+                    rbB = lookupRigidBody( nodeB );
+                    if( rbB == NULL )
+                        continue;
+                }
+                cons->setRigidBodies( rbA, rbB );
+                _dw->addConstraint( cons->getConstraint() );
+            }
+            else if( key == std::string( "WirePlane:" ) )
+            {
+                osg::Vec3 c, u, v;
+                osg::Vec2s subdiv;
+                istr >> c >> u >> v >> subdiv;
+                if( istr.fail() )
+                {
+                    osg::notify( osg::WARN ) << "WirePlane: error." << std::endl;
+                    continue;
+                }
+                osg::notify( osg::INFO ) << "WirePlane: " << c << " " << u << " " << v << " " << subdiv << std::endl;
+
+                osg::Geode* geode = new osg::Geode;
+                geode->addDrawable( osgwTools::makeWirePlane( c, u, v, subdiv ) );
+                _root->addChild( geode );
+            }
             else
                 osg::notify( osg::WARN ) << "ConfigReaderWriter: Unknown key: " << key << std::endl;
         }
@@ -622,6 +651,28 @@ protected:
         rb->setWorldTransform( wt );
 
         return( rb );
+    }
+
+    btRigidBody* lookupRigidBody( const std::string& nodeName )
+    {
+        osgwTools::FindNamedNode fnnA( nodeName );
+        _root->accept( fnnA );
+
+        // We get back a list of nodes and paths, but only use the first one.
+        osgwTools::FindNamedNode::NodeAndPath& napA( fnnA._napl[ 0 ] );
+        osgwTools::AbsoluteModelTransform* amtA = dynamic_cast< osgwTools::AbsoluteModelTransform* >( napA.first->getParent( 0 ) );
+        if( amtA == NULL )
+        {
+            osg::notify( osg::FATAL ) << "Node \"" << nodeName << "\" parent is not AMT." << std::endl;
+            return( NULL );
+        }
+        osgbCollision::RefRigidBody* rbA = dynamic_cast< osgbCollision::RefRigidBody* >( amtA->getUserData() );
+        if( rbA == NULL )
+        {
+            osg::notify( osg::FATAL ) << "AMT for \"" << nodeName << "\" has invalid user data." << std::endl;
+            return( NULL );
+        }
+        return( rbA->get() );
     }
 
 

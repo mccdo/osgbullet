@@ -6,9 +6,11 @@
 
 # World setup.
 #
-# Up: x y z      Specifies the up vector. Default is 0 0 1. (Place
-#                this command before the "Model:" command, as the
-#                model is translated by the up vector.)
+# Up: x y z      Specifies the up vector. Default is 0 0 1. (If
+#                "TranslateUp" is set, place both this command and
+#                the "TranslateUp" command before the "Model:" command
+#                to specity the correct model translation.
+# TranslateUp: n If specified, the model is translated by n * up.
 # GroundPlane: x y z d
 #                Specify the ground plane. Default is 0 0 1 0.
 # NoGroundPlane: Disables the ground plant. Default is to create a ground plane.
@@ -27,7 +29,7 @@
 #                When "Body:" and "AttachBody:" search for a named node,
 #                convert / attach to all node matches. Default: 0 (false);
 #                only the first match is converted / attached to.
-# Overall: {1|0} Specifies the "overall" paramter to OSGToCollada.
+# Overall: {1|0} Sets the _overall field in CreationRecord.
 #                Default is 1 (truw).
 # Mass: m        Specifies the mass of future rigid bodies. Default
 #                is 1.0.
@@ -56,7 +58,15 @@
 # Slider: nodeNameA nodeNameB axis low high useA
 #                Creates a slider constraint between two named nodes.
 
+# Debugging
+#
+# WirePlane: cx cy cz ux uy uz vx vy vz su sv
+#                Uses osgwTools::makeWirePlane to draw a grid, useful for
+#                object location verification. c xyz is a corner, u xyz is
+#                the plane u vector, and v xyz is the plane v vector. su
+#                and sv are plane subdivisions.
 
+TranslateUp: 7
 GroundPlane: 0 0 1 0
 HandNode: -2 6 3 0 0 0 1 2.5 1
 Model: concavesg.osg
