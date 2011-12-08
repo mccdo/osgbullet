@@ -82,7 +82,7 @@ public:
     HandNode( const HandNode& rhs, const osg::CopyOp& copyop=osg::CopyOp::SHALLOW_COPY );
 
     HandNode(); // Required for META_Node, but not intended for actual use.
-    META_Node( osgbBullet, HandNode );
+    META_Node(osgbInteraction,HandNode);
 
     virtual void traverse( osg::NodeVisitor& nv );
 
