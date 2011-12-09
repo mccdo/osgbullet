@@ -68,7 +68,7 @@
 
 TranslateUp: 7
 GroundPlane: 0 0 1 0
-HandNode: -2 6 3 0 0 0 1 2.5 1
+HandNode: -2 6 3 0 0 0 1 2 1
 Model: concavesg.osg
 
 Shape: 0

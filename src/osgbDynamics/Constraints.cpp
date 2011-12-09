@@ -117,6 +117,24 @@ bool Constraint::operator!=( const Constraint& rhs ) const
     );
 }
 
+osg::Matrix Constraint::orthonormalize( const osg::Matrix& in )
+{
+    osg::Vec3d a( in( 0, 0 ), in( 0, 1 ), in( 0, 2 ) );
+    osg::Vec3d b( in( 1, 0 ), in( 1, 1 ), in( 1, 2 ) );
+    osg::Vec3d c( a ^ b );
+    c.normalize();
+    b = c ^ a;
+    b.normalize();
+    a = b ^ c;
+    a.normalize();
+
+    osg::Matrix m( a[0], a[1], a[2], in(0,3),
+        b[0], b[1], b[2], in(1,3),
+        c[0], c[1], c[2], in(2,3),
+        in(3,0), in(3,1), in(3,2), in(3,3) );
+    return( m );
+}
+
 
 
 
@@ -207,6 +225,23 @@ bool SliderConstraint::operator!=( const SliderConstraint& rhs ) const
     );
 }
 
+osg::Matrix on( const osg::Matrix& in )
+{
+    osg::Vec3d a( in( 0, 0 ), in( 0, 1 ), in( 0, 2 ) );
+    osg::Vec3d b( in( 1, 0 ), in( 1, 1 ), in( 1, 2 ) );
+    osg::Vec3d c( a ^ b );
+    c.normalize();
+    b = c ^ a;
+    b.normalize();
+    a = b ^ c;
+    a.normalize();
+
+    osg::Matrix m( a[0], a[1], a[2], in(0,3),
+        b[0], b[1], b[2], in(1,3),
+        c[0], c[1], c[2], in(2,3),
+        in(3,0), in(3,1), in(3,2), in(3,3) );
+    return( m );
+}
 
 void SliderConstraint::createConstraint()
 {
@@ -238,10 +273,13 @@ void SliderConstraint::createConstraint()
         osg::notify( osg::WARN ) << "createConstraint: Invalid MotionState." << std::endl;
         return;
     }
-    const osg::Matrix invACOM( osg::Matrix::translate( -( motion->getCenterOfMass() ) ) );
+    osg::Vec3 invCom = -( motion->getCenterOfMass() );
+    osg::Vec3 scale = motion->getScale();
+    osg::Vec3 scaledInvCom = osg::Vec3( invCom[0]*scale[0], invCom[1]*scale[1], invCom[2]*scale[2] );
+    const osg::Matrix invACOM( osg::Matrix::translate( scaledInvCom ) );
     //
     //   2. Transform A back to the origin.
-    const osg::Matrix invAXform( osg::Matrix::inverse( _rbAXform ) );
+    const osg::Matrix invAXform( osg::Matrix::inverse( orthonormalize( _rbAXform ) ) );
     //
     //   3. The final rbA frame matrix.
     btTransform rbAFrame = osgbCollision::asBtTransform( 
@@ -260,10 +298,13 @@ void SliderConstraint::createConstraint()
             osg::notify( osg::WARN ) << "InternalCreateSpring: Invalid MotionState." << std::endl;
             return;
         }
-        const osg::Matrix invBCOM( osg::Matrix::translate( -( motion->getCenterOfMass() ) ) );
+        invCom = -( motion->getCenterOfMass() );
+        scale = motion->getScale();
+        scaledInvCom = osg::Vec3( invCom[0]*scale[0], invCom[1]*scale[1], invCom[2]*scale[2] );
+        const osg::Matrix invBCOM( osg::Matrix::translate( scaledInvCom ) );
         //
         //   2. Transform B back to the origin.
-        const osg::Matrix invBXform( osg::Matrix::inverse( _rbBXform ) );
+        const osg::Matrix invBXform( osg::Matrix::inverse( orthonormalize( _rbBXform ) ) );
         //
         //   3. The final rbB frame matrix.
         rbBFrame = osgbCollision::asBtTransform( 
@@ -445,10 +486,13 @@ void TwistSliderConstraint::createConstraint()
         osg::notify( osg::WARN ) << "createConstraint: Invalid MotionState." << std::endl;
         return;
     }
-    const osg::Matrix invACOM( osg::Matrix::translate( -( motion->getCenterOfMass() ) ) );
+    osg::Vec3 invCom = -( motion->getCenterOfMass() );
+    osg::Vec3 scale = motion->getScale();
+    osg::Vec3 scaledInvCom = osg::Vec3( invCom[0]*scale[0], invCom[1]*scale[1], invCom[2]*scale[2] );
+    const osg::Matrix invACOM( osg::Matrix::translate( scaledInvCom ) );
     //
     //   2. Transform A back to the origin.
-    const osg::Matrix invAXform( osg::Matrix::inverse( _rbAXform ) );
+    const osg::Matrix invAXform( osg::Matrix::inverse( orthonormalize( _rbAXform ) ) );
     //
     //   3. The final rbA frame matrix.
     btTransform rbAFrame = osgbCollision::asBtTransform( 
@@ -467,10 +511,13 @@ void TwistSliderConstraint::createConstraint()
             osg::notify( osg::WARN ) << "InternalCreateSpring: Invalid MotionState." << std::endl;
             return;
         }
-        const osg::Matrix invBCOM( osg::Matrix::translate( -( motion->getCenterOfMass() ) ) );
+        invCom = -( motion->getCenterOfMass() );
+        scale = motion->getScale();
+        scaledInvCom = osg::Vec3( invCom[0]*scale[0], invCom[1]*scale[1], invCom[2]*scale[2] );
+        const osg::Matrix invBCOM( osg::Matrix::translate( scaledInvCom ) );
         //
         //   2. Transform B back to the origin.
-        const osg::Matrix invBXform( osg::Matrix::inverse( _rbBXform ) );
+        const osg::Matrix invBXform( osg::Matrix::inverse( orthonormalize( _rbBXform ) ) );
         //
         //   3. The final rbB frame matrix.
         rbBFrame = osgbCollision::asBtTransform( 
@@ -718,7 +765,10 @@ btGeneric6DofSpringConstraint* LinearSpringConstraint::internalCreateSpringConst
         osg::notify( osg::WARN ) << "InternalCreateSpring: Invalid MotionState." << std::endl;
         return( NULL );
     }
-    const osg::Matrix invACOM( osg::Matrix::translate( -( motion->getCenterOfMass() ) ) );
+    osg::Vec3 invCom = -( motion->getCenterOfMass() );
+    osg::Vec3 scale = motion->getScale();
+    osg::Vec3 scaledInvCom = osg::Vec3( invCom[0]*scale[0], invCom[1]*scale[1], invCom[2]*scale[2] );
+    const osg::Matrix invACOM( osg::Matrix::translate( scaledInvCom ) );
     //
     //   2. Transform A back to the origin.
     const osg::Matrix invAXform( osg::Matrix::inverse( aXform ) );
@@ -737,7 +787,10 @@ btGeneric6DofSpringConstraint* LinearSpringConstraint::internalCreateSpringConst
         osg::notify( osg::WARN ) << "InternalCreateSpring: Invalid MotionState." << std::endl;
         return( NULL );
     }
-    const osg::Matrix invBCOM( osg::Matrix::translate( -( motion->getCenterOfMass() ) ) );
+    invCom = -( motion->getCenterOfMass() );
+    scale = motion->getScale();
+    scaledInvCom = osg::Vec3( invCom[0]*scale[0], invCom[1]*scale[1], invCom[2]*scale[2] );
+    const osg::Matrix invBCOM( osg::Matrix::translate( scaledInvCom ) );
     //
     //   2. Transform B back to the origin.
     const osg::Matrix invBXform( osg::Matrix::inverse( bXform ) );
@@ -1099,30 +1152,6 @@ void FixedConstraint::createConstraint()
     }
 
 
-    btTransform rbBFrame; // OK to not initialize.
-    if( _rbB != NULL )
-    {
-        // Create a matrix that puts A in B's coordinate space.
-        //
-        //   1. Inverse B center of mass offset.
-        osgbDynamics::MotionState* motion = dynamic_cast< osgbDynamics::MotionState* >( _rbB->getMotionState() );
-        if( motion == NULL )
-        {
-            osg::notify( osg::WARN ) << "SliderConstraint: Invalid MotionState." << std::endl;
-            return;
-        }
-        const osg::Vec3 bCom = motion->getCenterOfMass();
-        const osg::Matrix invBCOM( osg::Matrix::translate( -( bCom ) ) );
-        //
-        //   3. Transform from B's origin to A's origin.
-        const osg::Matrix rbBToRbA( osg::Matrix::inverse( _rbBXform ) * _rbAXform );
-        //
-        //   4. The final rbB frame matrix.
-        rbBFrame = osgbCollision::asBtTransform(
-            invBCOM * rbBToRbA );
-    }
-
-
     // A's reference frame is just the COM offset.
     osgbDynamics::MotionState* motion = dynamic_cast< osgbDynamics::MotionState* >( _rbA->getMotionState() );
     if( motion == NULL )
@@ -1130,8 +1159,38 @@ void FixedConstraint::createConstraint()
         osg::notify( osg::WARN ) << "SliderConstraint: Invalid MotionState." << std::endl;
         return;
     }
-    const osg::Matrix invACOM( osg::Matrix::translate( -( motion->getCenterOfMass() ) ) );
+    osg::Vec3 invCom = -( motion->getCenterOfMass() );
+    osg::Vec3 scale = motion->getScale();
+    osg::Vec3 scaledInvCom = osg::Vec3( invCom[0]*scale[0], invCom[1]*scale[1], invCom[2]*scale[2] );
+    const osg::Matrix invACOM( osg::Matrix::translate( scaledInvCom ) );
     btTransform rbAFrame = osgbCollision::asBtTransform( invACOM );
+
+
+    btTransform rbBFrame; // OK to not initialize.
+    if( _rbB != NULL )
+    {
+        // Create a matrix that puts A in B's coordinate space.
+        //
+        //   1. Inverse B center of mass offset.
+        motion = dynamic_cast< osgbDynamics::MotionState* >( _rbB->getMotionState() );
+        if( motion == NULL )
+        {
+            osg::notify( osg::WARN ) << "SliderConstraint: Invalid MotionState." << std::endl;
+            return;
+        }
+        invCom = -( motion->getCenterOfMass() );
+        scale = motion->getScale();
+        scaledInvCom = osg::Vec3( invCom[0]*scale[0], invCom[1]*scale[1], invCom[2]*scale[2] );
+        const osg::Matrix invBCOM( osg::Matrix::translate( scaledInvCom ) );
+        //
+        //   3. Transform from B's origin to A's origin.
+        const osg::Matrix rbBToRbA( osg::Matrix::inverse( orthonormalize( _rbBXform ) ) *
+            orthonormalize( _rbAXform ) );
+        //
+        //   4. The final rbB frame matrix.
+        rbBFrame = osgbCollision::asBtTransform(
+            invBCOM * rbBToRbA );
+    }
 
 
     btGeneric6DofConstraint* cons;
@@ -1426,7 +1485,10 @@ void BoxConstraint::internalPlanarBoxFrameComputation(
         osg::notify( osg::WARN ) << "InternalCreateSpring: Invalid MotionState." << std::endl;
         return;
     }
-    const osg::Matrix invACOM( osg::Matrix::translate( -( motion->getCenterOfMass() ) ) );
+    osg::Vec3 invCom = -( motion->getCenterOfMass() );
+    osg::Vec3 scale = motion->getScale();
+    osg::Vec3 scaledInvCom = osg::Vec3( invCom[0]*scale[0], invCom[1]*scale[1], invCom[2]*scale[2] );
+    const osg::Matrix invACOM( osg::Matrix::translate( scaledInvCom ) );
     //
     //   2. Transform A back to the origin.
     const osg::Matrix invAXform( osg::Matrix::inverse( cons->getAXform() ) );
@@ -1447,7 +1509,10 @@ void BoxConstraint::internalPlanarBoxFrameComputation(
             osg::notify( osg::WARN ) << "InternalCreateSpring: Invalid MotionState." << std::endl;
             return;
         }
-        const osg::Matrix invBCOM( osg::Matrix::translate( -( motion->getCenterOfMass() ) ) );
+        invCom = -( motion->getCenterOfMass() );
+        scale = motion->getScale();
+        scaledInvCom = osg::Vec3( invCom[0]*scale[0], invCom[1]*scale[1], invCom[2]*scale[2] );
+        const osg::Matrix invBCOM( osg::Matrix::translate( scaledInvCom ) );
         //
         //   2. Transform B back to the origin.
         const osg::Matrix invBXform( osg::Matrix::inverse( cons->getBXform() ) );
@@ -1456,47 +1521,6 @@ void BoxConstraint::internalPlanarBoxFrameComputation(
         bFrame = osgbCollision::asBtTransform( 
             orientation * invBXform * invBCOM );
     }
-
-
-#if 0
-    if( rbB != NULL )
-    {
-        // Create a matrix that orients the axes in B's coordinate space.
-        //
-        //   1. Inverse B center of mass offset.
-        osgbDynamics::MotionState* motion = dynamic_cast< osgbDynamics::MotionState* >( rbB->getMotionState() );
-        if( motion == NULL )
-        {
-            osg::notify( osg::WARN ) << "Planar or BoxConstraint: Invalid MotionState." << std::endl;
-            return;
-        }
-        const osg::Matrix invBCOM( osg::Matrix::translate( -( motion->getCenterOfMass() ) ) );
-        //
-        //   2. The final rbB frame matrix.
-        bFrame = osgbCollision::asBtTransform(
-            orientation * invBCOM );
-    }
-
-
-    // Create a matrix that puts A in B's coordinate space, accounting
-    // for orientation of the constraint axes.
-    //
-    //   1. Inverse A center of mass offset.
-    osgbDynamics::MotionState* motion = dynamic_cast< osgbDynamics::MotionState* >( rbA->getMotionState() );
-    if( motion == NULL )
-    {
-        osg::notify( osg::WARN ) << "Planar or BoxConstraint: Invalid MotionState." << std::endl;
-        return;
-    }
-    const osg::Matrix invACOM( osg::Matrix::translate( -( motion->getCenterOfMass() ) ) );
-    //
-    //   2. Transform from A's origin to B's origin.
-    const osg::Matrix rbAToRbB( osg::Matrix::inverse( rbAXform ) * rbBXform );
-    //
-    //   3. The final rbA frame matrix.
-    aFrame = osgbCollision::asBtTransform( 
-        orientation * rbAToRbB * invACOM );
-#endif
 }
 
 
@@ -1628,13 +1652,16 @@ void HingeConstraint::createConstraint()
         osg::notify( osg::WARN ) << "HingeConstraint: Invalid MotionState." << std::endl;
         return;
     }
-    osg::Matrix invACom = osg::Matrix::translate( -( motion->getCenterOfMass() ) );
+    osg::Vec3 invCom = -( motion->getCenterOfMass() );
+    osg::Vec3 scale = motion->getScale();
+    osg::Vec3 scaledInvCom = osg::Vec3( invCom[0]*scale[0], invCom[1]*scale[1], invCom[2]*scale[2] );
+    osg::Matrix invACom = osg::Matrix::translate( scaledInvCom );
     //
     // 2. Inverse A transform.
-    osg::Matrix invAXform = osg::Matrix::inverse( _rbAXform );
+    osg::Matrix invAXform = osg::Matrix::inverse( orthonormalize( _rbAXform ) );
     //
     // 3. A's orientation.
-    osg::Matrix rbAOrient( _rbAXform );
+    osg::Matrix rbAOrient( orthonormalize( _rbAXform ) );
     rbAOrient.setTrans( 0., 0., 0. );
     //
     // Transform the point and axis.
@@ -1655,13 +1682,16 @@ void HingeConstraint::createConstraint()
             osg::notify( osg::WARN ) << "HingeConstraint: Invalid MotionState." << std::endl;
             return;
         }
-        osg::Matrix invBCom = osg::Matrix::translate( -( motion->getCenterOfMass() ) );
+        invCom = -( motion->getCenterOfMass() );
+        scale = motion->getScale();
+        scaledInvCom = osg::Vec3( invCom[0]*scale[0], invCom[1]*scale[1], invCom[2]*scale[2] );
+        osg::Matrix invBCom = osg::Matrix::translate( scaledInvCom );
         //
         // 2. Inverse A transform.
-        osg::Matrix invBXform = osg::Matrix::inverse( _rbBXform );
+        osg::Matrix invBXform = osg::Matrix::inverse( orthonormalize( _rbBXform ) );
         //
         // 3. B's orientation.
-        osg::Matrix rbBOrient( _rbBXform );
+        osg::Matrix rbBOrient( orthonormalize( _rbBXform ) );
         rbBOrient.setTrans( 0., 0., 0. );
         //
         // Transform the point and axis.
@@ -1783,7 +1813,7 @@ void CardanConstraint::createConstraint()
 
 
     // Transform the world coordinate _axisA into A's local coordinates.
-    osg::Matrix aOrient = _rbAXform;
+    osg::Matrix aOrient = orthonormalize( _rbAXform) ;
     aOrient.setTrans( 0., 0., 0. );
     btVector3 localAxisA = osgbCollision::asBtVector3(
         _axisA * osg::Matrix::inverse( aOrient ) );
@@ -1795,7 +1825,7 @@ void CardanConstraint::createConstraint()
     osg::Vec3 axisB( c ^ _axisA );
 
     // Transform the world coordinate _axisB into B's local coordinates.
-    osg::Matrix bOrient = _rbBXform;
+    osg::Matrix bOrient = orthonormalize( _rbBXform );
     bOrient.setTrans( 0., 0., 0. );
     btVector3 localAxisB = osgbCollision::asBtVector3(
         axisB * osg::Matrix::inverse( bOrient ) );
@@ -1894,10 +1924,13 @@ void BallAndSocketConstraint::createConstraint()
         osg::notify( osg::WARN ) << "InternalCreateSpring: Invalid MotionState." << std::endl;
         return;
     }
-    const osg::Matrix invACOM( osg::Matrix::translate( -( motion->getCenterOfMass() ) ) );
+    osg::Vec3 invCom = -( motion->getCenterOfMass() );
+    osg::Vec3 scale = motion->getScale();
+    osg::Vec3 scaledInvCom = osg::Vec3( invCom[0]*scale[0], invCom[1]*scale[1], invCom[2]*scale[2] );
+    const osg::Matrix invACOM( osg::Matrix::translate( scaledInvCom ) );
     //
     //   2. Transform A back to the origin.
-    const osg::Matrix invAXform( osg::Matrix::inverse( _rbAXform ) );
+    const osg::Matrix invAXform( osg::Matrix::inverse( orthonormalize( _rbAXform ) ) );
     //
     //   3. The final rbA frame matrix.
     const osg::Matrix aXform( invAXform * invACOM );
@@ -1918,10 +1951,13 @@ void BallAndSocketConstraint::createConstraint()
             osg::notify( osg::WARN ) << "InternalCreateSpring: Invalid MotionState." << std::endl;
             return;
         }
-        const osg::Matrix invBCOM( osg::Matrix::translate( -( motion->getCenterOfMass() ) ) );
+        invCom = -( motion->getCenterOfMass() );
+        scale = motion->getScale();
+        scaledInvCom = osg::Vec3( invCom[0]*scale[0], invCom[1]*scale[1], invCom[2]*scale[2] );
+        const osg::Matrix invBCOM( osg::Matrix::translate( scaledInvCom ) );
         //
         //   2. Transform B back to the origin.
-        const osg::Matrix invBXform( osg::Matrix::inverse( _rbBXform ) );
+        const osg::Matrix invBXform( osg::Matrix::inverse( orthonormalize( _rbBXform ) ) );
         //
         //   3. The final rbB frame matrix.
         const osg::Matrix bXform = invBXform * invBCOM;
@@ -2069,10 +2105,13 @@ void RagdollConstraint::createConstraint()
         osg::notify( osg::WARN ) << "InternalCreateSpring: Invalid MotionState." << std::endl;
         return;
     }
-    const osg::Matrix invACOM( osg::Matrix::translate( -( motion->getCenterOfMass() ) ) );
+    osg::Vec3 invCom = -( motion->getCenterOfMass() );
+    osg::Vec3 scale = motion->getScale();
+    osg::Vec3 scaledInvCom = osg::Vec3( invCom[0]*scale[0], invCom[1]*scale[1], invCom[2]*scale[2] );
+    const osg::Matrix invACOM( osg::Matrix::translate( scaledInvCom ) );
     //
     //   2. Transform A back to the origin.
-    const osg::Matrix invAXform( osg::Matrix::inverse( _rbAXform ) );
+    const osg::Matrix invAXform( osg::Matrix::inverse( orthonormalize( _rbAXform ) ) );
     //
     //   3. The final rbA frame matrix.
     btTransform rbAFrame = osgbCollision::asBtTransform( 
@@ -2091,10 +2130,13 @@ void RagdollConstraint::createConstraint()
             osg::notify( osg::WARN ) << "InternalCreateSpring: Invalid MotionState." << std::endl;
             return;
         }
-        const osg::Matrix invBCOM( osg::Matrix::translate( -( motion->getCenterOfMass() ) ) );
+        invCom = -( motion->getCenterOfMass() );
+        scale = motion->getScale();
+        scaledInvCom = osg::Vec3( invCom[0]*scale[0], invCom[1]*scale[1], invCom[2]*scale[2] );
+        const osg::Matrix invBCOM( osg::Matrix::translate( scaledInvCom ) );
         //
         //   2. Transform B back to the origin.
-        const osg::Matrix invBXform( osg::Matrix::inverse( _rbBXform ) );
+        const osg::Matrix invBXform( osg::Matrix::inverse( orthonormalize( _rbBXform ) ) );
         //
         //   3. The final rbB frame matrix.
         rbBFrame = osgbCollision::asBtTransform( 

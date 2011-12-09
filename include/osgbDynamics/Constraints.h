@@ -183,6 +183,10 @@ protected:
     to implement Bullet constraint creation. */
     virtual void createConstraint() {}
 
+    /** Utility for supporting OSG local-to-world transforms
+    that contain scales. */
+    osg::Matrix orthonormalize( const osg::Matrix& in );
+
     btTypedConstraint* _constraint;
     bool _dirty;
 
