@@ -53,10 +53,26 @@ public:
 
     void apply( osg::Geode& geode );
 
+    /** \brief Builds CollectVerticesVisitor::_localNodePath (a NodePath) from all Transforms,
+    excluding AbsoluteModelTransform.
+
+    This visitor saves the transformed (world space) vertices from the scene graph.
+    However, in order to be compatible with the
+    \link rigidbody rigid body creation utilities, \endlink the visitor can't consider
+    AbsoluteModelTransforms in such a transformation, as they ignore all parent transforms.
+
+    To support this, we override NodeVisitor::apply(osg::Transform&) to build our own
+    NodePath (CollectVerticesVisitor::_localNodePath) that contains all Transform nodes encountered during traversal
+    except AbsoluteModelTransform nodes. */
+    void apply( osg::Transform& node );
+
 protected:
     void applyDrawable( osg::Drawable* drawable );
 
     osg::ref_ptr< osg::Vec3Array > verts_;
+
+    /** NodePath containing only Transform nodes, but excluding AbsoluteModelTransform. */
+    osg::NodePath _localNodePath;
 };
 
 
