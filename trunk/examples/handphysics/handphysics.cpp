@@ -207,6 +207,7 @@ public:
         short filterWith( 0 );
         osg::Vec4 groundPlane( 0., 0., 1., 0. );
         bool noGroundPlane( false );
+        osg::Vec2s groundFilters( 0, 0 );
 
         std::string nodeName;
         bool matchAllNodes( false );
@@ -250,6 +251,7 @@ public:
             else if( key == std::string( "GroundPlane:" ) )
             {
                 istr >> groundPlane[ 0 ] >> groundPlane[ 1 ] >> groundPlane[ 2 ] >> groundPlane[ 3 ];
+                groundFilters = osg::Vec2s( filterGroup, filterWith );
             }
             else if( key == std::string( "NoGroundPlane:" ) )
             {
@@ -406,8 +408,9 @@ public:
                 osg::Vec3 axisA, axisB;
                 istr >> nodeA >> nodeB >> pivotA >> pivotB >> axisA >> axisB;
 
-                btRigidBody* rbA = lookupRigidBody( nodeA );
-                btRigidBody* rbB = lookupRigidBody( nodeB );
+                osg::Matrix aXform, bXform;
+                btRigidBody* rbA = lookupRigidBody( nodeA, aXform );
+                btRigidBody* rbB = lookupRigidBody( nodeB, bXform );
                 if( ( rbA == NULL ) || ( rbB == NULL ) )
                     continue;
 
@@ -550,23 +553,20 @@ public:
                     continue;
                 }
 
-                btTransform wt;
-
-                btRigidBody* rbA = lookupRigidBody( nodeA );
+                osg::Matrix aXform;
+                btRigidBody* rbA = lookupRigidBody( nodeA, aXform );
                 if( rbA == NULL )
                     continue;
-                rbA->getMotionState()->getWorldTransform( wt );
-                cons->setAXform( osgbCollision::asOsgMatrix( wt ) );
+                cons->setAXform( aXform );
 
                 btRigidBody* rbB( NULL );
                 if( !( nodeB.empty() ) )
                 {
-                    osg::Matrix xfB;
-                    rbB = lookupRigidBody( nodeB );
+                    osg::Matrix bXform;
+                    rbB = lookupRigidBody( nodeB, bXform );
                     if( rbB == NULL )
                         continue;
-                    rbB->getMotionState()->getWorldTransform( wt );
-                    cons->setBXform( osgbCollision::asOsgMatrix( wt ) );
+                    cons->setBXform( bXform );
                 }
                 cons->setRigidBodies( rbA, rbB );
                 _dw->addConstraint( cons->getConstraint() );
@@ -594,13 +594,12 @@ public:
         if( !noGroundPlane )
         {
             osg::Node* groundNode;
-            if( (filterGroup == 0) && (filterWith == 0) )
+            if( groundFilters == osg::Vec2s( 0, 0 ) )
                 groundNode = osgbDynamics::generateGroundPlane( groundPlane, _dw );
             else
                 groundNode = osgbDynamics::generateGroundPlane( groundPlane, _dw, NULL, filterGroup, filterWith );
             _root->addChild( groundNode );
         }
-
 
         return true;
     }
@@ -642,6 +641,8 @@ protected:
         cr->_sceneGraph = amt.get();
 
         osg::Matrix m = osg::computeLocalToWorld( np );
+        cr->_scale = m.getScale();
+        m = osg::Matrix::scale( 1. / cr->_scale[0], 1. / cr->_scale[1], 1. / cr->_scale[2] ) * m;
         cr->_parentTransform = m;
         cr->setCenterOfMass( subgraph->getBound().center() );
 
@@ -661,7 +662,7 @@ protected:
         return( rb );
     }
 
-    btRigidBody* lookupRigidBody( const std::string& nodeName )
+    btRigidBody* lookupRigidBody( const std::string& nodeName, osg::Matrix& xform )
     {
         osgwTools::FindNamedNode fnnA( nodeName );
         _root->accept( fnnA );
@@ -680,6 +681,12 @@ protected:
             osg::notify( osg::FATAL ) << "AMT for \"" << nodeName << "\" has invalid user data." << std::endl;
             return( NULL );
         }
+
+        osg::NodePath np = napA.second;
+    
+        np.resize( np.size() - 2 );
+        xform = osg::computeLocalToWorld( np );
+
         return( rbA->get() );
     }
 
