@@ -147,7 +147,7 @@ protected:
 /** \endcond */
 
 
-btDiscreteDynamicsWorld* initPhysics( osg::Vec3 gravity = osg::Vec3( 0, 0, -1 ) )
+btDiscreteDynamicsWorld* initPhysics( osg::Vec3 gravity = osg::Vec3( 0, 0, -9.8 ) )
 {
     btDefaultCollisionConfiguration * collisionConfiguration = new btDefaultCollisionConfiguration();
 

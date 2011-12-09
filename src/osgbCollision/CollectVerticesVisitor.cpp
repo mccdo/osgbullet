@@ -19,6 +19,7 @@
  *************** <auto-copyright.pl END do not edit this line> ***************/
 
 #include <osgbCollision/CollectVerticesVisitor.h>
+#include <osgwTools/AbsoluteModelTransform.h>
 #include <osg/Transform>
 #include <osg/Geometry>
 #include <osg/Geode>
@@ -44,6 +45,19 @@ void CollectVerticesVisitor::reset()
     verts_->clear();
 }
 
+void CollectVerticesVisitor::apply( osg::Transform& node )
+{
+    // Override apply(Transform&) to avoid processing AMT nodes.
+    const bool nonAMT = ( dynamic_cast< osgwTools::AbsoluteModelTransform* >( &node ) == NULL );
+    if( nonAMT )
+        _localNodePath.push_back( &node );
+
+    traverse( node );
+
+    if( nonAMT )
+        _localNodePath.pop_back();
+}
+
 void CollectVerticesVisitor::apply( osg::Geode& geode )
 {
     unsigned int idx;
@@ -64,7 +78,7 @@ void CollectVerticesVisitor::applyDrawable( osg::Drawable* drawable )
         return;
     }
 
-    const osg::Matrix m = osg::computeLocalToWorld( getNodePath() );
+    const osg::Matrix m = osg::computeLocalToWorld( _localNodePath );
 
     unsigned int idx;
     for( idx=0; idx < geom->getNumPrimitiveSets(); idx++ )
