@@ -104,6 +104,7 @@ VertexAggOp::createHull( osg::Geometry& geom )
     if( !oldV )
     {
         osg::notify( osg::ALWAYS ) << "VertexAggOp: Can't create convex hull." << std::endl;
+        return;
     }
     btConvexHullShape* chs = new btConvexHullShape;
     osg::Vec3Array::const_iterator itr;
@@ -112,12 +113,21 @@ VertexAggOp::createHull( osg::Geometry& geom )
 
     osg::ref_ptr< osg::Node > n = osgbCollision::osgNodeFromBtCollisionShape( chs );
     osg::Geode* newGeode = dynamic_cast< osg::Geode* >( n.get() );
+    
     if( newGeode == NULL )
+    {
         osg::notify( osg::FATAL ) << "Got NULL geode from osgNodeFromBtCollisionShape" << std::endl;
+        return;
+    }
+    
     osg::Drawable* newDraw = newGeode->getDrawable( 0 );
     osg::Geometry* newGeom = dynamic_cast< osg::Geometry* >( newDraw );
+    
     if( newGeom == NULL )
+    {
         osg::notify( osg::FATAL ) << "Got NULL geometry from osgNodeFromBtCollisionShape" << std::endl;
+        return;
+    }
 
     geom.setVertexArray( newGeom->getVertexArray() );
     geom.setColorArray( newGeom->getColorArray() );
