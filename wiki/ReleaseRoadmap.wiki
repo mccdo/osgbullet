@@ -5,9 +5,9 @@
 
 = v2.1 =
 
-*Status:* Not yet started.
+*Status:* Ongoing development on svn trunk.
 
-Will contain additional support for constraints.
+This release will contain support for constraints, including the ability to store contraint information as scene graph user data, and the ability to read/write constraint data using the dot osg file format.
 
 
 = v2.0 =
