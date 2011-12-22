@@ -556,27 +556,28 @@ osg::Geometry* osgGeometryFromBtCollisionShape( const btSphereShape* btSphere )
 
 osg::Geometry* osgGeometryFromBtCollisionShape( const btCylinderShape* btCylinder )
 {
+    const osg::Vec3 defaultOrientation( 0., 0., 1. );
+    osg::Matrix m;
     double length;
-    osg::Vec3 orientation;
     const btVector3 halfExtents( btCylinder->getHalfExtentsWithMargin() );
     switch( btCylinder->getUpAxis() )
     {
         case X:
-            orientation.set( 1., 0., 0. );
+            m = osg::Matrix::rotate( defaultOrientation, osg::Vec3( 1., 0., 0. ) );
             length = halfExtents.getX();
             break;
         case Y:
-            orientation.set( 0., 1., 0. );
+            m = osg::Matrix::rotate( defaultOrientation, osg::Vec3( 0., 1., 0. ) );
             length = halfExtents.getY();
             break;
         case Z:
-            orientation.set( 0., 0., 1. );
+            // Leave m set to the identity matrix.
             length = halfExtents.getZ();
             break;
     }
     const double radius( btCylinder->getRadius() );
 
-    return( osgwTools::makeOpenCylinder( orientation, length, radius, radius ) );
+    return( osgwTools::makeOpenCylinder( m, length, radius, radius ) );
 }
 
 
