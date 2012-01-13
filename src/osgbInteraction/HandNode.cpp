@@ -1,6 +1,6 @@
 /*************** <auto-copyright.pl BEGIN do not edit this line> **************
  *
- * osgBullet is (C) Copyright 2009-2011 by Kenneth Mark Bryden
+ * osgBullet is (C) Copyright 2009-2012 by Kenneth Mark Bryden
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -799,6 +799,8 @@ HandNode::adjustPositionInternal( const osg::Vec3& deltaMotion )
         float aggressiveness = 3.f;
 
         float dot = pull * deltaMotion;
+        osg::notify( osg::ALWAYS ) << "adjustPositionInternal " << dot << " " << pull << std::endl;
+
         if( dot > 0. )
         {
             // Delta motion is towards the _requestedPosition.
@@ -807,12 +809,16 @@ HandNode::adjustPositionInternal( const osg::Vec3& deltaMotion )
         else
         {
             if( dot == 0. )
+            {
                 // Delta motion is zero. Move in the pull direction.
                 _correctedPosition += ( pull * .05 );
+            }
             else
+            {
                 // Delta motion is away from _requestedPosition.
                 // Mirror the delta vector towards the _requestedPosition.
                 _correctedPosition += ( deltaMotion + ( pull * dot * -2. ) * aggressiveness );
+            }
         }
     }
 
@@ -845,10 +851,12 @@ HandNode::adjustPositionInternal( const osg::Vec3& deltaMotion )
 
     if( ( numPenetrationLoops == 0 ) &&
         ( _correctedPosition != _requestedPosition ) )
+    {
         // There were no penetrations, but they are different points,
         // so immediately 'warp' to the requested position. NOTE: If there's
         // something in the way, this technique will tunnel through it.
         _correctedPosition = _requestedPosition;
+    }
 
     // Debug
     if( _debugVerts.valid() )
@@ -1018,7 +1026,7 @@ void HandNode::init()
 
         btDiscreteDynamicsWorld* ddw = dynamic_cast< btDiscreteDynamicsWorld* >( _bulletWorld );
         if( ddw != NULL )
-            ddw->addRigidBody( _body, btBroadphaseProxy::KinematicFilter, btBroadphaseProxy::AllFilter );
+            ddw->addRigidBody( _body, btBroadphaseProxy::KinematicFilter, ~btBroadphaseProxy::CharacterFilter );
         else
             _bulletWorld->addRigidBody( _body );
 

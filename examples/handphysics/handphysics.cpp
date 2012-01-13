@@ -1,6 +1,6 @@
 /*************** <auto-copyright.pl BEGIN do not edit this line> **************
  *
- * osgBullet is (C) Copyright 2009-2011 by Kenneth Mark Bryden
+ * osgBullet is (C) Copyright 2009-2012 by Kenneth Mark Bryden
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -117,6 +117,8 @@ public:
         {
             if( (ea.getKey() == 'd' ) || (ea.getKey() == 'D' ) )
             {
+                osg::notify( osg::ALWAYS ) << "default" << std::endl;
+
                 // Default gesture
                 _handNode->sendGestureCode( osgbInteraction::GestureHandler::Default );
                 _handNode->setPose( osgbInteraction::HandNode::POSE_DEFAULT );
@@ -131,6 +133,8 @@ public:
             }
             else if( (ea.getKey() == 'f' ) || (ea.getKey() == 'F' ) )
             {
+                osg::notify( osg::ALWAYS ) << "fist" << std::endl;
+
                 // Fist gesture
                 _handNode->sendGestureCode( osgbInteraction::GestureHandler::Fist );
                 _handNode->setPose( osgbInteraction::HandNode::POSE_FIST );
@@ -272,6 +276,7 @@ public:
                     _hn->setHandedness( right ? osgbInteraction::HandNode::RIGHT : osgbInteraction::HandNode::LEFT );
                     _hn->setPosition( pos );
                     _hn->setAttitude( quat );
+                    _hn->setDebug( true );
                 }
             }
             else if( key == std::string( "Model:" ) )
