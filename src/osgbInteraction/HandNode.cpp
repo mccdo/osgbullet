@@ -312,8 +312,6 @@ public:
             btTransform xform; xform.setIdentity();
             _cs->addChildShape( xform, shape );
             _palm._btChildIdx = _cs->getNumChildShapes() - 1;
-
-            osg::Node* debugNode = osgbCollision::osgNodeFromBtCollisionShape( shape );
         }
     }
 
@@ -375,8 +373,6 @@ public:
             btTransform xform; xform.setIdentity();
             _cs->addChildShape( xform, shape );
             ai._btChildIdx = _cs->getNumChildShapes() - 1;
-
-            osg::Node* debugNode = osgbCollision::osgNodeFromBtCollisionShape( shape );
         }
     }
 
