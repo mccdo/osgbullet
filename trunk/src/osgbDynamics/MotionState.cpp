@@ -78,7 +78,7 @@ MotionState::setWorldTransform(const btTransform& worldTrans)
         if( !quiescent )
         {
             MotionStateCallbackList::iterator it;
-            for( it = _mscl.begin(); it != _mscl.end(); it++ )
+            for( it = _mscl.begin(); it != _mscl.end(); ++it )
                 (**it)( worldTrans );
         }
     }
@@ -295,7 +295,7 @@ bool TripleBufferMotionStateUpdate( osgbDynamics::MotionStateList& msl, osgbDyna
         return( false );
 
     MotionStateList::const_iterator it;
-    for( it = msl.begin(); it != msl.end(); it++ )
+    for( it = msl.begin(); it != msl.end(); ++it )
         (*it)->updateTripleBuffer( addr );
 
     tb->endRead();

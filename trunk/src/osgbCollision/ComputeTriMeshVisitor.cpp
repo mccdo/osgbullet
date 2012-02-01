@@ -81,7 +81,7 @@ void ComputeTriMeshVisitor::applyDrawable( osg::Drawable * drawable )
 
     osg::Matrix m = osg::computeLocalToWorld( getNodePath() );
     osg::Vec3Array::iterator iter;
-    for( iter = functor.vertices->begin(); iter != functor.vertices->end(); iter++ )
+    for( iter = functor.vertices->begin(); iter != functor.vertices->end(); ++iter )
     {
         mesh->push_back( *iter * m );
     }

@@ -167,12 +167,12 @@ bool DragHandler::pick( float wx, float wy )
     osg::Vec3d pickPointWC;
     osgbCollision::RefRigidBody* rrb( NULL );
     osgUtil::LineSegmentIntersector::Intersections::const_iterator it;
-    for( it = intersections.begin(); it != intersections.end(); it++ )
+    for( it = intersections.begin(); it != intersections.end(); ++it )
     {
         const osgUtil::LineSegmentIntersector::Intersection& intersection = *it;
         const osg::NodePath& np = intersection.nodePath;
         osg::NodePath::const_reverse_iterator rnpit;
-        for( rnpit = np.rbegin(); rnpit != np.rend(); rnpit++ )
+        for( rnpit = np.rbegin(); rnpit != np.rend(); ++rnpit )
         {
             const osg::Node& currentNode = *( *rnpit );
 

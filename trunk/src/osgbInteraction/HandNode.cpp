@@ -1254,10 +1254,10 @@ HandNode::setVirtualArticulation( const HandNode::Articulation part, const float
 
     ValueMap::const_iterator it;
     if( _calibrate )
-        for( it = _valueMap.begin(); it != _valueMap.end(); it++ )
+        for( it = _valueMap.begin(); it != _valueMap.end(); ++it )
             _ail[ it->first ]._calibrateBaseAngle = it->second;
     else
-        for( it = _valueMap.begin(); it != _valueMap.end(); it++ )
+        for( it = _valueMap.begin(); it != _valueMap.end(); ++it )
             _ail[ it->first ].setAngle( it->second );
 }
 float
@@ -1401,7 +1401,7 @@ HandNode::sendGestureCode( const unsigned int gestureCode )
         _pt->pause( true );
 
     GestureHandlerVector::iterator itr;
-    for( itr=_ghv.begin(); itr != _ghv.end(); itr++ )
+    for( itr=_ghv.begin(); itr != _ghv.end(); ++itr )
     {
         GestureHandler* gh = (*itr).get();
         if( (*gh)( gestureCode, *this ) )

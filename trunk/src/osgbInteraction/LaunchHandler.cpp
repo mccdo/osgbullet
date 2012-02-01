@@ -175,7 +175,7 @@ void LaunchHandler::reset()
         _pt->pause( true );
 
     NodeList::iterator it;
-    for( it=_nodeList.begin(); it != _nodeList.end(); it++ )
+    for( it=_nodeList.begin(); it != _nodeList.end(); ++it )
     {
         osg::ref_ptr< osg::Node > node = *it;
         osgbCollision::RefRigidBody* rrb = dynamic_cast< osgbCollision::RefRigidBody* >( node->getUserData() );
