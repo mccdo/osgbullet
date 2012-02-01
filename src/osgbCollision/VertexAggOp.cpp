@@ -108,7 +108,7 @@ VertexAggOp::createHull( osg::Geometry& geom )
     }
     btConvexHullShape* chs = new btConvexHullShape;
     osg::Vec3Array::const_iterator itr;
-    for( itr = oldV->begin(); itr != oldV->end(); itr++ )
+    for( itr = oldV->begin(); itr != oldV->end(); ++itr )
         chs->addPoint( osgbCollision::asBtVector3( *itr ) );
 
     osg::ref_ptr< osg::Node > n = osgbCollision::osgNodeFromBtCollisionShape( chs );

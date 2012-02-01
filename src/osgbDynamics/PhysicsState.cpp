@@ -178,7 +178,7 @@ unsigned int PhysicsState::getNumEntries() const
 void PhysicsState::exportEntired( osgDB::Output& out ) const
 {
     DataMap::const_iterator it;
-    for( it = _dataMap.begin(); it != _dataMap.end(); it++ )
+    for( it = _dataMap.begin(); it != _dataMap.end(); ++it )
     {
         osg::ref_ptr< osgwTools::RefID > rid = new osgwTools::RefID( it->first );
         out.writeObject( *rid );
@@ -224,14 +224,14 @@ void PhysicsState::removePhysicsData( const std::string& id )
 void PhysicsState::loadState()
 {
     DataMap::iterator it;
-    for( it = _dataMap.begin(); it != _dataMap.end(); it++ )
+    for( it = _dataMap.begin(); it != _dataMap.end(); ++it )
         it->second->loadState();
 }
 
 void PhysicsState::restoreState() const
 {
     DataMap::const_iterator it;
-    for( it = _dataMap.begin(); it != _dataMap.end(); it++ )
+    for( it = _dataMap.begin(); it != _dataMap.end(); ++it )
         it->second->restoreState();
 }
 

@@ -185,7 +185,7 @@ btConvexHullShape* btConvexHullCollisionShapeFromOSG( osg::Node* node )
     btScalar* btvp = btverts;
 
     osg::Vec3Array::const_iterator itr;
-    for( itr = v->begin(); itr != v->end(); itr++ )
+    for( itr = v->begin(); itr != v->end(); ++itr )
     {
         const osg::Vec3& s( *itr );
         *btvp++ = (btScalar)( s[ 0 ] );
