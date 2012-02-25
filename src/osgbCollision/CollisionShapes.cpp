@@ -18,8 +18,6 @@
  *
  *************** <auto-copyright.pl END do not edit this line> ***************/
 
-#include <btBulletCollisionCommon.h>
-
 #include <BulletCollision/CollisionShapes/btShapeHull.h>
 
 #include <osgbCollision/CollisionShapes.h>
