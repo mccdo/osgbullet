@@ -103,3 +103,57 @@ osgbCollision::asBtVector4( const osg::Vec4& v )
     return btVector4( v.x(), v.y(), v.z(), v.w() );
 }
 
+
+btVector3* osgbCollision::asBtVector3Array( const osg::Vec3Array* v )
+{
+    btVector3* out( new btVector3[ v->size() ] );
+
+    btVector3* outPtr( out );
+    osg::Vec3Array::const_iterator inPtr;
+    for( inPtr=v->begin(); inPtr != v->end(); ++inPtr )
+    {
+        *outPtr++ = asBtVector3( *inPtr );
+    }
+
+    return( out );
+}
+bool osgbCollision::disposeBtVector3Array( btVector3* array )
+{
+    if( array == NULL )
+        return( false );
+    delete[] array;
+    return( true );
+}
+
+osg::Vec3Array* asOsgVec3Array( const btVector3* v, const unsigned int size )
+{
+    osg::ref_ptr< osg::Vec3Array > out( new osg::Vec3Array );
+    out->resize( size );
+
+    osg::Vec3Array::iterator outPtr;
+    btVector3 const* inPtr = v;
+    for( outPtr=out->begin(); outPtr != out->end(); ++outPtr )
+    {
+        *outPtr = asOsgVec3( *inPtr++ );
+    }
+
+    return( out.release() );
+}
+
+
+LocalBtVector3Array::LocalBtVector3Array( const osg::Vec3Array* v )
+  : _btVector3( asBtVector3Array( v ) )
+{
+}
+LocalBtVector3Array::~LocalBtVector3Array()
+{
+    disposeBtVector3Array( _btVector3 );
+}
+btVector3* LocalBtVector3Array::get()
+{
+    return( _btVector3 );
+}
+const btVector3* LocalBtVector3Array::get() const
+{
+    return( _btVector3 );
+}
