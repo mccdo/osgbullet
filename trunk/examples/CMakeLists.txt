@@ -7,6 +7,7 @@ ADD_SUBDIRECTORY( dice )
 ADD_SUBDIRECTORY( handphysics )
 ADD_SUBDIRECTORY( hinge )
 ADD_SUBDIRECTORY( multithreaded )
+ADD_SUBDIRECTORY( patch-lowlevel )
 ADD_SUBDIRECTORY( slider )
 ADD_SUBDIRECTORY( saverestore )
 

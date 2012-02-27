@@ -27,6 +27,7 @@
 #include <osg/Matrix>
 #include <osg/Vec3>
 #include <osg/Vec4>
+#include <osg/Array>
 
 #include <LinearMath/btTransform.h>
 
@@ -53,6 +54,29 @@ OSGBCOLLISION_EXPORT btVector3 asBtVector3( const osg::Vec3& v );
 OSGBCOLLISION_EXPORT osg::Vec4 asOsgVec4( const btVector3& v, const double w );
 OSGBCOLLISION_EXPORT osg::Vec4 asOsgVec4( const btVector4& v );
 OSGBCOLLISION_EXPORT btVector4 asBtVector4( const osg::Vec4& v );
+
+/** Note: Return value allocated with new. Call disposeBtVector3Array() to
+ensure the array is deleted within the osgbCollision library.
+\see LocalBtVector3Array */
+OSGBCOLLISION_EXPORT btVector3* asBtVector3Array( const osg::Vec3Array* v );
+OSGBCOLLISION_EXPORT bool disposeBtVector3Array( btVector3* array );
+
+OSGBCOLLISION_EXPORT osg::Vec3Array* asOsgVec3Array( const btVector3* v, const unsigned int size );
+
+/** Create a btVector3 array from an OSG Vec3Array as a local variable
+(deleted the btVector3 array when the class instance goes out of scope). */
+class OSGBCOLLISION_EXPORT LocalBtVector3Array
+{
+public:
+    LocalBtVector3Array( const osg::Vec3Array* v );
+    virtual ~LocalBtVector3Array();
+
+    btVector3* get();
+    const btVector3* get() const;
+
+protected:
+    btVector3* _btVector3;
+};
 
 /**@}*/
 
