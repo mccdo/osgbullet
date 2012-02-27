@@ -145,7 +145,13 @@ osg::Node* makeFlag( btSoftRigidDynamicsWorld* bw )
     softBody->m_cfg.kLF = 0.05;
     softBody->m_cfg.kDG = 0.01;
     softBody->m_cfg.piterations = 2;
+#if( BULLET_VERSION >= 279 )
     softBody->m_cfg.aeromodel = btSoftBody::eAeroModel::V_TwoSidedLiftDrag;
+#else
+    // Hm. Not sure how to make the wind blow on older Bullet.
+    // This doesn't seem to work.
+    softBody->m_cfg.aeromodel = btSoftBody::eAeroModel::V_TwoSided;
+#endif    
     softBody->setWindVelocity( btVector3( 50., 0., 0. ) );
     softBody->setTotalMass( 1. );
 
