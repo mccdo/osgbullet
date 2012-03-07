@@ -151,7 +151,7 @@ osg::Node* makeFlag( btSoftRigidDynamicsWorld* bw )
     // Hm. Not sure how to make the wind blow on older Bullet.
     // This doesn't seem to work.
     softBody->m_cfg.aeromodel = btSoftBody::eAeroModel::V_TwoSided;
-#endif    
+#endif
     softBody->setWindVelocity( btVector3( 50., 0., 0. ) );
     softBody->setTotalMass( 1. );
 
