@@ -42,7 +42,7 @@ if( BUILD_SHARED_LIBS )
     # osgbDynamics depends on osgbCollision
     target_link_libraries( ${LIB_NAME}
         optimized "osgbCollision"
-        debug "osgbCollision}"
+        debug "osgbCollision"
     )
 endif()
 
