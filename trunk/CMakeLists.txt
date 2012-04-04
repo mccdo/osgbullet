@@ -15,17 +15,6 @@ if( WIN32 )
 else()
     set( CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_ARCHIVE_OUTPUT_DIRECTORY} )
 endif()
-#foreach( CONF ${CMAKE_CONFIGURATION_TYPES} )
-#    string( TOUPPER "${CONF}" CONF )
-#    set( "CMAKE_RUNTIME_OUTPUT_DIRECTORY_${CONF}" "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}" )
-#    set( "CMAKE_ARCHIVE_OUTPUT_DIRECTORY_${CONF}" "${CMAKE_ARCHIVE_OUTPUT_DIRECTORY}" )
-#    if( WIN32 )
-#        set( "CMAKE_LIBRARY_OUTPUT_DIRECTORY_${CONF}" "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}" )
-#    else()
-#        set( "CMAKE_LIBRARY_OUTPUT_DIRECTORY_${CONF}" "${CMAKE_ARCHIVE_OUTPUT_DIRECTORY}" )
-#    endif()
-#endforeach()
-
 
 IF( WIN32 AND MSVC )
     OPTION( OSGBULLET_WIN32_USE_MP "Build with multiple processes (/MP option; VS 2005 and above)." ON )
@@ -129,3 +118,13 @@ if( DOXYGEN_FOUND )
         ${PROJECT_BINARY_DIR}/doc/doxyfile
     )
 endif()
+
+if(MSVC)
+    install(
+        DIRECTORY ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/\${CMAKE_INSTALL_CONFIG_NAME}/
+        DESTINATION lib
+        USE_SOURCE_PERMISSIONS
+        COMPONENT libosgbbullet-dev
+        FILES_MATCHING PATTERN "*.pdb"
+    )
+endif(MSVC)
