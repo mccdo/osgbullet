@@ -46,15 +46,12 @@ if( BUILD_SHARED_LIBS )
         ${OSGBULLET_P5_LIBRARY}
     )
 
-    if( WIN32 )
-        set( RELATIVE_LIB_PATH ../../lib/ )
-    endif()
     # osgbDynamics depends on osgbCollision
     target_link_libraries( ${LIB_NAME}
         optimized "osgbDynamics"
-        debug "${RELATIVE_LIB_PATH}osgbDynamics${CMAKE_DEBUG_POSTFIX}"
+        debug "osgbDynamics"
         optimized "osgbCollision"
-        debug "${RELATIVE_LIB_PATH}osgbCollision${CMAKE_DEBUG_POSTFIX}"
+        debug "osgbCollision"
         ${OSGBULLET_P5_LIBRARY}
     )
 endif()

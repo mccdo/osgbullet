@@ -33,12 +33,3 @@ INSTALL(
     COMPONENT libosgbbullet-dev
 )
 
-if(MSVC)
-    install(
-        DIRECTORY ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/\${CMAKE_INSTALL_CONFIG_NAME}/
-        DESTINATION lib
-        USE_SOURCE_PERMISSIONS
-        COMPONENT libosgbbullet-dev
-        FILES_MATCHING PATTERN "*.pdb"
-    )
-endif(MSVC)

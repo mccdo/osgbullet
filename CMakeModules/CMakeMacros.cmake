@@ -4,16 +4,12 @@ endif()
 
 macro( link_internal TRGTNAME )
     foreach( LINKLIB ${ARGN} )
-        target_link_libraries( ${TRGTNAME} optimized "${LINKLIB}" debug "${RELATIVE_LIB_PATH}${LINKLIB}${CMAKE_DEBUG_POSTFIX}" )
+        target_link_libraries( ${TRGTNAME} optimized "${LINKLIB}" debug "${LINKLIB}" )
     endforeach()
 endmacro()
 
 
 macro( _osgBulletPlugin TRGTNAME )
-    if( WIN32 )
-        set( RELATIVE_LIB_PATH ../../../lib/ )
-    endif()
-
     if( BUILD_SHARED_LIBS )
         add_library( ${TRGTNAME} MODULE ${ARGN} )
 
@@ -84,7 +80,6 @@ macro( _osgBulletMakeExeInternal _exeName _osgBulletLibs _bulletLibs )
     add_executable( ${_exeName} ${ARGN} )
     if( WIN32 )
         set_target_properties( ${_exeName} PROPERTIES DEBUG_POSTFIX d )
-        set( RELATIVE_LIB_PATH ../../lib/ )
     endif()
 
     link_internal( ${_exeName}
