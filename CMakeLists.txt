@@ -1,5 +1,5 @@
 # # # # # #  project setup  # # # # # #
-cmake_minimum_required( VERSION 2.8 )
+cmake_minimum_required( VERSION 2.8.8 )
 project( osgBullet )
 
 # Please keep in sync with Version.h
@@ -29,8 +29,10 @@ INCLUDE( CMakeMacros )
 include( FindOSGHelper )
 include( FindBulletHelper )
 
-FIND_PACKAGE( OSGWorks REQUIRED )
-
+FIND_PACKAGE( osgWorks 2.0.0 REQUIRED )
+if( osgWorks_FOUND )
+    include( ${osgWorks_USE_FILE} )
+endif()
 
 # OSGBULLET_USE_DOUBLE_PRECISION gets set to TRUE or FALSE in FindBulletHelper.cmake.
 # If TRUE, add the BT double precision definition globally.
@@ -53,7 +55,7 @@ endif()
 INCLUDE_DIRECTORIES( 
     ${PROJECT_SOURCE_DIR}/include
     ${OSG_INCLUDE_DIRS}
-    ${OSGWORKS_INCLUDE_DIR}
+    #${OSGWORKS_INCLUDE_DIR}
     ${BULLET_INCLUDE_DIRS}
     ${BULLET_EXTRAS_INCLUDE_DIR}
     ${OSGBULLET_P5_INCLUDE_DIR}
