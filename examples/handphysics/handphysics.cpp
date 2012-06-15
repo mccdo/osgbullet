@@ -826,7 +826,7 @@ int main( int argc, char** argv )
             dbgDraw->BeginDraw();
 
         currSimTime = viewer.getFrameStamp()->getSimulationTime();
-        bulletWorld->stepSimulation( currSimTime - prevSimTime );
+        bulletWorld->stepSimulation( currSimTime - prevSimTime, 8, 1./120. );
         float dt = currSimTime - prevSimTime;
         prevSimTime = currSimTime;
 
