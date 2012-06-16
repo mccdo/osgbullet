@@ -2,6 +2,7 @@ set( LIB_NAME osgbCollision )
 set( HEADER_PATH ${PROJECT_SOURCE_DIR}/include/${LIB_NAME} )
 add_definitions( -DOSGBCOLLISION_LIBRARY )
 
+configure_file( "${HEADER_PATH}/Version.h.in" "${HEADER_PATH}/Version.h" @ONLY)
 
 set( LIB_PUBLIC_HEADERS
     ${HEADER_PATH}/BoundingCone.h

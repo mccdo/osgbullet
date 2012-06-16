@@ -4,6 +4,9 @@ project( osgBullet )
 
 # Please keep in sync with Version.h
 set( OSGBULLET_VERSION 2.00.02 )
+set( OSGBCOLLISION_MAJOR_VERSION 2 )
+set( OSGBCOLLISION_MINOR_VERSION 0 )
+set( OSGBCOLLISION_SUB_VERSION 2 )
 
 set( CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/CMakeModules;${CMAKE_MODULE_PATH}" )
 
@@ -121,6 +124,8 @@ if( DOXYGEN_FOUND )
     )
 endif()
 
+# On windows provide the user with the pdb files 
+# for debugging if they are present
 if(MSVC)
     install(
         DIRECTORY ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/\${CMAKE_INSTALL_CONFIG_NAME}/
@@ -130,3 +135,52 @@ if(MSVC)
         FILES_MATCHING PATTERN "*.pdb"
     )
 endif(MSVC)
+
+# Install the CMake find script for osgWorks
+install( FILES "extra/FindosgBullet.cmake"
+    DESTINATION "share/${CMAKE_PROJECT_NAME}/extra"
+    COMPONENT libosgbbullet
+)
+
+#
+# Create and install all of the auto find tools
+# =============================================
+
+# Add all targets to the build-tree export set
+export(TARGETS osgbInteraction osgbCollision osgbDynamics
+  FILE "${PROJECT_BINARY_DIR}/lib/osgBulletLibraryDepends.cmake")
+
+# Export the package for use from the build-tree
+# (this registers the build-tree with a global CMake-registry)
+export(PACKAGE osgBullet)
+
+# Create a osgBulletBuildTreeSettings.cmake file for the use from the build tree
+configure_file(osgBulletBuildTreeSettings.cmake.in
+  "${PROJECT_BINARY_DIR}/lib/osgBulletBuildTreeSettings.cmake" @ONLY)
+
+#configure_file(osgBulletConfig.cmake.in
+#  "${PROJECT_BINARY_DIR}/lib/osgBulletConfig.cmake" @ONLY)
+configure_file(osgBulletConfigVersion.cmake.in
+  "${PROJECT_BINARY_DIR}/lib/osgBulletConfigVersion.cmake" @ONLY)
+configure_file(UseosgBullet.cmake.in
+  "${PROJECT_BINARY_DIR}/lib/UseosgBullet.cmake" @ONLY)
+
+# Install the export set for use with the install-tree
+install(EXPORT osgbullet-targets DESTINATION lib)
+
+include( CMakePackageConfigHelpers )
+# Create the osgBulletConfig.cmake and osgBulletConfigVersion files
+#file(RELATIVE_PATH CONF_REL_INCLUDE_DIR "${CMAKE_INSTALL_PREFIX}/lib"
+#   "${CMAKE_INSTALL_PREFIX}/include")
+
+configure_package_config_file( 
+    osgBulletConfig.cmake.in ${CMAKE_CURRENT_BINARY_DIR}/lib/osgBulletConfig.cmake
+    INSTALL_DESTINATION lib
+    PATH_VARS OSGBULLET_USE_DOUBLE_PRECISION )
+
+install(FILES ${CMAKE_CURRENT_BINARY_DIR}/lib/osgBulletConfig.cmake 
+              ${CMAKE_CURRENT_BINARY_DIR}/lib/osgBulletConfigVersion.cmake
+              ${CMAKE_CURRENT_BINARY_DIR}/lib/UseosgBullet.cmake
+        DESTINATION lib )
+
+
