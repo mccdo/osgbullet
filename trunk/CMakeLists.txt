@@ -183,4 +183,22 @@ install(FILES ${CMAKE_CURRENT_BINARY_DIR}/lib/osgBulletConfig.cmake
               ${CMAKE_CURRENT_BINARY_DIR}/lib/UseosgBullet.cmake
         DESTINATION lib )
 
+#
+# Setup the fpc auto detection files
+if(WIN32)
+    set(OSGBULLET_FPC_LIBRARIES "/libpath:\"\${libdir}\" osgbCollision.lib osgbDynamics.lib osgbInteraction.lib")
+    set(OSGBULLET_FPC_INCLUDES "/I\"\${includedir}\"")
+else(WIN32)
+    set(OSGBULLET_FPC_INCLUDES "-I\${includedir}")
+    if(APPLE)
+        set(OSGBULLET_FPC_LIBRARIES "-L\${libdir} -losgbCollision.dylib -losgbDynamics.dylib -losgbInteraction.dylib")
+    else(APPLE)
+        set(OSGBULLET_FPC_LIBRARIES "-L\${libdir} -losgbCollision.so -losgbDynamics.so -losgbInteraction.so")
+    endif(APPLE)
+endif(WIN32)
 
+configure_file(extra/osgbullet.fpc.in
+  "${PROJECT_BINARY_DIR}/lib/flagpoll/osgbullet.fpc" @ONLY)
+
+install(FILES ${CMAKE_CURRENT_BINARY_DIR}/lib/flagpoll/osgbullet.fpc
+        DESTINATION lib/flagpoll )
