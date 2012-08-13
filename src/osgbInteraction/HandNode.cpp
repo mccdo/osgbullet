@@ -454,14 +454,14 @@ float HandNode::_defaultLength( 16.2f );
 
 
 HandNode::HandNode()
-  : _rightOrLeft( HandNode::RIGHT ),
-    _calibrate( false ),
+  : _calibrate( false ),
+    _rightOrLeft( HandNode::RIGHT ),
     _length( _defaultLength ),
     _bulletWorld( NULL ),
     _body( NULL ),
     _shape( NULL ),
-    _ghost( NULL ),
     _useGhost( true ),
+    _ghost( NULL ),
     _traverseHand( true ),
     _pt( NULL ),
     _debug( false )
@@ -469,15 +469,16 @@ HandNode::HandNode()
     setName( "HandNode" );
     init();
 }
+
 HandNode::HandNode( btDynamicsWorld* bulletWorld, const HandNode::Handedness rightOrLeft, float handLength )
-  : _rightOrLeft( rightOrLeft ),
-    _calibrate( false ),
+  : _calibrate( false ),
+    _rightOrLeft( rightOrLeft ),
     _length( handLength ),
     _bulletWorld( bulletWorld ),
     _body( NULL ),
     _shape( NULL ),
-    _ghost( NULL ),
     _useGhost( true ),
+    _ghost( NULL ),
     _traverseHand( true ),
     _pt( NULL ),
     _debug( false )
@@ -486,17 +487,17 @@ HandNode::HandNode( btDynamicsWorld* bulletWorld, const HandNode::Handedness rig
     init();
 }
 HandNode::HandNode( const HandNode& rhs, const osg::CopyOp& copyop )
-  : _rightOrLeft( rhs._rightOrLeft ),
-    _calibrate( rhs._calibrate ),
+  : _calibrate( rhs._calibrate ),
     _requestedPosition( rhs._requestedPosition ),
     _correctedPosition( rhs._correctedPosition ),
+    _rightOrLeft( rhs._rightOrLeft ),
     _attitude( rhs._attitude ),
     _length( rhs._length ),
     _bulletWorld( rhs._bulletWorld ),
     _body( NULL ),
     _shape( NULL ),
-    _ghost( NULL ),
     _useGhost( rhs._useGhost ),
+    _ghost( NULL ),
     _traverseHand( rhs._traverseHand ),
     _pt( rhs._pt ),
     _debug( rhs._debug )
@@ -504,6 +505,7 @@ HandNode::HandNode( const HandNode& rhs, const osg::CopyOp& copyop )
     setName( rhs.getName() );
     init();
 }
+
 HandNode::~HandNode()
 {
     cleanup();
