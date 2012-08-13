@@ -37,40 +37,44 @@ namespace osgbDynamics
 
 Constraint::Constraint()
   : osg::Object(),
-    _rbA( NULL ),
-    _rbB( NULL ),
     _constraint( NULL ),
-    _dirty( true )
+    _dirty( true ),
+    _rbA( NULL ),
+    _rbB( NULL )
 {
 }
+
 Constraint::Constraint( btRigidBody* rbA, btRigidBody* rbB )
   : osg::Object(),
-    _rbA( rbA ),
-    _rbB( rbB ),
     _constraint( NULL ),
-    _dirty( true )
+    _dirty( true ),
+    _rbA( rbA ),
+    _rbB( rbB )
 {
 }
+
 Constraint::Constraint( btRigidBody* rbA, const osg::Matrix& rbAXform,
         btRigidBody* rbB, const osg::Matrix& rbBXform )
-  : _rbA( rbA ),
+  : _constraint( NULL ),
+    _dirty( true ),
+    _rbA( rbA ),
     _rbB( rbB ),
     _rbAXform( rbAXform ),
-    _rbBXform( rbBXform ),
-    _constraint( NULL ),
-    _dirty( true )
+    _rbBXform( rbBXform )
 {
 }
+
 Constraint::Constraint( const Constraint& rhs, const osg::CopyOp& copyop )
   : osg::Object( rhs, copyop ),
+    _constraint( rhs._constraint ),
+    _dirty( rhs._dirty ),
     _rbA( rhs._rbA ),
     _rbB( rhs._rbB ),
     _rbAXform( rhs._rbAXform ),
-    _rbBXform( rhs._rbBXform ),
-    _constraint( rhs._constraint ),
-    _dirty( rhs._dirty )
+    _rbBXform( rhs._rbBXform )
 {
 }
+
 Constraint::~Constraint()
 {
     // Deleting the constraint is up to the calling code. Something like this:
