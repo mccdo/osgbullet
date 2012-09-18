@@ -31,6 +31,7 @@
 #include <osg/ref_ptr>
 
 #include <btBulletDynamicsCommon.h>
+#include <BulletDynamics/ConstraintSolver/btContactConstraint.h>
 
 #include <list>
 #include <string>
