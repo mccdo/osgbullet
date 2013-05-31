@@ -165,10 +165,11 @@ mark_as_advanced( BULLET_INCLUDE_DIR )
 # If we had to look for Bullet, *and* we found it,
 # then let's see whether Bullet was built using
 # double precision or not...
+# By default, bullet is NOT built with double precision.
 #
+set( OSGBULLET_USE_DOUBLE_PRECISION FALSE CACHE BOOL "Select to force compiling with -DBT_USE_DOUBLE_PRECISION." )
 if( _needToFindBullet AND BULLET_FOUND )
     message( STATUS "Testing Bullet for use of double precision..." )
-    set( OSGBULLET_USE_DOUBLE_PRECISION FALSE CACHE BOOL "Select to force compiling with -DBT_USE_DOUBLE_PRECISION." )
     set( _result )
     set( _buildOut )
     
