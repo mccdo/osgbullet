@@ -10,6 +10,15 @@ set( OSGBCOLLISION_SUB_VERSION 2 )
 
 set( CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/CMakeModules;${CMAKE_MODULE_PATH}" )
 
+IF(UNIX AND NOT WIN32 AND NOT APPLE)
+  IF(CMAKE_SIZEOF_VOID_P MATCHES "8")
+      SET(LIB_POSTFIX "64" CACHE STRING "suffix for 32/64 dir placement")
+      MARK_AS_ADVANCED(LIB_POSTFIX)
+  ENDIF()
+ENDIF()
+IF(NOT DEFINED LIB_POSTFIX)
+    SET(LIB_POSTFIX "")
+ENDIF()
 
 set( CMAKE_RUNTIME_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR}/bin )
 set( CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR}/lib )
@@ -194,7 +203,7 @@ endif()
 if(MSVC)
     install(
         DIRECTORY ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/\${CMAKE_INSTALL_CONFIG_NAME}/
-        DESTINATION lib
+        DESTINATION lib${LIB_POSTFIX}
         USE_SOURCE_PERMISSIONS
         COMPONENT libosgbbullet-dev
         FILES_MATCHING PATTERN "*.pdb"
@@ -231,7 +240,7 @@ configure_file(UseosgBullet.cmake.in
   "${PROJECT_BINARY_DIR}/lib/UseosgBullet.cmake" @ONLY)
 
 # Install the export set for use with the install-tree
-install(EXPORT osgbullet-targets DESTINATION lib)
+install(EXPORT osgbullet-targets DESTINATION lib${LIB_POSTFIX})
 
 include( CMakePackageConfigHelpers )
 # Create the osgBulletConfig.cmake and osgBulletConfigVersion files
@@ -240,13 +249,13 @@ include( CMakePackageConfigHelpers )
 
 configure_package_config_file( 
     osgBulletConfig.cmake.in ${CMAKE_CURRENT_BINARY_DIR}/lib/osgBulletConfig.cmake
-    INSTALL_DESTINATION lib
+    INSTALL_DESTINATION lib${LIB_POSTFIX}
     PATH_VARS OSGBULLET_USE_DOUBLE_PRECISION )
 
 install(FILES ${CMAKE_CURRENT_BINARY_DIR}/lib/osgBulletConfig.cmake 
               ${CMAKE_CURRENT_BINARY_DIR}/lib/osgBulletConfigVersion.cmake
               ${CMAKE_CURRENT_BINARY_DIR}/lib/UseosgBullet.cmake
-        DESTINATION lib )
+        DESTINATION lib${LIB_POSTFIX} )
 
 #
 # Setup the fpc auto detection files
@@ -266,4 +275,5 @@ configure_file(extra/osgbullet.fpc.in
   "${PROJECT_BINARY_DIR}/lib/flagpoll/osgbullet.fpc" @ONLY)
 
 install(FILES ${CMAKE_CURRENT_BINARY_DIR}/lib/flagpoll/osgbullet.fpc
-        DESTINATION lib/flagpoll )
+        DESTINATION lib${LIB_POSTFIX}/flagpoll )
+
