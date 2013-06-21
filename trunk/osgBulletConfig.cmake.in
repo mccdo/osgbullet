@@ -12,19 +12,19 @@ set(OSGBULLET_LIBRARIES "osgbCollision;osgbDynamics;osgbInteraction" )
 # Compute paths
 if(EXISTS "${PACKAGE_PREFIX_DIR}/CMakeCache.txt")
     # In build tree
-    include("${PACKAGE_PREFIX_DIR}/lib/osgBulletBuildTreeSettings.cmake")
+    include("${PACKAGE_PREFIX_DIR}/@CMAKE_INSTALL_LIBDIR@/osgBulletBuildTreeSettings.cmake")
     # Our library dependencies (contains definitions for IMPORTED targets)
-    include("${PACKAGE_PREFIX_DIR}/lib/osgBulletLibraryDepends.cmake")
+    include("${PACKAGE_PREFIX_DIR}/@CMAKE_INSTALL_LIBDIR@/osgBulletLibraryDepends.cmake")
 else()
     set_and_check(OSGBULLET_INCLUDE_DIRS "${PACKAGE_PREFIX_DIR}/include")
     # The osgBullet targets file.
-    if(EXISTS "${PACKAGE_PREFIX_DIR}/lib/osgbullet-targets.cmake")
-        include("${PACKAGE_PREFIX_DIR}/lib/osgbullet-targets.cmake")
+    if(EXISTS "${PACKAGE_PREFIX_DIR}/@CMAKE_INSTALL_LIBDIR@/osgbullet-targets.cmake")
+        include("${PACKAGE_PREFIX_DIR}/@CMAKE_INSTALL_LIBDIR@/osgbullet-targets.cmake")
     endif()
 endif()
 
 # The location of the UseosgBullet.cmake file.
-set(osgBullet_USE_FILE "${PACKAGE_PREFIX_DIR}/lib/UseosgBullet.cmake")
+set(osgBullet_USE_FILE "${PACKAGE_PREFIX_DIR}/@CMAKE_INSTALL_LIBDIR@/UseosgBullet.cmake")
 
 set(OSGBULLET_USE_DOUBLE_PRECISION @OSGBULLET_USE_DOUBLE_PRECISION@)
 set(OSGBULLET_SHARED @BUILD_SHARED_LIBS@)
