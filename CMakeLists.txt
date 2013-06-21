@@ -10,16 +10,6 @@ set( OSGBCOLLISION_SUB_VERSION 2 )
 
 set( CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/CMakeModules;${CMAKE_MODULE_PATH}" )
 
-IF(UNIX AND NOT WIN32 AND NOT APPLE)
-  IF(CMAKE_SIZEOF_VOID_P MATCHES "8")
-      SET(LIB_POSTFIX "64" CACHE STRING "suffix for 32/64 dir placement")
-      MARK_AS_ADVANCED(LIB_POSTFIX)
-  ENDIF()
-ENDIF()
-IF(NOT DEFINED LIB_POSTFIX)
-    SET(LIB_POSTFIX "")
-ENDIF()
-
 set( CMAKE_RUNTIME_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR}/bin )
 set( CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR}/lib )
 if( WIN32 )
@@ -28,6 +18,9 @@ else()
     set( CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_ARCHIVE_OUTPUT_DIRECTORY} )
 endif()
 
+#
+# Setup the parrallel build support for windows
+#
 IF( WIN32 AND MSVC )
     OPTION( OSGBULLET_WIN32_USE_MP "Build with multiple processes (/MP option; VS 2005 and above)." ON )
     MARK_AS_ADVANCED( OSGBULLET_WIN32_USE_MP )
@@ -35,6 +28,17 @@ IF( WIN32 AND MSVC )
         SET( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /MP" )
     ENDIF( OSGBULLET_WIN32_USE_MP )
 ENDIF( WIN32 AND MSVC )
+
+#
+# Setup the the lib directory on a per platform basis
+#
+if(CMAKE_COMPILER_IS_GNUCXX)
+    include(GNUInstallDirs)
+endif(CMAKE_COMPILER_IS_GNUCXX)
+
+if(NOT DEFINED CMAKE_INSTALL_LIBDIR)
+    set(CMAKE_INSTALL_LIBDIR lib)
+endif(NOT DEFINED CMAKE_INSTALL_LIBDIR)
 
 
 IF(NOT ANDROID)
@@ -71,6 +75,35 @@ IF(APPLE)
 ENDIF()
 ENDIF()
 
+IF(APPLE)
+
+        #Here we check if the user specified IPhone SDK
+    IF(OSG_BUILD_PLATFORM_IPHONE OR OSG_BUILD_PLATFORM_IPHONE_SIMULATOR)
+
+        #set iphone arch and flags taken from http://sites.google.com/site/michaelsafyan/coding/resources/how-to-guides/cross-compile-for-the-iphone/how-to-cross-compile-for-the-iphone-using-cmake
+        IF(OSG_BUILD_PLATFORM_IPHONE)
+            SET(CMAKE_OSX_ARCHITECTURES "armv7" CACHE STRING "Build architectures for iOS" FORCE)
+            SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -miphoneos-version-min=5.1 -mno-thumb -arch armv7 -pipe -no-cpp-precomp" CACHE STRING "Flags used by the compiler during all build types." FORCE)
+        ELSE()
+            #simulator uses i386 architectures
+            SET(CMAKE_OSX_ARCHITECTURES "i386" CACHE STRING "Build architectures for iOS Simulator" FORCE)
+            SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -mno-thumb -arch i386 -pipe -no-cpp-precomp" CACHE STRING "Flags used by the compiler during all build types." FORCE)
+        ENDIF()
+
+        #here we set the specific iphone sdk version. We can only set either device or simulator sdk. So if you want both you currently have to have two seperate projects
+        SET(CMAKE_OSX_SYSROOT "${IPHONE_SDKROOT}" CACHE STRING "System root for iOS" FORCE)
+
+        #hack, force link to opengles
+        set(CMAKE_EXE_LINKER_FLAGS "-framework Foundation -framework OpenGLES")
+
+        #use the IPhone windowing system
+        SET(OSG_WINDOWING_SYSTEM "IOS" CACHE STRING "Forced IPhone windowing system on iOS"  FORCE)
+        SET(OSG_DEFAULT_IMAGE_PLUGIN_FOR_OSX "imageio" CACHE STRING "Forced imageio default image plugin for iOS" FORCE)
+
+        #I think this or similar will be required for IPhone apps
+        OPTION(OSG_BUILD_APPLICATION_BUNDLES "Enable the building of applications and examples as OSX Bundles" ON)
+    ENDIF()
+ENDIF()
 
 INCLUDE( CMakeMacros )
 
@@ -151,36 +184,6 @@ ADD_SUBDIRECTORY( src/osgbDynamics )
 ADD_SUBDIRECTORY( src/osgbInteraction )
 ADD_SUBDIRECTORY( src/plugins )
 
-IF(APPLE)
-
-        #Here we check if the user specified IPhone SDK
-    IF(OSG_BUILD_PLATFORM_IPHONE OR OSG_BUILD_PLATFORM_IPHONE_SIMULATOR)
-
-        #set iphone arch and flags taken from http://sites.google.com/site/michaelsafyan/coding/resources/how-to-guides/cross-compile-for-the-iphone/how-to-cross-compile-for-the-iphone-using-cmake
-        IF(OSG_BUILD_PLATFORM_IPHONE)
-            SET(CMAKE_OSX_ARCHITECTURES "armv7" CACHE STRING "Build architectures for iOS" FORCE)
-            SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -miphoneos-version-min=5.1 -mno-thumb -arch armv7 -pipe -no-cpp-precomp" CACHE STRING "Flags used by the compiler during all build types." FORCE)
-        ELSE()
-            #simulator uses i386 architectures
-            SET(CMAKE_OSX_ARCHITECTURES "i386" CACHE STRING "Build architectures for iOS Simulator" FORCE)
-            SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -mno-thumb -arch i386 -pipe -no-cpp-precomp" CACHE STRING "Flags used by the compiler during all build types." FORCE)
-        ENDIF()
-
-        #here we set the specific iphone sdk version. We can only set either device or simulator sdk. So if you want both you currently have to have two seperate projects
-        SET(CMAKE_OSX_SYSROOT "${IPHONE_SDKROOT}" CACHE STRING "System root for iOS" FORCE)
-
-        #hack, force link to opengles
-        set(CMAKE_EXE_LINKER_FLAGS "-framework Foundation -framework OpenGLES")
-
-        #use the IPhone windowing system
-        SET(OSG_WINDOWING_SYSTEM "IOS" CACHE STRING "Forced IPhone windowing system on iOS"  FORCE)
-        SET(OSG_DEFAULT_IMAGE_PLUGIN_FOR_OSX "imageio" CACHE STRING "Forced imageio default image plugin for iOS" FORCE)
-
-        #I think this or similar will be required for IPhone apps
-        OPTION(OSG_BUILD_APPLICATION_BUNDLES "Enable the building of applications and examples as OSX Bundles" ON)
-    ENDIF()
-ENDIF()
-
 #
 # Doxygen
 find_package( Doxygen )
@@ -203,7 +206,7 @@ endif()
 if(MSVC)
     install(
         DIRECTORY ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/\${CMAKE_INSTALL_CONFIG_NAME}/
-        DESTINATION lib${LIB_POSTFIX}
+        DESTINATION ${CMAKE_INSTALL_LIBDIR}
         USE_SOURCE_PERMISSIONS
         COMPONENT libosgbbullet-dev
         FILES_MATCHING PATTERN "*.pdb"
@@ -222,7 +225,7 @@ install( FILES "extra/FindosgBullet.cmake"
 
 # Add all targets to the build-tree export set
 export(TARGETS osgbInteraction osgbCollision osgbDynamics
-  FILE "${PROJECT_BINARY_DIR}/lib/osgBulletLibraryDepends.cmake")
+  FILE "${PROJECT_BINARY_DIR}/${CMAKE_INSTALL_LIBDIR}/osgBulletLibraryDepends.cmake")
 
 # Export the package for use from the build-tree
 # (this registers the build-tree with a global CMake-registry)
@@ -230,32 +233,32 @@ export(PACKAGE osgBullet)
 
 # Create a osgBulletBuildTreeSettings.cmake file for the use from the build tree
 configure_file(osgBulletBuildTreeSettings.cmake.in
-  "${PROJECT_BINARY_DIR}/lib/osgBulletBuildTreeSettings.cmake" @ONLY)
+  "${PROJECT_BINARY_DIR}/${CMAKE_INSTALL_LIBDIR}/osgBulletBuildTreeSettings.cmake" @ONLY)
 
 #configure_file(osgBulletConfig.cmake.in
-#  "${PROJECT_BINARY_DIR}/lib/osgBulletConfig.cmake" @ONLY)
+#  "${PROJECT_BINARY_DIR}/${CMAKE_INSTALL_LIBDIR}/osgBulletConfig.cmake" @ONLY)
 configure_file(osgBulletConfigVersion.cmake.in
-  "${PROJECT_BINARY_DIR}/lib/osgBulletConfigVersion.cmake" @ONLY)
+  "${PROJECT_BINARY_DIR}/${CMAKE_INSTALL_LIBDIR}/osgBulletConfigVersion.cmake" @ONLY)
 configure_file(UseosgBullet.cmake.in
-  "${PROJECT_BINARY_DIR}/lib/UseosgBullet.cmake" @ONLY)
+  "${PROJECT_BINARY_DIR}/${CMAKE_INSTALL_LIBDIR}/UseosgBullet.cmake" @ONLY)
 
 # Install the export set for use with the install-tree
-install(EXPORT osgbullet-targets DESTINATION lib${LIB_POSTFIX})
+install(EXPORT osgbullet-targets DESTINATION ${CMAKE_INSTALL_LIBDIR})
 
 include( CMakePackageConfigHelpers )
 # Create the osgBulletConfig.cmake and osgBulletConfigVersion files
-#file(RELATIVE_PATH CONF_REL_INCLUDE_DIR "${CMAKE_INSTALL_PREFIX}/lib"
+#file(RELATIVE_PATH CONF_REL_INCLUDE_DIR "${CMAKE_INSTALL_PREFIX}/${CMAKE_INSTALL_LIBDIR}"
 #   "${CMAKE_INSTALL_PREFIX}/include")
 
 configure_package_config_file( 
-    osgBulletConfig.cmake.in ${CMAKE_CURRENT_BINARY_DIR}/lib/osgBulletConfig.cmake
-    INSTALL_DESTINATION lib${LIB_POSTFIX}
+    osgBulletConfig.cmake.in ${CMAKE_CURRENT_BINARY_DIR}/${CMAKE_INSTALL_LIBDIR}/osgBulletConfig.cmake
+    INSTALL_DESTINATION ${CMAKE_INSTALL_LIBDIR}
     PATH_VARS OSGBULLET_USE_DOUBLE_PRECISION )
 
-install(FILES ${CMAKE_CURRENT_BINARY_DIR}/lib/osgBulletConfig.cmake 
-              ${CMAKE_CURRENT_BINARY_DIR}/lib/osgBulletConfigVersion.cmake
-              ${CMAKE_CURRENT_BINARY_DIR}/lib/UseosgBullet.cmake
-        DESTINATION lib${LIB_POSTFIX} )
+install(FILES ${CMAKE_CURRENT_BINARY_DIR}/${CMAKE_INSTALL_LIBDIR}/osgBulletConfig.cmake 
+              ${CMAKE_CURRENT_BINARY_DIR}/${CMAKE_INSTALL_LIBDIR}/osgBulletConfigVersion.cmake
+              ${CMAKE_CURRENT_BINARY_DIR}/${CMAKE_INSTALL_LIBDIR}/UseosgBullet.cmake
+        DESTINATION ${CMAKE_INSTALL_LIBDIR} )
 
 #
 # Setup the fpc auto detection files
@@ -272,8 +275,8 @@ else(WIN32)
 endif(WIN32)
 
 configure_file(extra/osgbullet.fpc.in
-  "${PROJECT_BINARY_DIR}/lib/flagpoll/osgbullet.fpc" @ONLY)
+  "${PROJECT_BINARY_DIR}/${CMAKE_INSTALL_LIBDIR}/flagpoll/osgbullet.fpc" @ONLY)
 
-install(FILES ${CMAKE_CURRENT_BINARY_DIR}/lib/flagpoll/osgbullet.fpc
-        DESTINATION lib${LIB_POSTFIX}/flagpoll )
+install(FILES ${CMAKE_CURRENT_BINARY_DIR}/${CMAKE_INSTALL_LIBDIR}/flagpoll/osgbullet.fpc
+        DESTINATION ${CMAKE_INSTALL_LIBDIR}/flagpoll )
 
