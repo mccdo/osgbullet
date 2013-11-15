@@ -23,7 +23,10 @@
 #include <osg/Geode>
 #include <osg/Notify>
 #include <osgwTools/Transform.h>
-#include <osgwTools/ShortEdgeOp.h>
+#include <osgwTools/Version.h>
+#if( OSGWORKS_OSG_VERSION < 30109 )
+#  include <osgwTools/ShortEdgeOp.h>
+#endif()
 #include <osgwTools/ReducerOp.h>
 #include <osgwTools/GeometryModifier.h>
 #include <osgbCollision/Utils.h>
@@ -235,6 +238,7 @@ void ComputeShapeVisitor::reduce( osg::Node& node )
     seFeature *= _bs.radius() * 2.;
 
     osg::notify( osg::DEBUG_FP ) << "ComputeShapeVisitor: Reducing..." << std::endl;
+#if( OSGWORKS_OSG_VERSION < 30109 )
     {
         osgwTools::ShortEdgeOp* seOp = new osgwTools::ShortEdgeOp( sePercent, seFeature );
         seOp->setDoTriStrip( false );
@@ -244,6 +248,7 @@ void ComputeShapeVisitor::reduce( osg::Node& node )
         node.accept( modifier );
         modifier.displayStatistics( osg::notify( osg::DEBUG_FP ) );
     }
+#endif
 
     {
         osgwTools::ReducerOp* redOp = new osgwTools::ReducerOp;

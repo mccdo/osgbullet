@@ -24,6 +24,8 @@
 #include <osgbDynamics/RigidBodyAnimation.h>
 #include <btBulletDynamicsCommon.h>
 
+#include <osgwTools/Version.h>
+
 #include <osgViewer/Viewer>
 #include <osgDB/ReadFile>
 #include <osgDB/FileUtils>
@@ -99,15 +101,22 @@ osg::MatrixTransform* createOffOriginOSGBox( osg::Vec3 size )
     geom->setVertexArray( v );
 
     osg::Vec3Array * n = new osg::Vec3Array;
-    n->resize( 6 );
+    n->resize( 8 );
     ( *n )[ 0 ] = osg::Vec3( 0, 0, -1 );
     ( *n )[ 1 ] = osg::Vec3( 0, 0, 1 );
     ( *n )[ 2 ] = osg::Vec3( -1, 0, 0 );
     ( *n )[ 3 ] = osg::Vec3( 1, 0, 0 );
     ( *n )[ 4 ] = osg::Vec3( 0, -1, 0 );
     ( *n )[ 5 ] = osg::Vec3( 0, 1, 0 );
+    ( *n )[ 6 ] = osg::Vec3( 0, 1, 0 );
+    ( *n )[ 7 ] = osg::Vec3( 0, 1, 0 );
     geom->setNormalArray( n );
+#if( OSGWORKS_OSG_VERSION < 30109 )
     geom->setNormalBinding( osg::Geometry::BIND_PER_PRIMITIVE );
+#else
+    // TBD need to fix this for current OSG to render a box properly.
+    geom->setNormalBinding( osg::Geometry::BIND_PER_VERTEX );
+#endif
 
     osg::Vec4Array * c = new osg::Vec4Array;
     c->resize( 8 );
