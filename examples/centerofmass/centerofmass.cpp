@@ -172,8 +172,8 @@ then you merely specify the COM in the
 Note that the call to setCenterOfMass() is conditional; if you
 don't call it, osgBullet will use the bounding volume center
 as the COM. However, osgBullet never uses the origin as the COM,
-unless you specify it directly with a call to setCenterOfMass(),
-or it just happens to coincide with the model origin.
+unless you specify it directly with a call to setCenterOfMass()
+(or it just happens to coincide with the bounding volume center).
 
 If your application doesn't use the
 \link rigidbody rigid body creation utilities, \endlink
