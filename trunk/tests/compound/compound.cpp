@@ -138,7 +138,7 @@ osg::MatrixTransform * createOffOriginOSGBox( osg::Vec3 size )
     geom->setNormalArray( n );
 #if( OSGWORKS_OSG_VERSION < 30109 )
     geom->setNormalBinding( osg::Geometry::BIND_PER_PRIMITIVE );
-#ekse
+#else
     // TBD need to fix this for current OSG to render a box properly.
     geom->setNormalBinding( osg::Geometry::BIND_PER_VERTEX );
 #endif
