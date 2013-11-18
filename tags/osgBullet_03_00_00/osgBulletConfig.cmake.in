@@ -1,0 +1,30 @@
+# - Config file for the osgBullet package
+# It defines the following variables
+#  OSGBULLET_INCLUDE_DIRS - include directories for osgBullet
+#  OSGBULLET_LIBRARIES    - libraries to link against
+#  OSGBULLET_EXECUTABLE   - the bar executable
+
+@PACKAGE_INIT@
+
+# These are IMPORTED targets created by osgWorksLibraryDepends.cmake
+set(OSGBULLET_LIBRARIES "osgbCollision;osgbDynamics;osgbInteraction" )
+
+# Compute paths
+if(EXISTS "${PACKAGE_PREFIX_DIR}/CMakeCache.txt")
+    # In build tree
+    include("${PACKAGE_PREFIX_DIR}/@CMAKE_INSTALL_LIBDIR@/osgBulletBuildTreeSettings.cmake")
+    # Our library dependencies (contains definitions for IMPORTED targets)
+    include("${PACKAGE_PREFIX_DIR}/@CMAKE_INSTALL_LIBDIR@/osgBulletLibraryDepends.cmake")
+else()
+    set_and_check(OSGBULLET_INCLUDE_DIRS "${PACKAGE_PREFIX_DIR}/include")
+    # The osgBullet targets file.
+    if(EXISTS "${PACKAGE_PREFIX_DIR}/@CMAKE_INSTALL_LIBDIR@/osgbullet-targets.cmake")
+        include("${PACKAGE_PREFIX_DIR}/@CMAKE_INSTALL_LIBDIR@/osgbullet-targets.cmake")
+    endif()
+endif()
+
+# The location of the UseosgBullet.cmake file.
+set(osgBullet_USE_FILE "${PACKAGE_PREFIX_DIR}/@CMAKE_INSTALL_LIBDIR@/UseosgBullet.cmake")
+
+set(OSGBULLET_USE_DOUBLE_PRECISION @OSGBULLET_USE_DOUBLE_PRECISION@)
+set(OSGBULLET_SHARED @BUILD_SHARED_LIBS@)
