@@ -3,11 +3,13 @@
 <wiki:toc />
 
 
-= v2.1 =
+= v3.0 =
 
-*Status:* Ongoing development on svn trunk.
+*Released 18 Nov 2013*
 
-This release will contain support for constraints, including the ability to store contraint information as scene graph user data, and the ability to read/write constraint data using the dot osg file format.
+v3.00.00 is compatible with OSG v2.8.5 through v3.3.0.
+
+This release contain support for constraints, including the ability to store constraint information as scene graph user data, and the ability to read/write constraint data using the dot osg file format.
 
 
 = v2.0 =
