@@ -3,9 +3,35 @@
 <wiki:toc />
 
 
-= v2.0 Current Release =
+= v3.0 Current Release =
 
-Released 26 Oct 2011, v2.0 is the current stable release.
+Released 18 Nov 2013, v3.0 is the current stable release.
+
+== Source ==
+
+A source package for v3.0 is available.
+
+[https://drive.google.com/file/d/0B2kjcsFgFhsONjQxalpyN2NJbW8/edit?usp=sharing osgBullet-v3.00.00.zip]
+
+Use this URL to checkout a v3.0 source tree:
+
+`http://osgbullet.googlecode.com/svn/tags/osgBullet_03_00_00`
+
+== Binaries ==
+
+Sorry, binary packages are not currently available.
+
+
+= svn trunk =
+
+Checkout the osgBullet current development source code from svn:
+
+`http://osgbullet.googlecode.com/svn/trunk`
+
+
+= v2.0 =
+
+Released 26 Oct 2011.
 
 == Source ==
 
@@ -18,17 +44,6 @@ Source packages for v2.0 are available.
 Use this URL to checkout a v2.0 source tree:
 
 `http://osgbullet.googlecode.com/svn/tags/osgBullet_02_00_00`
-
-== Binaries ==
-
-Sorry, binary packages are not currently available.
-
-
-= svn trunk =
-
-Checkout the osgBullet current development source code from svn:
-
-`http://osgbullet.googlecode.com/svn/trunk`
 
 
 = v1.1 =
