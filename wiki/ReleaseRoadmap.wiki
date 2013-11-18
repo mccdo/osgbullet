@@ -11,6 +11,8 @@ v3.00.00 is compatible with OSG v2.8.5 through v3.3.0.
 
 This release contains support for constraints, including the ability to store constraint information as scene graph user data, and the ability to read/write constraint data using the dot osg file format.
 
+Other changes are mostly minor. However, the release merits a major revision number increment because some OSG features used by osgWorks and osgBullet were removed in OSG v3.1.9. Most notably, this impacts geometry simplification when creating convex hull collision shapes. Note that this functionality is only unavailable if you are building withOSG >= v3.1.9.
+
 
 = v2.0 =
 
