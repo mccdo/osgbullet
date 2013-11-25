@@ -88,7 +88,8 @@ void CollectVerticesVisitor::applyDrawable( osg::Drawable* drawable )
         for( jdx=0; jdx < ps->getNumIndices(); jdx++ )
         {
             unsigned int index = ps->index( jdx );
-            verts_->push_back( (*in)[ index ] * m );
+            if(index < in->size())
+                verts_->push_back( (*in)[ index ] * m );
         }
     }
 
