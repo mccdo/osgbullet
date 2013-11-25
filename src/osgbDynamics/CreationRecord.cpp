@@ -33,7 +33,6 @@
 namespace osgbDynamics
 {
 
-
 CreationRecord::CreationRecord()
   : _sceneGraph( NULL ),
     _version( 3 ),
@@ -47,6 +46,9 @@ CreationRecord::CreationRecord()
     _mass( 1.f ),
     _restitution( 0.f ),
     _friction( 1.f ),
+    _rollingFriction( -1.f ),
+    _linearDamping( -1.f ),
+    _angularDamping( -1.f ),
     _axis( osgbCollision::Z ),
     _reductionLevel( CreationRecord::NONE ),
     _overall( false )
@@ -65,6 +67,9 @@ CreationRecord::CreationRecord( const CreationRecord& rhs, osg::CopyOp copyop )
     _mass( rhs._mass ),
     _restitution( rhs._restitution ),
     _friction( rhs._friction ),
+    _rollingFriction( rhs._rollingFriction ),
+    _linearDamping( rhs._linearDamping ),
+    _angularDamping( rhs._angularDamping ),
     _axis( rhs._axis ),
     _reductionLevel( rhs._reductionLevel ),
     _overall( rhs._overall )

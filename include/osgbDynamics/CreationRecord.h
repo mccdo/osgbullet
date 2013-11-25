@@ -91,6 +91,10 @@ struct OSGBDYNAMICS_EXPORT CreationRecord : public osg::Object
     float _restitution;
     float _friction;
 
+    float _rollingFriction;
+    float _linearDamping;
+    float _angularDamping;
+
     /** For _shapeType == CYLINDER_SHAPE_PROXYTYPE only. */
     osgbCollision::AXIS _axis;
 

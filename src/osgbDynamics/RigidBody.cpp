@@ -166,6 +166,16 @@ btRigidBody* createRigidBody( osgbDynamics::CreationRecord* cr, btCollisionShape
     btRigidBody::btRigidBodyConstructionInfo rbInfo( cr->_mass, motion, shape, localInertia );
     rbInfo.m_friction = btScalar( cr->_friction );
     rbInfo.m_restitution = btScalar( cr->_restitution );
+
+#if( BT_BULLET_VERSION > 280 )
+    if( cr->_rollingFriction >= 0.f )
+        rbInfo.m_rollingFriction = cr->_rollingFriction;
+#endif
+    if( cr->_linearDamping >= 0.f )
+        rbInfo.m_linearDamping = cr->_linearDamping;
+    if( cr->_angularDamping >= 0.f )
+        rbInfo.m_angularDamping = cr->_angularDamping;
+
 	btRigidBody* rb = new btRigidBody( rbInfo );
     if( rb == NULL )
     {
