@@ -1,7 +1,7 @@
 #summary osgBullet compatibility by version
 
 || *Release date* || *osgBullet* || *!OpenSceneGraph* || *Bullet* || *osgWorks* ||
-|| 18 Nov 2013 || v3.0 || v2.8.5 - v3.3.0 || v2.80 - v2.82 || v3.0 ||
+|| 18 Nov 2013 || v3.0 || v2.8.5 - v3.3.0 || v2.80 - v2.82 || v3.0.1 ||
 || 26 Oct 2011 || v2.0 || v2.8.0 - v3.0.1 || v2.76 - v2.79 || v2.0 ||
 || 11 Sept 2010 || v1.1 || v2.6.1 - v2.8.5 || v2.74, v2.75, v2.76{{{(*)}}} || v1.1 ||
 || 4 Nov 2009 || v1.0 || v2.6.1 - v2.8.4 || v2.74, v2.75 || v1.0 ||
