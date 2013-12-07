@@ -288,10 +288,10 @@ int main( int argc, char* argv[] )
     if (mass != 1.f )
         osg::notify( osg::INFO ) << "osgbpp: Mass: " << mass << std::endl;
 
-    bool comSpecified;
     std::string comStr;
     osg::Vec3 com;
-    if( comSpecified = arguments.read( "--com", comStr ) )
+    bool comSpecified = arguments.read( "--com", comStr );
+    if( comSpecified )
     {
         char comma;
         std::istringstream oStr( comStr );

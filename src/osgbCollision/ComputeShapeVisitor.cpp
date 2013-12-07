@@ -26,7 +26,7 @@
 #include <osgwTools/Version.h>
 #if( OSGWORKS_OSG_VERSION < 30109 )
 #  include <osgwTools/ShortEdgeOp.h>
-#endif()
+#endif
 #include <osgwTools/ReducerOp.h>
 #include <osgwTools/GeometryModifier.h>
 #include <osgbCollision/Utils.h>
