@@ -123,7 +123,7 @@ btCollisionShape* ComputeShapeVisitor::createShape( osg::Node& node, const osg::
         osg::notify( osg::WARN ) << "ComputeShapeVisitor encountered non-Geode." << std::endl;
         return( NULL );
     }
-    osg::Geode* geodeCopy = new osg::Geode( *( node.asGeode() ), osg::CopyOp::DEEP_COPY_ALL );
+    osg::ref_ptr< osg::Geode > geodeCopy = new osg::Geode( *( node.asGeode() ), osg::CopyOp::DEEP_COPY_ALL );
     osgwTools::transform( m, geodeCopy->asGeode() );
 
     btCollisionShape* collision( NULL );
