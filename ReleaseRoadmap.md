@@ -1,0 +1,48 @@
+
+
+
+# v3.0 #
+
+**Released 18 Nov 2013**
+
+v3.00.00 is compatible with OSG v2.8.5 through v3.3.0.
+
+This release contains support for constraints, including the ability to store constraint information as scene graph user data, and the ability to read/write constraint data using the dot osg file format.
+
+Other changes are mostly minor. However, the release merits a major revision number increment because some OSG features used by osgWorks and osgBullet were removed in OSG v3.1.9. Most notably, this impacts geometry simplification when creating convex hull collision shapes. Note that this functionality is only unavailable if you are building withOSG >= v3.1.9.
+
+
+# v2.0 #
+
+**Released 26 Oct 2011**
+
+v2.00.00 is not backwards-compatible with osgBullet v1.xx. osgBullet-based applications and projects will need to port their code to the new version. Changes from v1.01.00 to v2.00.00 include the following:
+
+  * The osgbBullet library has been replaced with two libraries: osgbCollision and osgbDynamics. Your project will need to link with the new libraries. The v2.00.00 release contains an analogous change in the namespaces and header file directory structure.
+    * By linking with osgbCollision, your osgBullet application can use Bullet for collision detection without a dependency on libBulletDynamics. The new collision example program demonstrates this usage.
+  * osgBullet's support for btRigidBody creation, with automatic support for non-origin center of mass and non-unit scaling, has improved dramatically:
+    * The OSGToCollada class has been replaced by new rigid body creation convenience routines. See the osgbDynamics/RigidBody.h header file. Nearly all of the examples and tests use the new interface.
+    * Rigid body and collision shape creation from a subgraph is no longer destructive. Applications are no longer required to make a deep copy of their subgraph before rigid body and collision shape creation.
+    * The new ComputeShapesVisitor computes btCompoundShapes from Geodes in a scene graph.
+    * osgBullet's CreationRecord struct now stores a polygon reduction level, used by the ComputeShapesVisitor during creation of triangle mesh and convex triangle mesh collision shapes.
+  * A new library, osgbInteraction, has been added to allow user interaction with the physics simulation. The library contains the following classes:
+    * The HandNode class features a fully articulated hand model that can be driven by a data glove or keyboard. Support for the P5 data glove is provided.
+    * The DragHandler allows the user to drag rigid bodies using the mouse.
+    * The LaunchHandler allows the user to fire objects into the scene.
+    * The SaveRestoreHandler allows the user to capture the physics simulation at a particular point in time, then restore back to the capture point.
+  * New examples demonstrate hinge and slider constraints.
+  * The MotionState class now exposes routines to convert between Bullet collision object and OSG coordinates while correctly accounting for differences due to center of mass and scaling.
+  * A new example, saverestore, demonstrates saving current physics state and restoring from file.
+  * Many classes are now documented using Doxygen.
+
+
+# v1.1 #
+
+**Released 11 Sept 2010**
+
+This is the first release that attempts to be compatible with Bullet v2.76. The portions of osgBullet that require the Bullet ColladaConverter library (removed in v2.76) will not function. You must use Bullet v2.74 or v2.75 to use osgBullet with ColladaConverter.
+
+
+# v1.0 #
+
+**Released 4 Nov 2009**

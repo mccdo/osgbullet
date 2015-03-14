@@ -1,0 +1,57 @@
+
+
+# CMake #
+
+Like OpenSceneGraph, osgBullet uses CMake. The osgBullet build system requires CMake v2.8 or later.
+
+To create project files for osgBullet, follow these general steps:
+  * Run the CMake GUI or ccmake.
+  * Specify a build directory, then hit Configure.
+  * Resolve any missing dependencies and again hit Configure.
+  * When all dependencies have been resolved, hit Generate.
+
+# Dependencies #
+
+osgBullet depends on OpenSceneGraph, Bullet, and osgWorks. See the CompatibilityMatrix.
+
+For best results, build your Bullet binaries from Bullet's CMake system. Some Windows users have reported problems when using Bullet built from its Visual Studio project files.
+
+## Finding the OSG and Bullet Dependencies ##
+
+The osgBullet CMake system should find OSG and Bullet if they're installed on your system in a standard/typical location. You might need to set a special variable required by the CMake modules that find these dependencies (such as the OSG\_DIR environment variable).
+
+If the CMake system fails to find these dependencies, it's usually because the dependencies are installed in a non-typical location, or you're using them from a source tree.
+
+osgBullet's CMake system uses CMake helper scripts to assist in finding the OSG and Bullet dependencies. Both scripts work the same way.
+
+Select the installation type using the BulletInstallType and OSGInstallType pulldown menus in the CMake GUI. You can select Default Installation, Alternate Installation, or Source And Build Tree. Then select Configure. The CMake GUI will prompt you for additional directory information based on your pulldown menu selection. Supply the requested directory information and select Configure again.
+
+**Note:** Currently, osgBullet's CMake system does **not** display an error if it can't find Bullet. Make sure CMake finds Bullet by displaying advanced CMake variables and checking the values of BULLET\_INCLUDE\_DIR, BULLET\_COLLISION\_LIBRARY, and BULLET\_DYNAMICS\_LIBRARY.
+
+## Finding the osgWorks Dependency ##
+
+The osgBullet CMake system should find osgWorks if it's installed on your system in a standard/typical location. If the CMake system fails to find osgWorks, it's usually because osgWorks is installed in a non-standard location, or you're using osgWorks from a source tree.
+
+If you have osgWorks installed in a non-standard location, specify the top-level install directory with `OSGWORKS_ROOT`, either as an environment variable or by adding a CMake entry. Then select Configure again.
+
+If you are using osgWorks from a source tree, use the `OSGWORKS_BUILD_DIR` and `OSGWORKS_SOURCE_DIR` variables (either in the environment, or as CMake entries) to specify the root of the build and source trees, respectively. Then select Configure again.
+
+In summary:
+  * If the dependency is in a standard location, you shouldn't need to set any variables. CMake should just find them.
+  * Set **either** the `OSGWORKS_ROOT` variable (if installed in a non-standard location) **or both** the `OSGWORKS_BUILD_DIR` and `OSGWORKS_SOURCE_DIR` variables (if using the dependency from a source tree). You should never have to set all three.
+
+# Building #
+
+Use your project files / makefiles to build osgWorks. Build the install target to install osgWorks on your system.
+
+## Troubleshooting Builds ##
+
+osgBullet should build without error on all major platforms. If you encounter link errors, the most likely cause is a mismatch between the double precision setting in the CMake systems of osgBullet and Bullet. Please make sure both projects are configured and built consistently, either single or double precision.
+
+See extras/TestBulletPrecision.cpp for a standalone Bullet application that displays whether Bullet was built with single or double precision.
+
+## Installing osgBullet ##
+
+Once you have built osgBullet it is possible to install osgBullet into a directory that will contain a bin, lib, and include directory with the 'install' target for GNUMake. The location of this directory can be set via the CMake variable CMAKE\_INSTALL\_PREFIX. After you have installed osgBullet, be sure to point your (DY)LD\_LIBRARY\_PATH at the lib directory and your PATH at the bin directory. This will enable your applications to load the appropriate osgBullet libraries and plugins.
+
+osgBullet's data files are installed by default, but this can be disabled by unchecking the OSGBULLET\_INSTALL\_DATA CMake variable. Add the osgBullet data file path, either from the source tree or install location, to your OSG\_FILE\_PATH variable. Otherwise, osgBullet tests and examples will not be able to find the data.
