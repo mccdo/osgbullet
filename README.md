@@ -2,7 +2,7 @@
 =========
 
 ## ``osgBullet``
-``osgBullet`` is a set of software tools for applications that use both [OpenSceneGraph (OSG)](http://www.openscenegraph.org/) and [Bullet](http://code.google.com/p/bullet/). The ``osgBullet`` library is the result of collaborative work between Paul Martz ([Skew Matrix Software](http://www.skew-matrix.com/)), [Ames Lab](http://www.ameslab.gov/, and [ARDEC](http://www.pica.army.mil/PicatinnyPublic/index.asp). It's used as part of the [VE-Suite](http://www.ve-suite.org/) project. ``osgBullet`` is open source and available under the GNU LGPL v2.1 software license.
+``osgBullet`` is a set of software tools for applications that use both [OpenSceneGraph (OSG)](http://www.openscenegraph.org/) and [Bullet](http://code.google.com/p/bullet/). The ``osgBullet`` library is the result of collaborative work between Paul Martz ([Skew Matrix Software](http://www.skew-matrix.com/)), [Ames Lab](http://www.ameslab.gov/), and [ARDEC](http://www.pica.army.mil/PicatinnyPublic/index.asp). It's used as part of the [VE-Suite](http://www.ve-suite.org/) project. ``osgBullet`` is open source and available under the GNU LGPL v2.1 software license.
 
 ## Documentation
 Online Doxygen documentation can be found [here](http://vesuite.org/external/docs/osgbullet/index.html).
@@ -41,7 +41,7 @@ The project contains a small collection of example programs to demonstrate use o
 The project contains several test programs to ensure correct functionality.
 
 ## Support
-Skew Matrix Software provides full ``osgBullet`` development and consulting services. For support requests beyond issuing issues through Google Code, please contact Skew Matrix Software LLC.
+Skew Matrix Software provides full ``osgBullet`` development and consulting services. For support requests beyond issuing issues through GitHub, please contact Skew Matrix Software LLC.
 
 ## Contribute
 All contributions are welcome and will be considered for inclusion in the project. Please contribute any enhancements or bug fixes by opening an issue and use the Contribution from user issue template. Create and attach a compressed patch file containing your changes.
