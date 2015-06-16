@@ -40,8 +40,11 @@ The project contains a small collection of example programs to demonstrate use o
 ### Tests
 The project contains several test programs to ensure correct functionality.
 
+## Building, Running, and More
+Lots of additional information is available on the wiki.
+
 ## Support
 Skew Matrix Software provides full ``osgBullet`` development and consulting services. For support requests beyond issuing issues through GitHub, please contact Skew Matrix Software LLC.
 
 ## Contribute
-All contributions are welcome and will be considered for inclusion in the project. Please contribute any enhancements or bug fixes by opening an issue and use the Contribution from user issue template. Create and attach a compressed patch file containing your changes.
+All contributions are welcome and will be considered for inclusion in the project. Until otherwise specified, please use pull requests or issues to introduce changes.
