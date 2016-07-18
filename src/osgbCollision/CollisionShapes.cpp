@@ -38,7 +38,7 @@
 #include <osg/Timer>
 #include <osg/io_utils>
 #include <iostream>
-
+#include <algorithm>
 
 namespace osgbCollision
 {
