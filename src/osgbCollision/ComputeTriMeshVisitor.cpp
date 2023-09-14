@@ -44,7 +44,12 @@ struct ComputeTriMeshFunc
         vertices->clear();
     }
 
+    // https://github.com/openscenegraph/OpenSceneGraph/commit/c9545970ac3b6a805b994abd3bd76ed447e3e3f6
+    #if( OSGWORKS_OSG_VERSION >= 30506 )
+    void inline operator()( const osg::Vec3 v1, const osg::Vec3 v2, const osg::Vec3 v3 )
+    #else
     void inline operator()( const osg::Vec3 v1, const osg::Vec3 v2, const osg::Vec3 v3, bool _temp )
+    #endif
     {
         vertices->push_back( v1 );
         vertices->push_back( v2 );
